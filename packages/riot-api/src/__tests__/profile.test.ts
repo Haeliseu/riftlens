@@ -4,6 +4,7 @@ import { server } from "../../test/mocks/server"
 import { RiotApiClient } from "../client"
 import {
   getChampionIconUrl,
+  getChampionStats,
   getMatchHistory,
   getProfileIconUrl,
   getProfileSummary,
@@ -67,6 +68,21 @@ describe("getMatchHistory", () => {
       position: "JUNGLE",
     })
     expect(matches.filter((m) => m.win)).toHaveLength(1)
+  })
+})
+
+describe("getChampionStats", () => {
+  it("aggregates per champion with solo/flex split", async () => {
+    const stats = await getChampionStats(client, "EUW1", "test-puuid-123", 2)
+
+    expect(stats).toHaveLength(1)
+    const lee = stats[0]
+    expect(lee?.championName).toBe("LeeSin")
+    expect(lee?.total.games).toBe(2)
+    expect(lee?.total.wins).toBe(1)
+    // mock matches are queueId 420 -> solo bucket only
+    expect(lee?.solo.games).toBe(2)
+    expect(lee?.flex.games).toBe(0)
   })
 })
 

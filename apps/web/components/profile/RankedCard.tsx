@@ -45,8 +45,8 @@ export function RankedCard({ soloRank }: RankedCardProps) {
         <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="h-12 w-12 rounded-full bg-muted overflow-hidden flex items-center justify-center">
+      <div className="flex items-center gap-4">
+        <div className="h-20 w-20 flex-shrink-0 flex items-center justify-center">
           {soloRank ? (
             // biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed
             <img
@@ -54,10 +54,10 @@ export function RankedCard({ soloRank }: RankedCardProps) {
                 ((soloRank.tier[0] ?? "") + soloRank.tier.slice(1).toLowerCase()) as TierName
               )}
               alt=""
-              className="h-full w-full object-contain"
+              className="h-20 w-20 object-contain"
             />
           ) : (
-            <span className="text-xs text-muted-foreground">—</span>
+            <span className="text-3xl text-muted-foreground">—</span>
           )}
         </div>
         <div>

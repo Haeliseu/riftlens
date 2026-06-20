@@ -141,3 +141,73 @@ export async function getMatchHistory(
 
   return matches.filter((m): m is MatchSummary => m !== null)
 }
+
+export interface ChampionBucket {
+  games: number
+  wins: number
+  kills: number
+  deaths: number
+  assists: number
+}
+
+export interface ChampionAggregate {
+  championId: number
+  championName: string
+  total: ChampionBucket
+  solo: ChampionBucket
+  flex: ChampionBucket
+}
+
+function emptyBucket(): ChampionBucket {
+  return { games: 0, wins: 0, kills: 0, deaths: 0, assists: 0 }
+}
+
+function addToBucket(b: ChampionBucket, p: { win: boolean; k: number; d: number; a: number }) {
+  b.games += 1
+  b.wins += p.win ? 1 : 0
+  b.kills += p.k
+  b.deaths += p.d
+  b.assists += p.a
+}
+
+/**
+ * Aggregates per-champion winrate across the player's ranked games, split into
+ * Solo/Duo (420) and Flex (440) buckets plus a combined total — like opgg's
+ * "champions" panel. One ranked match-list call + N detail calls.
+ */
+export async function getChampionStats(
+  client: RiotApiClient,
+  region: Region,
+  puuid: string,
+  count = 30
+): Promise<ChampionAggregate[]> {
+  const routing = regionToRouting(region)
+  const ids = await getMatchIds(client, routing, puuid, { type: "ranked", count })
+
+  const byChamp = new Map<number, ChampionAggregate>()
+
+  await Promise.all(
+    ids.map((id) =>
+      getMatch(client, routing, id)
+        .then((m) => {
+          const p = m.info.participants.find((x) => x.puuid === puuid)
+          if (!p) return
+          const agg = byChamp.get(p.championId) ?? {
+            championId: p.championId,
+            championName: p.championName,
+            total: emptyBucket(),
+            solo: emptyBucket(),
+            flex: emptyBucket(),
+          }
+          const line = { win: p.win, k: p.kills, d: p.deaths, a: p.assists }
+          addToBucket(agg.total, line)
+          if (m.info.queueId === 420) addToBucket(agg.solo, line)
+          else if (m.info.queueId === 440) addToBucket(agg.flex, line)
+          byChamp.set(p.championId, agg)
+        })
+        .catch(() => {})
+    )
+  )
+
+  return [...byChamp.values()].sort((a, b) => b.total.games - a.total.games)
+}

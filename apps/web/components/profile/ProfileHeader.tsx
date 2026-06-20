@@ -15,7 +15,7 @@ export function ProfileHeader({
   profileIconId,
   summonerLevel,
 }: ProfileHeaderProps) {
-  const name = decodeURIComponent(gameName)
+  const name = gameName
   return (
     <div className="flex items-center gap-4">
       <div className="relative h-16 w-16 flex-shrink-0">

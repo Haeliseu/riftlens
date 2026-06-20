@@ -187,7 +187,7 @@ export function SearchHero() {
     setOpen(false)
     setQuery("")
     setSuggestions([])
-    router.push(`/profile/${reg}/${encodeURIComponent(gameName)}/${tagLine}`)
+    router.push(`/profile/${reg}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`)
   }
 
   function handleSubmit(e: React.FormEvent) {

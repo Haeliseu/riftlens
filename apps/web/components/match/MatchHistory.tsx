@@ -46,7 +46,9 @@ export function MatchHistory({
           <button
             type="button"
             onClick={() =>
-              router.push(`/profile/${region}/${encodeURIComponent(gameName)}/${tagLine}`)
+              router.push(
+                `/profile/${region}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`
+              )
             }
             className="ml-auto text-xs underline"
           >

@@ -56,19 +56,26 @@ async function indexSummoner(region: string, summary: ProfileSummary) {
   }
 }
 
+/** Route params may arrive percent-encoded; decode once, tolerate already-decoded. */
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
 export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
   const { region, gameName, tagLine } = await params
   const { opponent, relation, period } = await searchParams
 
+  const name = safeDecode(gameName)
+  const tag = safeDecode(tagLine)
+
   const client = new RiotApiClient(process.env.RIOT_API_KEY ?? "")
   let summary: ProfileSummary | null = null
   try {
-    summary = await getProfileSummary(
-      client,
-      region as Region,
-      decodeURIComponent(gameName),
-      tagLine
-    )
+    summary = await getProfileSummary(client, region as Region, name, tag)
     void indexSummoner(region, summary)
   } catch {
     // Riot lookup failed (bad key / unknown player) — render shells
@@ -78,24 +85,23 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
     <div className="space-y-6">
       <ProfileHeader
         region={region}
-        gameName={gameName}
-        tagLine={tagLine}
+        gameName={name}
+        tagLine={tag}
         profileIconId={summary?.profileIconId ?? null}
         summonerLevel={summary?.summonerLevel ?? null}
       />
 
       {!summary && (
         <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-          Aucune donnée Riot pour <strong>{decodeURIComponent(gameName)}</strong> sur{" "}
-          <strong>{region}</strong>. Vérifie la région (le compte joue peut-être sur une autre) ou
-          la validité de la clé API Riot.
+          Aucune donnée Riot pour <strong>{name}</strong> sur <strong>{region}</strong>. Vérifie la
+          région (le compte joue peut-être sur une autre) ou la validité de la clé API Riot.
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-4">
           <RankedCard soloRank={summary?.soloRank ?? null} />
-          <LpChart region={region} gameName={gameName} tagLine={tagLine} />
+          <LpChart region={region} gameName={name} tagLine={tag} />
           <ChampionStats region={region} puuid={summary?.puuid ?? null} />
         </div>
 
@@ -103,8 +109,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
           <MatchFilter />
           <MatchHistory
             region={region}
-            gameName={gameName}
-            tagLine={tagLine}
+            gameName={name}
+            tagLine={tag}
             puuid={summary?.puuid ?? null}
             {...(opponent ? { opponentPuuid: opponent } : {})}
             {...(relation ? { opponentRelation: relation } : {})}

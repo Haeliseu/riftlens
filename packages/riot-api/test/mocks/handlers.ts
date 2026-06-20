@@ -38,9 +38,8 @@ export const handlers = [
       },
     ])
   ),
-  http.get(
-    "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/:puuid/ids",
-    () => HttpResponse.json(["EUW1_1", "EUW1_2"])
+  http.get("https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/:puuid/ids", () =>
+    HttpResponse.json(["EUW1_1", "EUW1_2"])
   ),
   http.get("https://europe.api.riotgames.com/lol/match/v5/matches/:matchId", ({ params }) =>
     HttpResponse.json({
