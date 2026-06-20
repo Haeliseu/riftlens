@@ -1,3 +1,6 @@
+import { db } from "@riftlens/db"
+import { summoners } from "@riftlens/db/schema"
+import { sql } from "drizzle-orm"
 import { MatchFilter } from "@/components/match/MatchFilter"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
@@ -18,9 +21,57 @@ interface ProfilePageProps {
   }>
 }
 
+async function indexPlayer(region: string, gameName: string, tagLine: string) {
+  const routingMap: Record<string, string> = {
+    EUW1: "europe",
+    EUN1: "europe",
+    TR1: "europe",
+    RU: "europe",
+    NA1: "americas",
+    BR1: "americas",
+    LA1: "americas",
+    LA2: "americas",
+    KR: "asia",
+    JP1: "asia",
+    OC1: "sea",
+  }
+  const routing = routingMap[region] ?? "europe"
+
+  try {
+    const res = await fetch(
+      `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${tagLine}`,
+      { headers: { "X-Riot-Token": process.env.RIOT_API_KEY ?? "" }, next: { revalidate: 3600 } }
+    )
+    if (!res.ok) return
+    const account = (await res.json()) as { puuid: string; gameName: string; tagLine: string }
+
+    await db
+      .insert(summoners)
+      .values({
+        puuid: account.puuid,
+        gameName: account.gameName,
+        tagLine: account.tagLine,
+        region,
+      })
+      .onConflictDoUpdate({
+        target: summoners.puuid,
+        set: {
+          gameName: account.gameName,
+          tagLine: account.tagLine,
+          region,
+          lastUpdatedAt: sql`now()`,
+        },
+      })
+  } catch {
+    // Non-fatal — index best effort
+  }
+}
+
 export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
   const { region, gameName, tagLine } = await params
   const { opponent, relation, period } = await searchParams
+
+  void indexPlayer(region, decodeURIComponent(gameName), tagLine)
 
   return (
     <div className="space-y-6">

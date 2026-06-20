@@ -1,10 +1,10 @@
 "use client"
 
-import { Clock, Search, X } from "lucide-react"
+import { Clock, Search, User, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
-const REGIONS = [
+export const REGIONS = [
   { id: "EUW1", label: "EUW" },
   { id: "NA1", label: "NA" },
   { id: "KR", label: "KR" },
@@ -26,15 +26,27 @@ interface RecentSearch {
   region: string
 }
 
+interface Suggestion {
+  gameName: string
+  tagLine: string
+  region: string
+  profileIconId: number | null
+  summonerLevel: number | null
+}
+
 function parseQuery(raw: string): { gameName: string; tagLine: string } | null {
   const trimmed = raw.trim()
-  const sep = trimmed.includes("#") ? "#" : " "
-  const parts = trimmed.split(sep)
-  if (parts.length < 2) return null
-  const gameName = parts[0] ?? ""
-  const tagLine = parts.slice(1).join("").toUpperCase()
+  const sep = trimmed.includes("#") ? "#" : null
+  if (!sep) return null
+  const idx = trimmed.indexOf("#")
+  const gameName = trimmed.slice(0, idx)
+  const tagLine = trimmed.slice(idx + 1).toUpperCase()
   if (!gameName || !tagLine) return null
   return { gameName, tagLine }
+}
+
+function regionLabel(id: string) {
+  return REGIONS.find((r) => r.id === id)?.label ?? id
 }
 
 export function SearchHero() {
@@ -42,8 +54,11 @@ export function SearchHero() {
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
   const [recent, setRecent] = useState<RecentSearch[]>([])
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     try {
@@ -53,12 +68,37 @@ export function SearchHero() {
   }, [])
 
   useEffect(() => {
-    function onClick(e: MouseEvent) {
+    function onClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener("mousedown", onClick)
-    return () => document.removeEventListener("mousedown", onClick)
+    document.addEventListener("mousedown", onClickOutside)
+    return () => document.removeEventListener("mousedown", onClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    const q = query.includes("#") ? (query.split("#")[0] ?? query) : query
+
+    if (q.length < 2) {
+      setSuggestions([])
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&region=${region}`)
+        const data = (await res.json()) as Suggestion[]
+        setSuggestions(data)
+      } catch {
+        setSuggestions([])
+      } finally {
+        setLoading(false)
+      }
+    }, 300)
+  }, [query, region])
 
   function navigate(gameName: string, tagLine: string, reg: string) {
     const next: RecentSearch = { gameName, tagLine, region: reg }
@@ -71,17 +111,25 @@ export function SearchHero() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     } catch {}
     setOpen(false)
+    setQuery("")
+    setSuggestions([])
     router.push(`/profile/${reg}/${encodeURIComponent(gameName)}/${tagLine}`)
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const parsed = parseQuery(query)
-    if (!parsed) return
-    navigate(parsed.gameName, parsed.tagLine, region)
+    if (parsed) {
+      navigate(parsed.gameName, parsed.tagLine, region)
+      return
+    }
+    // No tag typed — navigate to first suggestion or do nothing
+    const first = suggestions[0] ?? recent[0]
+    if (first) navigate(first.gameName, first.tagLine, first.region)
   }
 
-  function removeRecent(idx: number) {
+  function removeRecent(idx: number, e: React.MouseEvent) {
+    e.stopPropagation()
     const updated = recent.filter((_, i) => i !== idx)
     setRecent(updated)
     try {
@@ -89,19 +137,20 @@ export function SearchHero() {
     } catch {}
   }
 
-  const showDropdown = open && recent.length > 0 && !query
+  const showRecent = open && !query && recent.length > 0
+  const showSuggestions = open && query.length >= 2 && (suggestions.length > 0 || loading)
 
   return (
     <div ref={ref} className="w-full max-w-xl relative">
       <form
         onSubmit={handleSubmit}
-        className="flex gap-0 rounded-xl border bg-card shadow-lg overflow-hidden"
+        className="flex rounded-xl border bg-card shadow-lg overflow-hidden"
       >
         {/* Region selector */}
         <select
           value={region}
           onChange={(e) => setRegion(e.target.value)}
-          className="bg-muted border-r text-sm font-medium px-3 py-0 focus:outline-none cursor-pointer text-foreground"
+          className="bg-muted border-r text-sm font-medium px-3 focus:outline-none cursor-pointer text-foreground flex-shrink-0"
         >
           {REGIONS.map((r) => (
             <option key={r.id} value={r.id}>
@@ -133,41 +182,75 @@ export function SearchHero() {
         </button>
       </form>
 
-      {/* Recent searches dropdown */}
-      {showDropdown && (
+      {/* Dropdown */}
+      {(showRecent || showSuggestions) && (
         <div className="absolute top-full mt-1 w-full rounded-xl border bg-card shadow-xl z-50 overflow-hidden">
-          <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Recherches récentes
-          </p>
-          {recent.map((r, i) => (
-            <div
-              key={`${r.gameName}#${r.tagLine}`}
-              className="flex items-center px-4 py-2.5 hover:bg-accent transition-colors cursor-pointer group"
-            >
-              <button
-                type="button"
-                className="flex items-center gap-3 flex-1 text-left"
-                onClick={() => navigate(r.gameName, r.tagLine, r.region)}
-              >
-                <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                <span className="text-sm font-medium">{r.gameName}</span>
-                <span className="text-muted-foreground text-sm">#{r.tagLine}</span>
-                <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                  {REGIONS.find((reg) => reg.id === r.region)?.label ?? r.region}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  removeRecent(i)
-                }}
-                className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent"
-              >
-                <X className="h-3 w-3 text-muted-foreground" />
-              </button>
-            </div>
-          ))}
+          {/* Live suggestions */}
+          {showSuggestions && (
+            <>
+              {loading ? (
+                <div className="px-4 py-3 text-xs text-muted-foreground">Recherche…</div>
+              ) : (
+                suggestions.map((s) => (
+                  <button
+                    key={`${s.gameName}#${s.tagLine}@${s.region}`}
+                    type="button"
+                    onClick={() => navigate(s.gameName, s.tagLine, s.region)}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-accent transition-colors text-left"
+                  >
+                    <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">{s.gameName}</span>
+                    <span className="text-muted-foreground text-sm">#{s.tagLine}</span>
+                    {s.summonerLevel && (
+                      <span className="text-xs text-muted-foreground ml-1">
+                        niv. {s.summonerLevel}
+                      </span>
+                    )}
+                    <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                      {regionLabel(s.region)}
+                    </span>
+                  </button>
+                ))
+              )}
+            </>
+          )}
+
+          {/* Recent searches */}
+          {showRecent && (
+            <>
+              <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Récents
+              </p>
+              {recent.map((r, i) => (
+                <div
+                  key={`${r.gameName}#${r.tagLine}`}
+                  className="flex items-center px-4 py-2.5 hover:bg-accent transition-colors group"
+                >
+                  <button
+                    type="button"
+                    className="flex items-center gap-3 flex-1 text-left"
+                    onClick={() => navigate(r.gameName, r.tagLine, r.region)}
+                  >
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm font-medium">{r.gameName}</span>
+                    <span className="text-muted-foreground text-sm">#{r.tagLine}</span>
+                    <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                      {regionLabel(r.region)}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => removeRecent(i, e)}
+                    className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted"
+                  >
+                    <X className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
