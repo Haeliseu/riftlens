@@ -1,5 +1,6 @@
 import type { RiotApiClient, RoutingRegion } from "../client"
 import { type MatchDto, MatchDtoSchema, MatchListSchema } from "../types/match"
+import { type MatchTimeline, MatchTimelineSchema } from "../types/timeline"
 
 export async function getMatchIds(
   client: RiotApiClient,
@@ -35,4 +36,13 @@ export async function getMatch(
 ): Promise<MatchDto> {
   const url = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}`
   return client.fetch(url, MatchDtoSchema)
+}
+
+export async function getMatchTimeline(
+  client: RiotApiClient,
+  routing: RoutingRegion,
+  matchId: string
+): Promise<MatchTimeline> {
+  const url = `https://${routing}.api.riotgames.com/lol/match/v5/matches/${matchId}/timeline`
+  return client.fetch(url, MatchTimelineSchema)
 }

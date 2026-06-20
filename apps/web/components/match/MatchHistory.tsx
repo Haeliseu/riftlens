@@ -216,7 +216,7 @@ export function MatchHistory({
                 </button>
                 {expanded && (
                   <div className="border-t">
-                    <MatchDetailPanel matchId={m.matchId} region={region} />
+                    <MatchDetailPanel matchId={m.matchId} region={region} ownerPuuid={puuid} />
                   </div>
                 )}
               </div>
