@@ -106,4 +106,23 @@ describe("MatchRow", () => {
     render(<MatchRow match={{ ...base, previouslyPlayed: prev }} />)
     expect(screen.queryByText("5×")).toBeNull()
   })
+
+  it("shows Perfect KDA when deaths is 0", () => {
+    render(<MatchRow match={{ ...base, deaths: 0 }} />)
+    expect(screen.getByText(/10\/0\/8/)).toBeInTheDocument()
+    expect(screen.getByText(/18\.0 KDA/)).toBeInTheDocument()
+  })
+
+  it("clicking indicator without onOpponentFilter does not throw", () => {
+    const prev: PreviouslyPlayedInfo = {
+      totalGames: 3,
+      asAlly: 2,
+      asEnemy: 1,
+      wins: 2,
+      losses: 1,
+      lastPlayedMs: Date.now(),
+    }
+    render(<MatchRow match={{ ...base, previouslyPlayed: prev, opponentPuuid: "opp" }} />)
+    expect(() => fireEvent.click(screen.getByText("3×").closest("button")!)).not.toThrow()
+  })
 })

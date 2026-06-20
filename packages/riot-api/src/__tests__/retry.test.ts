@@ -93,4 +93,10 @@ describe("withRetry", () => {
     await promise
     vi.useRealTimers()
   })
+
+  it("throws lastError when maxAttempts is 0 (loop never runs)", async () => {
+    const fn = vi.fn()
+    await expect(withRetry(fn, { maxAttempts: 0 })).rejects.toBeUndefined()
+    expect(fn).not.toHaveBeenCalled()
+  })
 })

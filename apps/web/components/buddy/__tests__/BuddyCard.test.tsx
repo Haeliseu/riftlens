@@ -111,4 +111,22 @@ describe("BuddyCard", () => {
     fireEvent.click(screen.getByRole("button"))
     expect(handler).toHaveBeenCalledWith("TestPlayer", "EUW")
   })
+
+  it("clicking without onPlayerClick does not throw", () => {
+    render(<BuddyCard {...defaultProps} />)
+    expect(() => fireEvent.click(screen.getByRole("button"))).not.toThrow()
+  })
+
+  it("displays 'good' heat bar for 53-59% WR", () => {
+    const { container } = render(<BuddyCard {...defaultProps} champWinRate={55} />)
+    const heatBar = container.querySelector(".w-\\[3px\\]")
+    expect(heatBar?.className).toContain("color-heat-good")
+  })
+
+  it("rank image onError hides the image", () => {
+    render(<BuddyCard {...defaultProps} />)
+    const img = screen.getByRole("img")
+    fireEvent.error(img)
+    expect((img as HTMLImageElement).style.display).toBe("none")
+  })
 })

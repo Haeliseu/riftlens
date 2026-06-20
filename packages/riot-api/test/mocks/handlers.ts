@@ -2,6 +2,14 @@ import { HttpResponse, http } from "msw"
 
 export const handlers = [
   http.get(
+    "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/RATELIMITED/429",
+    () =>
+      new HttpResponse("Rate Limited", {
+        status: 429,
+        headers: { "Retry-After": "5" },
+      })
+  ),
+  http.get(
     "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/NOTEXIST/404",
     () => new HttpResponse("Not Found", { status: 404 })
   ),

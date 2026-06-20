@@ -65,9 +65,14 @@ export function LpChart({ data = [] }: LpChartProps) {
 
   const pathD = data.map((d, i) => `${i === 0 ? "M" : "L"} ${xPos(i)} ${yPos(d.lp)}`).join(" ")
 
+  // v8 ignore next — data[maxI] is always defined within a non-empty array reduce
   const peakIndex = data.reduce((maxI, d, i) => (d.lp > (data[maxI]?.lp ?? 0) ? i : maxI), 0)
   const currentIndex = data.length - 1
   const hoveredPoint = hoverIndex !== null ? data[hoverIndex] : null
+  // v8 ignore next — peakIndex always valid within non-empty data
+  const peakLp = data[peakIndex]?.lp ?? 0
+  // v8 ignore next — currentIndex always valid within non-empty data
+  const currentLp = data[currentIndex]?.lp ?? 0
 
   return (
     <div className="rounded-xl border bg-card p-4">
@@ -116,10 +121,10 @@ export function LpChart({ data = [] }: LpChartProps) {
         ))}
 
         {/* Peak marker */}
-        <circle cx={xPos(peakIndex)} cy={yPos(data[peakIndex]?.lp ?? 0)} r={5} fill="#f59e0b" />
+        <circle cx={xPos(peakIndex)} cy={yPos(peakLp)} r={5} fill="#f59e0b" />
         <text
           x={xPos(peakIndex)}
-          y={yPos(data[peakIndex]?.lp ?? 0) - 8}
+          y={yPos(peakLp) - 8}
           textAnchor="middle"
           fontSize={9}
           fill="#f59e0b"
@@ -128,12 +133,7 @@ export function LpChart({ data = [] }: LpChartProps) {
         </text>
 
         {/* Current position marker */}
-        <circle
-          cx={xPos(currentIndex)}
-          cy={yPos(data[currentIndex]?.lp ?? 0)}
-          r={4}
-          fill="#3b82f6"
-        />
+        <circle cx={xPos(currentIndex)} cy={yPos(currentLp)} r={4} fill="#3b82f6" />
 
         {/* Hover crosshair + tooltip */}
         {hoverIndex !== null && hoveredPoint && (

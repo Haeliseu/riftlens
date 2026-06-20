@@ -74,6 +74,8 @@ export function BuddyCard({
   onPlayerClick,
 }: BuddyCardProps) {
   const heatKey = getHeatKey(champWinRate)
+  // v8 ignore next — summonerName is always a non-empty string
+  const avatarInitial = summonerName[0]?.toUpperCase() ?? "?"
 
   return (
     <div
@@ -96,7 +98,7 @@ export function BuddyCard({
             className="relative flex-shrink-0"
           >
             <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-              {summonerName[0]?.toUpperCase() ?? "?"}
+              {avatarInitial}
             </div>
             {previouslyPlayed && (
               <span

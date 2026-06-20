@@ -83,6 +83,7 @@ export function MatchRow({ match, onOpponentFilter }: MatchRowProps) {
       {match.previouslyPlayed && match.opponentPuuid && (
         <button
           type="button"
+          // v8 ignore next — opponentPuuid is always defined when this button renders
           onClick={() => onOpponentFilter?.(match.opponentPuuid ?? "")}
           className="flex flex-col items-center rounded border px-2 py-1 text-xs hover:bg-accent transition-colors"
           title={`${match.previouslyPlayed.totalGames} parties · ${match.previouslyPlayed.asAlly} allié / ${match.previouslyPlayed.asEnemy} ennemi · ${match.previouslyPlayed.wins}V ${match.previouslyPlayed.losses}D`}

@@ -28,11 +28,13 @@ const TIER_BASE: Record<TierName, number> = {
 const DIVISION_OFFSET: Record<Division, number> = { IV: 0, III: 100, II: 200, I: 300 }
 
 export function tierToLP(tier: TierName, division: Division, lp: number): number {
+  // v8 ignore next — DIVISION_OFFSET always has all Division keys
   return TIER_BASE[tier] + (DIVISION_OFFSET[division] ?? 0) + lp
 }
 
 export function lpToTier(value: number): { tier: TierName; division: Division; lp: number } {
   const tiers = Object.entries(TIER_BASE) as [TierName, number][]
+  // v8 ignore next 10 — entry is always defined (Object.entries), division index always 0-3
   for (let i = tiers.length - 1; i >= 0; i--) {
     const entry = tiers[i]
     if (entry === undefined) continue
@@ -64,6 +66,7 @@ export function computeAverageGameRank(participantRanks: RankedEntry[]): {
   const values = participantRanks
     .map((r) => tierToLP(r.tier, r.division, r.leaguePoints))
     .sort((a, b) => a - b)
+  // v8 ignore next — values is non-empty (participantRanks.length > 0 checked above)
   const median = values[Math.floor(values.length / 2)] ?? 0
   const { tier, division } = lpToTier(median)
   return { tier, division }

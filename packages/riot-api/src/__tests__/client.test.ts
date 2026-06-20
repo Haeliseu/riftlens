@@ -51,4 +51,28 @@ describe("RiotApiClient", () => {
     expect(client.getRoutingRegion("NA1")).toBe("americas")
     expect(client.getRoutingRegion("KR")).toBe("asia")
   })
+
+  it("sets retryAfterSeconds from Retry-After header on 429", async () => {
+    vi.useFakeTimers()
+    const headers = new Headers({ "Retry-After": "5" })
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 429,
+      headers,
+      text: async () => "Rate Limited",
+    } as Response)
+
+    let capturedError: unknown
+    const promise = client
+      .fetch("https://europe.api.riotgames.com/test", z.unknown())
+      .catch((err: unknown) => {
+        capturedError = err
+      })
+    await vi.runAllTimersAsync()
+    await promise
+    vi.restoreAllMocks()
+    vi.useRealTimers()
+    expect(capturedError).toBeInstanceOf(RiotApiError)
+    expect((capturedError as RiotApiError).retryAfterSeconds).toBe(5)
+  })
 })

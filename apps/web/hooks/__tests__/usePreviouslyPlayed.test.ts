@@ -37,6 +37,19 @@ describe("usePreviouslyPlayed", () => {
     expect(result.current.data).toBeNull()
   })
 
+  it("returns null when response is not ok", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: false,
+      json: async () => null,
+    } as Response)
+
+    const { result } = renderHook(() => usePreviouslyPlayed("mock-puuid", "their-puuid"), {
+      wrapper: createWrapper(),
+    })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toBeNull()
+  })
+
   it("caches result for 5 minutes (isStale false after fetch)", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
