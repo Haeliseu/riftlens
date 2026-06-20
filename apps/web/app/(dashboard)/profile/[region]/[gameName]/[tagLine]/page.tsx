@@ -12,6 +12,7 @@ import { MatchFilter } from "@/components/match/MatchFilter"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
+import { LiveGame } from "@/components/profile/LiveGame"
 import { LpChart } from "@/components/profile/LpChart"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { RankedCard } from "@/components/profile/RankedCard"
@@ -112,6 +113,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
           région (le compte joue peut-être sur une autre) ou la validité de la clé API Riot.
         </div>
       )}
+
+      {summary && <LiveGame puuid={summary.puuid} region={region} />}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-4">

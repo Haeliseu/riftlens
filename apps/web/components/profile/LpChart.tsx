@@ -47,7 +47,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps
       leaguePoints: p.leaguePoints,
     }))
 
-  if (data.length === 0) {
+  if (data.length < 2) {
     return (
       <div className="rounded-xl border bg-card p-4">
         <div className="flex items-center justify-between mb-3">
@@ -58,7 +58,9 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps
           className="flex items-center justify-center text-center text-muted-foreground text-xs px-4"
           style={{ height: CHART_HEIGHT }}
         >
-          L'historique LP se construit à chaque visite du profil (Riot ne fournit pas le passé).
+          {data.length === 0
+            ? "L'historique LP se construit à chaque changement de LP (Riot ne fournit pas le passé)."
+            : "Premier point enregistré — la courbe apparaît dès le prochain changement de LP."}
         </div>
       </div>
     )
