@@ -18,11 +18,13 @@ interface LpDataPoint {
 }
 
 interface LpChartProps {
-  region: string
-  gameName: string
-  tagLine: string
+  region?: string
+  gameName?: string
+  tagLine?: string
   puuid?: string | null
   data?: LpDataPoint[]
+  /** render without the card chrome (for embedding into another card) */
+  embedded?: boolean
 }
 
 const CHART_WIDTH = 320
@@ -33,9 +35,10 @@ function formatDate(ms: number) {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(ms))
 }
 
-export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps) {
+export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: LpChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const { data: history } = useLpHistory(dataProp ? null : puuid, region)
+  const cardClass = embedded ? "mt-3 border-t pt-3" : "rounded-xl border bg-card p-4"
 
   const data: LpDataPoint[] =
     dataProp ??
@@ -49,7 +52,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps
 
   if (data.length < 2) {
     return (
-      <div className="rounded-xl border bg-card p-4">
+      <div className={cardClass}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-medium">LP Chart</span>
           <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
@@ -95,7 +98,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps
   const currentLp = data[currentIndex]?.lp ?? 0
 
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className={cardClass}>
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium">LP Chart</span>
         <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>

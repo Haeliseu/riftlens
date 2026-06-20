@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
 import { MatchDetailPanel } from "./MatchDetailPanel"
+import { PerformanceSummary } from "./PerformanceSummary"
 
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
 
@@ -104,7 +105,7 @@ export function MatchHistory({
   period = "all",
 }: MatchHistoryProps) {
   const router = useRouter()
-  const [count, setCount] = useState(10)
+  const [count, setCount] = useState(30)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
@@ -119,6 +120,8 @@ export function MatchHistory({
 
   return (
     <div className="space-y-2">
+      {matches && matches.length > 0 && <PerformanceSummary matches={matches} />}
+
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex gap-1">
           {QUEUE_GROUPS.map((g) => (
@@ -210,6 +213,32 @@ export function MatchHistory({
                     alt={m.championName}
                     className="h-9 w-9 rounded-md flex-shrink-0"
                   />
+
+                  {/* Matchup: lane opponent (big) + enemy carry nested (small, inset) */}
+                  {m.laneOpponentChampionId != null && (
+                    <div className="relative w-9 flex-shrink-0 flex flex-col items-center">
+                      {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                      <img
+                        src={getChampionIconUrl(m.laneOpponentChampionId)}
+                        alt="adversaire"
+                        className="h-9 w-9 rounded-md"
+                      />
+                      {m.enemyCarryChampionId != null &&
+                        m.enemyCarryChampionId !== m.laneOpponentChampionId && (
+                          // biome-ignore lint/performance/noImgElement: external CDN icon
+                          <img
+                            src={getChampionIconUrl(m.enemyCarryChampionId)}
+                            alt="carry ennemi"
+                            title="Carry adverse"
+                            className="absolute -bottom-1 -right-1 h-5 w-5 rounded-sm border border-background shadow-md ring-1 ring-amber-400/60"
+                          />
+                        )}
+                      <span className="text-[8px] leading-none text-muted-foreground mt-0.5">
+                        vs
+                      </span>
+                    </div>
+                  )}
+
                   <div className="w-[88px] flex-shrink-0">
                     <p
                       className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
@@ -282,7 +311,7 @@ export function MatchHistory({
           {canLoadMore && (
             <button
               type="button"
-              onClick={() => setCount((c) => Math.min(50, c + 10))}
+              onClick={() => setCount((c) => Math.min(50, c + 20))}
               disabled={isFetching}
               className="w-full rounded-md border bg-card py-2 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
             >

@@ -3,6 +3,7 @@
 import { CURRENT_SEASON_LABEL, getRankIconUrl, type TierName } from "@riftlens/riot-api"
 import { useAverageRank } from "@/hooks/useAverageRank"
 import { capitalizeTier, rankLabelFr, tierColor } from "@/lib/tiers"
+import { LpChart } from "./LpChart"
 
 export interface SoloRank {
   tier: string
@@ -93,6 +94,8 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
           )}
         </div>
       )}
+
+      <LpChart embedded puuid={puuid ?? null} region={region} />
     </div>
   )
 }

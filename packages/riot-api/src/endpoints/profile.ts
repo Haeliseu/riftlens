@@ -111,6 +111,14 @@ export interface MatchSummary {
   placement: number
   /** best score on own team: "MVP" if won, "ACE" if lost, else null */
   badge: "MVP" | "ACE" | null
+  /** the direct lane opponent's champion (same teamPosition, enemy team) */
+  laneOpponentChampionId: number | null
+  /** highest-carry enemy + their position */
+  enemyCarryChampionId: number | null
+  enemyCarryPosition: string | null
+  /** champion ids per side, for with/against filtering */
+  allyChampionIds: number[]
+  enemyChampionIds: number[]
 }
 
 /** Heuristic 0–100 "carry" contribution from kill participation, damage share, KDA, CS. */
@@ -179,6 +187,8 @@ export async function getMatchHistory(
             return {
               puuid: x.puuid,
               teamId: x.teamId,
+              championId: x.championId,
+              position: x.teamPosition ?? x.individualPosition ?? null,
               score: computeCarryScore({
                 kills: x.kills,
                 deaths: x.deaths,
@@ -200,6 +210,14 @@ export async function getMatchHistory(
           )
           const badge: "MVP" | "ACE" | null = ownScore === teamMax ? (p.win ? "MVP" : "ACE") : null
 
+          const ownPos = p.teamPosition ?? p.individualPosition ?? null
+          const enemies = scored.filter((s) => s.teamId !== p.teamId)
+          const laneOpp = ownPos ? enemies.find((s) => s.position === ownPos) : undefined
+          const enemyCarry = enemies.reduce<(typeof enemies)[number] | undefined>(
+            (best, s) => (!best || s.score > best.score ? s : best),
+            undefined
+          )
+
           const teamKills = teamAgg.get(p.teamId)?.kills ?? 0
           const cs = (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0)
           return {
@@ -213,12 +231,17 @@ export async function getMatchHistory(
             cs,
             teamKills,
             queueId: m.info.queueId ?? null,
-            position: p.teamPosition ?? p.individualPosition ?? null,
+            position: ownPos,
             gameCreationMs: m.info.gameCreation,
             gameDurationS: dur,
             carryScore: ownScore,
             placement,
             badge,
+            laneOpponentChampionId: laneOpp?.championId ?? null,
+            enemyCarryChampionId: enemyCarry?.championId ?? null,
+            enemyCarryPosition: enemyCarry?.position ?? null,
+            allyChampionIds: scored.filter((s) => s.teamId === p.teamId).map((s) => s.championId),
+            enemyChampionIds: enemies.map((s) => s.championId),
           }
         })
         .catch(() => null)
