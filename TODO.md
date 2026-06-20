@@ -104,10 +104,17 @@ Prérequis à réunir pour la soumission sur developer.riotgames.com :
 
 ## 🟣 6. Demandé — encore à faire (gros morceaux)
 
-- [ ] **Connexion Riot (RSO)** : login « via Riot » = Riot Sign-On, **nécessite une
-  approbation Riot séparée** + enregistrement d'un client OAuth (redirect URI, scopes).
-  À préparer comme provider Better Auth, activable seulement après accord Riot. Tant que ce
-  n'est pas approuvé, garder le login actuel.
+- [x] **Connexion Riot (RSO) — scaffold posé** : provider `genericOAuth` "riot" ajouté dans
+  `apps/web/lib/auth.ts`, **env-gated** (actif seulement si `RIOT_CLIENT_ID` + `RIOT_CLIENT_SECRET`
+  sont définis). Reste à faire pour l'activer :
+  1. Faire approuver un **client RSO** par Riot (formulaire dédié, comme la prod key).
+  2. Renseigner `RIOT_CLIENT_ID` / `RIOT_CLIENT_SECRET` (Vercel + `.env.local`).
+  3. Déclarer la **redirect URI** dans le portail Riot : `{BETTER_AUTH_URL}/api/auth/oauth2/callback/riot`.
+  4. Bouton front : `authClient.signIn.oauth2({ providerId: "riot" })` (cacher derrière un flag
+     `NEXT_PUBLIC_RIOT_LOGIN_ENABLED`).
+  5. **Lier le puuid** : après login, appeler `https://auth.riotgames.com/userinfo` puis
+     `/riot/account/v1/accounts/me` avec l'access token → stocker le puuid sur le profil
+     (override `getUserInfo` du provider, ou hook `databaseHooks.user.create.after`).
 - [ ] **Onglet Détails — build/skill order** : ordre d'achat d'objets **horodaté** et ordre de
   montée des sorts viennent de `match-v5/{matchId}/timeline` (appel séparé, lourd). À ajouter :
   endpoint timeline + parsing des events ITEM_PURCHASED / SKILL_LEVEL_UP.
@@ -130,3 +137,6 @@ Prérequis à réunir pour la soumission sur developer.riotgames.com :
 - Fixes API : IDs chiffrés optionnels, pseudos spéciaux, chemins CDN icônes.
 - Détail de partie en 3 onglets (Général objets/sorts/runes, Détails stats+pings, Runes).
 - Score de carry par partie, filtre historique par rôle, backfill saison + bouton Actualiser.
+- Timeline : ordre d'achat (horodaté) + ordre des sorts (Q/W/E/R) dans l'onglet Détails.
+- Panels DB : performances par rôle, « croisés plusieurs fois » (allié/ennemi + WR).
+- Scaffold RSO (provider Riot env-gated dans Better Auth, prêt à activer après accord Riot).
