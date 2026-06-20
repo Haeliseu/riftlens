@@ -1,0 +1,22 @@
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+coverage/
+*.local
+.env
+.env.*
+!.env.example
+
+# Tauri
+apps/desktop/src-tauri/target/
+
+# Mobile
+.expo/
+android/
+ios/
+
+# Editor
+.DS_Store
+*.swp

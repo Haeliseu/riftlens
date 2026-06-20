@@ -1,0 +1,4 @@
+{
+  "extends": "@riftlens/config/tsconfig/node.json",
+  "include": ["src/**/*.ts"]
+}

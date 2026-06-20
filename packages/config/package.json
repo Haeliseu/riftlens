@@ -1,0 +1,15 @@
+{
+  "name": "@riftlens/config",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "vitest": "4.1.9"
+  },
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/nextjs.json": "./tsconfig/nextjs.json",
+    "./tsconfig/node.json": "./tsconfig/node.json",
+    "./tsconfig/react-library.json": "./tsconfig/react-library.json",
+    "./vitest/base.config": "./vitest/base.config.ts"
+  }
+}

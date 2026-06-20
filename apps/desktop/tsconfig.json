@@ -1,0 +1,10 @@
+{
+  "extends": "@riftlens/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "src-tauri"]
+}
