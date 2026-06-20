@@ -73,6 +73,8 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps
   const innerH = CHART_HEIGHT - PADDING.top - PADDING.bottom
 
   function xPos(i: number) {
+    // Single point → centre it (avoid divide-by-zero).
+    if (data.length <= 1) return PADDING.left + innerW / 2
     return PADDING.left + (i / (data.length - 1)) * innerW
   }
   function yPos(lp: number) {
@@ -123,18 +125,21 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps
         <path d={pathD} fill="none" stroke="#6366f1" strokeWidth={2} />
 
         {/* Hover detection zones — SVG mouse zones, keyboard nav N/A */}
-        {data.map((d, i) => (
-          // biome-ignore lint/a11y/noStaticElementInteractions: SVG hover zone, not interactive control
-          <rect
-            key={d.dateMs}
-            x={xPos(i) - innerW / (2 * (data.length - 1))}
-            y={PADDING.top}
-            width={innerW / (data.length - 1)}
-            height={innerH}
-            fill="transparent"
-            onMouseEnter={() => setHoverIndex(i)}
-          />
-        ))}
+        {data.map((d, i) => {
+          const zoneW = data.length > 1 ? innerW / (data.length - 1) : innerW
+          return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: SVG hover zone, not interactive control
+            <rect
+              key={d.dateMs}
+              x={xPos(i) - zoneW / 2}
+              y={PADDING.top}
+              width={zoneW}
+              height={innerH}
+              fill="transparent"
+              onMouseEnter={() => setHoverIndex(i)}
+            />
+          )
+        })}
 
         {/* Peak marker */}
         <circle cx={xPos(peakIndex)} cy={yPos(peakLp)} r={5} fill="#f59e0b" />

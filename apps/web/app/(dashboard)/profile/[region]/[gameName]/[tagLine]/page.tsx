@@ -7,6 +7,7 @@ import {
   RiotApiClient,
 } from "@riftlens/riot-api"
 import { sql } from "drizzle-orm"
+import { after } from "next/server"
 import { MatchFilter } from "@/components/match/MatchFilter"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
@@ -81,11 +82,12 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
   try {
     summary = await getProfileSummary(client, region as Region, name, tag)
     const s = summary
-    // Best-effort persistence: ensure the row exists (name/icon/level), then
-    // ingest matches + LP snapshot + rank cache. Never blocks rendering.
-    void indexSummoner(region, s).then(() =>
-      ingestProfile(region as Region, s.puuid, s.soloRank).catch(() => {})
-    )
+    // Persist after the response is sent — `after()` keeps the serverless
+    // function alive on Vercel (a bare `void` promise would be frozen/killed).
+    after(async () => {
+      await indexSummoner(region, s)
+      await ingestProfile(region as Region, s.puuid, s.soloRank).catch(() => {})
+    })
   } catch {
     // Riot lookup failed (bad key / unknown player) — render shells
   }

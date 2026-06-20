@@ -8,6 +8,7 @@ import {
 } from "@riftlens/db/schema"
 import type { Division, MatchDto, Region, TierName } from "@riftlens/riot-api"
 import {
+  getLeagueEntriesByPuuid,
   getMatch,
   getMatchIds,
   RiotApiClient,
@@ -195,6 +196,17 @@ export async function syncSeason(region: Region, puuid: string, budget = 40): Pr
   for (const id of toFetch) {
     const m = await getMatch(c, routing, id).catch(() => null)
     if (m) await storeMatch(region, m, puuid)
+  }
+
+  // Also capture a fresh LP snapshot + rank cache on each sync.
+  const entries = await getLeagueEntriesByPuuid(c, region, puuid).catch(() => [])
+  const solo = entries.find((e) => e.queueType === "RANKED_SOLO_5x5")
+  if (solo) {
+    await recordRankSnapshot(puuid, {
+      tier: solo.tier,
+      rank: solo.rank,
+      leaguePoints: solo.leaguePoints,
+    }).catch(() => {})
   }
 
   const remaining = missing.length - toFetch.length
