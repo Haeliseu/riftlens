@@ -26,7 +26,7 @@
     "@riftlens/config": "workspace:*",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "4.1.9",
-    "msw": "2.7.0",
+    "msw": "2.14.6",
     "typescript": "6.0.3",
     "vitest": "4.1.9"
   }
