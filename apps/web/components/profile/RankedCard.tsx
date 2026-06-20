@@ -33,24 +33,24 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
         <span className="text-[10px] text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
       </div>
 
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-4 mb-2">
         {soloRank ? (
           // biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed
           <img
             src={getRankIconUrl(capitalizeTier(soloRank.tier) as TierName)}
             alt=""
-            className="w-16 h-16 object-contain flex-shrink-0"
+            className="w-28 h-28 object-contain flex-shrink-0 drop-shadow"
           />
         ) : (
-          <div className="h-16 w-16 flex items-center justify-center text-3xl text-muted-foreground">
+          <div className="h-28 w-28 flex items-center justify-center text-5xl text-muted-foreground">
             —
           </div>
         )}
         <div>
-          <p className="text-lg font-semibold" style={{ color }}>
+          <p className="text-xl font-bold" style={{ color }}>
             {label}
           </p>
-          <p className="text-xs text-muted-foreground font-mono">
+          <p className="text-sm text-muted-foreground font-mono">
             {soloRank ? soloRank.leaguePoints : 0} LP
           </p>
         </div>

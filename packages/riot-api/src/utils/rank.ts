@@ -73,8 +73,14 @@ export function computeAverageGameRank(participantRanks: RankedEntry[]): {
 }
 
 const CDN =
-  "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem"
+  "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images"
 
+/** Tightly-cropped mini-crest (SVG) — fills its box far better than the padded emblem. */
 export function getRankIconUrl(tier: TierName): string {
-  return `${CDN}/emblem-${tier.toLowerCase()}.png`
+  return `${CDN}/ranked-mini-crests/${tier.toLowerCase()}.svg`
+}
+
+/** The large winged emblem (lots of transparent padding); use only at big sizes. */
+export function getRankEmblemUrl(tier: TierName): string {
+  return `${CDN}/ranked-emblem/emblem-${tier.toLowerCase()}.png`
 }

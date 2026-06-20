@@ -18,6 +18,20 @@ const ROLES = [
   { id: "UTILITY", label: "Supp" },
 ]
 
+const QUEUE_GROUPS = [
+  { id: "ALL", label: "Toutes" },
+  { id: "SOLO", label: "Solo/Duo" },
+  { id: "FLEX", label: "Flex" },
+  { id: "OTHER", label: "Autre" },
+]
+
+function inQueueGroup(queueId: number | null, group: string): boolean {
+  if (group === "ALL") return true
+  if (group === "SOLO") return queueId === 420
+  if (group === "FLEX") return queueId === 440
+  return queueId !== 420 && queueId !== 440 // OTHER (ARAM, Arena, normals…)
+}
+
 function carryColor(score: number): string {
   if (score >= 65) return "text-violet-400"
   if (score >= 45) return "text-blue-400"
@@ -89,29 +103,52 @@ export function MatchHistory({
   const [count, setCount] = useState(10)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
+  const [queueGroup, setQueueGroup] = useState<string>("ALL")
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
   let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
+  if (matches && queueGroup !== "ALL")
+    matches = matches.filter((m) => inQueueGroup(m.queueId, queueGroup))
   if (matches && role !== "ALL") matches = matches.filter((m) => m.position === role)
-  const canLoadMore = (rawMatches?.length ?? 0) >= count && count < 50 && period === "all"
+  const canLoadMore =
+    (rawMatches?.length ?? 0) >= count && count < 50 && period === "all" && queueGroup === "ALL"
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-1">
-        {ROLES.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => setRole(r.id)}
-            className={`rounded-md px-2.5 py-1 text-xs ${
-              role === r.id
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {r.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex gap-1">
+          {QUEUE_GROUPS.map((g) => (
+            <button
+              key={g.id}
+              type="button"
+              onClick={() => setQueueGroup(g.id)}
+              className={`rounded-md px-2.5 py-1 text-xs ${
+                queueGroup === g.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
+        </div>
+        <div className="h-4 w-px bg-border" />
+        <div className="flex gap-1">
+          {ROLES.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setRole(r.id)}
+              className={`rounded-md px-2.5 py-1 text-xs ${
+                role === r.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {opponentPuuid && (
@@ -144,9 +181,7 @@ export function MatchHistory({
           Historique indisponible (clé API Riot ?).
         </p>
       ) : !matches || matches.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center py-8">
-          Aucune partie classée récente.
-        </p>
+        <p className="text-muted-foreground text-sm text-center py-8">Aucune partie récente.</p>
       ) : (
         <div className="space-y-1">
           {matches.map((m) => {

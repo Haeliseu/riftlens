@@ -134,18 +134,22 @@ export function computeCarryScore(p: {
 }
 
 /**
- * Fetches the player's recent ranked matches (Solo/Duo by default) and reduces
- * each to the target player's line — what opgg/dpm render in the match list.
+ * Fetches the player's recent matches (all queues by default) and reduces each
+ * to the target player's line — what opgg/dpm render in the match list.
+ * Pass a `queue` id to restrict to a single queue.
  */
 export async function getMatchHistory(
   client: RiotApiClient,
   region: Region,
   puuid: string,
   count = 10,
-  queue = 420
+  queue?: number
 ): Promise<MatchSummary[]> {
   const routing = regionToRouting(region)
-  const ids = await getMatchIds(client, routing, puuid, { queue, count })
+  const ids = await getMatchIds(client, routing, puuid, {
+    count,
+    ...(queue !== undefined ? { queue } : {}),
+  })
 
   const matches = await Promise.all(
     ids.map((id) =>
