@@ -102,6 +102,23 @@ Prérequis à réunir pour la soumission sur developer.riotgames.com :
 
 ---
 
+## 🟣 6. Demandé — encore à faire (gros morceaux)
+
+- [ ] **Connexion Riot (RSO)** : login « via Riot » = Riot Sign-On, **nécessite une
+  approbation Riot séparée** + enregistrement d'un client OAuth (redirect URI, scopes).
+  À préparer comme provider Better Auth, activable seulement après accord Riot. Tant que ce
+  n'est pas approuvé, garder le login actuel.
+- [ ] **Onglet Détails — build/skill order** : ordre d'achat d'objets **horodaté** et ordre de
+  montée des sorts viennent de `match-v5/{matchId}/timeline` (appel séparé, lourd). À ajouter :
+  endpoint timeline + parsing des events ITEM_PURCHASED / SKILL_LEVEL_UP.
+- [ ] **Panel « joueurs croisés »** : « les 5 derniers croisés plusieurs fois » avec WR.
+  Données dans `match_participants` (déjà ingéré) — agréger par puuid rencontré ≥2 fois,
+  WR avec/contre. Nécessite la DB peuplée (migration appliquée).
+- [ ] **Performances par rôle** (panel sidebar comme DPM : parties + WR par rôle). Agrégeable
+  depuis `summoner_matches` (champ `position` à stocker — actuellement non persisté ; l'ajouter).
+- [ ] **Icônes de pings** : actuellement le breakdown affiche les **libellés + compteurs**.
+  Pour les icônes CDN, mapper chaque type de ping vers `assets/ux/pings/…` (chemins à fiabiliser).
+
 ## ✅ Déjà fait
 
 - Recherche enrichie (icône/niveau/rang), profil (header, rang, historique, champions
@@ -111,3 +128,5 @@ Prérequis à réunir pour la soumission sur developer.riotgames.com :
 - Schéma + migration DB (lp_snapshots, rank_history, cache rang, queue_id).
 - Conformité policy Riot : gratuit, tags non-shaming, clé serveur, agrégation de rangs publics.
 - Fixes API : IDs chiffrés optionnels, pseudos spéciaux, chemins CDN icônes.
+- Détail de partie en 3 onglets (Général objets/sorts/runes, Détails stats+pings, Runes).
+- Score de carry par partie, filtre historique par rôle, backfill saison + bouton Actualiser.
