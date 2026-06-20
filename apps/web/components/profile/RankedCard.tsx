@@ -1,6 +1,11 @@
 "use client"
 
-import { CURRENT_SEASON_LABEL, getRankIconUrl, type TierName } from "@riftlens/riot-api"
+import {
+  CURRENT_SEASON_LABEL,
+  getRankEmblemUrl,
+  getRankIconUrl,
+  type TierName,
+} from "@riftlens/riot-api"
 import { useAverageRank } from "@/hooks/useAverageRank"
 import { useLadderRank } from "@/hooks/useLadderRank"
 import { useLpHistory } from "@/hooks/useLpHistory"
@@ -73,12 +78,14 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
 
       <div className="flex items-center gap-4 mb-2">
         {soloRank ? (
-          // biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed
-          <img
-            src={getRankIconUrl(capitalizeTier(soloRank.tier) as TierName)}
-            alt=""
-            className="w-28 h-28 object-contain flex-shrink-0 drop-shadow"
-          />
+          <div className="relative w-28 h-28 flex-shrink-0 overflow-hidden">
+            {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
+            <img
+              src={getRankEmblemUrl(capitalizeTier(soloRank.tier) as TierName)}
+              alt=""
+              className="absolute inset-0 h-full w-full object-contain scale-[3.4] drop-shadow"
+            />
+          </div>
         ) : (
           <div className="h-28 w-28 flex items-center justify-center text-5xl text-muted-foreground">
             —

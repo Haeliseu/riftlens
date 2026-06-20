@@ -4,6 +4,7 @@ import { getChampionIconUrl, type MatchSummary, queueName } from "@riftlens/riot
 import { ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useChampions } from "@/hooks/useChampions"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
 import { ROLES, roleIconUrl } from "@/lib/roles"
 import { MatchDetailPanel } from "./MatchDetailPanel"
@@ -107,12 +108,19 @@ export function MatchHistory({
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
   const [period, setPeriod] = useState<"all" | "day" | "session">("all")
+  const [champId, setChampId] = useState<number | null>(null)
+  const [champMode, setChampMode] = useState<"with" | "against">("against")
+  const { data: champions } = useChampions()
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
   let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
   if (matches && queueGroup !== "ALL")
     matches = matches.filter((m) => inQueueGroup(m.queueId, queueGroup))
   if (matches && role !== "ALL") matches = matches.filter((m) => m.position === role)
+  if (matches && champId != null)
+    matches = matches.filter((m) =>
+      (champMode === "with" ? m.allyChampionIds : m.enemyChampionIds).includes(champId)
+    )
   const canLoadMore =
     (rawMatches?.length ?? 0) >= count && count < 50 && period === "all" && queueGroup === "ALL"
 
@@ -176,6 +184,46 @@ export function MatchHistory({
               {g.label}
             </button>
           ))}
+        </div>
+
+        {/* Champion filter (with / against) */}
+        <div className="flex items-center gap-1">
+          <div className="flex gap-0.5 rounded-md border p-0.5">
+            <button
+              type="button"
+              onClick={() => setChampMode("with")}
+              className={`rounded px-2 py-1 text-xs ${champMode === "with" ? "ring-1 ring-primary bg-accent font-medium" : "text-muted-foreground"}`}
+            >
+              Avec
+            </button>
+            <button
+              type="button"
+              onClick={() => setChampMode("against")}
+              className={`rounded px-2 py-1 text-xs ${champMode === "against" ? "ring-1 ring-primary bg-accent font-medium" : "text-muted-foreground"}`}
+            >
+              Contre
+            </button>
+          </div>
+          <input
+            list="champ-filter-list"
+            placeholder="Champion…"
+            defaultValue=""
+            onChange={(e) => {
+              const c = (champions ?? []).find((x) => x.name === e.target.value)
+              setChampId(c?.id ?? null)
+            }}
+            className="h-7 w-28 rounded-md border bg-card px-2 text-xs focus:outline-none"
+          />
+          <datalist id="champ-filter-list">
+            {(champions ?? []).map((c) => (
+              <option key={c.id} value={c.name} />
+            ))}
+          </datalist>
+          {champId != null && (
+            <span className="text-[10px] text-muted-foreground">
+              {matches?.length ?? 0} parties
+            </span>
+          )}
         </div>
       </div>
 
