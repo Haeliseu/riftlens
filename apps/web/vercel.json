@@ -1,4 +1,4 @@
 {
-  "buildCommand": "cd ../.. && pnpm --filter @riftlens/db db:migrate && pnpm turbo build --filter=web",
+  "buildCommand": "cd ../.. && pnpm turbo build --filter=web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
 }
