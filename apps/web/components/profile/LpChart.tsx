@@ -3,12 +3,16 @@
 import type { TierName } from "@riftlens/riot-api"
 import { CURRENT_SEASON_LABEL } from "@riftlens/riot-api"
 import { useState } from "react"
+import { useLpHistory } from "@/hooks/useLpHistory"
 
 interface LpDataPoint {
   dateMs: number
   tier: TierName
   division: string
+  /** y-axis value: absolute ladder value (tierToLP) when available, else raw LP */
   lp: number
+  /** LP within the division, for the tooltip */
+  leaguePoints?: number
   avgGameRank?: { tier: TierName; division: string }
   isPeak?: boolean
 }
@@ -17,6 +21,7 @@ interface LpChartProps {
   region: string
   gameName: string
   tagLine: string
+  puuid?: string | null
   data?: LpDataPoint[]
 }
 
@@ -28,8 +33,19 @@ function formatDate(ms: number) {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(ms))
 }
 
-export function LpChart({ data = [] }: LpChartProps) {
+export function LpChart({ data: dataProp, puuid, region = "EUW1" }: LpChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
+  const { data: history } = useLpHistory(dataProp ? null : puuid, region)
+
+  const data: LpDataPoint[] =
+    dataProp ??
+    (history ?? []).map((p) => ({
+      dateMs: new Date(p.recordedAt).getTime(),
+      tier: p.tier as TierName,
+      division: p.division,
+      lp: p.value,
+      leaguePoints: p.leaguePoints,
+    }))
 
   if (data.length === 0) {
     return (
@@ -39,10 +55,10 @@ export function LpChart({ data = [] }: LpChartProps) {
           <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
         </div>
         <div
-          className="flex items-center justify-center text-muted-foreground text-xs"
+          className="flex items-center justify-center text-center text-muted-foreground text-xs px-4"
           style={{ height: CHART_HEIGHT }}
         >
-          Aucune donnée disponible
+          L'historique LP se construit à chaque visite du profil (Riot ne fournit pas le passé).
         </div>
       </div>
     )
@@ -158,7 +174,8 @@ export function LpChart({ data = [] }: LpChartProps) {
         <div className="mt-2 rounded-md border bg-popover p-2 text-xs space-y-0.5">
           <p className="font-medium">{formatDate(hoveredPoint.dateMs)}</p>
           <p>
-            {hoveredPoint.tier} {hoveredPoint.division} · {hoveredPoint.lp} LP
+            {hoveredPoint.tier} {hoveredPoint.division} ·{" "}
+            {hoveredPoint.leaguePoints ?? hoveredPoint.lp} LP
           </p>
           {hoveredPoint.avgGameRank && (
             <p className="text-muted-foreground">

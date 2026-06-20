@@ -1,9 +1,4 @@
-import {
-  CURRENT_SEASON_LABEL,
-  getProfileIconUrl,
-  getRankIconUrl,
-  type TierName,
-} from "@riftlens/riot-api"
+import { getProfileIconUrl, getRankIconUrl, type TierName } from "@riftlens/riot-api"
 import { regionBadge } from "@/lib/regions"
 import { capitalizeTier, rankLabelFr, tierColor } from "@/lib/tiers"
 
@@ -63,9 +58,6 @@ export function ProfileHeader({
             style={{ backgroundColor: rb.color }}
           >
             {rb.label}
-          </span>
-          <span className="text-[10px] px-2 py-0.5 rounded bg-accent text-accent-foreground border">
-            {CURRENT_SEASON_LABEL}
           </span>
         </div>
         {soloRank ? (

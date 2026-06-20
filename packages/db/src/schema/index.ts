@@ -1,5 +1,7 @@
+export * from "./lp-snapshots"
 export * from "./match-participants"
 export * from "./matches"
+export * from "./rank-history"
 export * from "./rune-pages"
 export * from "./summoner-matches"
 export * from "./summoners"

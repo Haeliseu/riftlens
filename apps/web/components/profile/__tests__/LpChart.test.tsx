@@ -1,7 +1,14 @@
 import { SEASON_2_2026_START_MS } from "@riftlens/riot-api"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { fireEvent, render as rtlRender, screen } from "@testing-library/react"
+import type { ReactElement } from "react"
 import { describe, expect, it } from "vitest"
 import { LpChart } from "../LpChart"
+
+function render(ui: ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return rtlRender(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
+}
 
 const mockData = [
   { dateMs: SEASON_2_2026_START_MS + 86400000, tier: "Diamond" as const, division: "IV", lp: 0 },
@@ -23,7 +30,7 @@ const mockData = [
 describe("LpChart", () => {
   it("shows empty state when no data", () => {
     render(<LpChart region="EUW1" gameName="Test" tagLine="EUW" />)
-    expect(screen.getByText(/Aucune donnée/)).toBeInTheDocument()
+    expect(screen.getByText(/historique LP se construit/)).toBeInTheDocument()
   })
 
   it("shows LP Chart label in both states", () => {

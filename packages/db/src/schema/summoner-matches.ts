@@ -1,4 +1,14 @@
-import { bigint, boolean, index, integer, pgTable, real, text, uuid } from "drizzle-orm/pg-core"
+import {
+  bigint,
+  boolean,
+  index,
+  integer,
+  pgTable,
+  real,
+  text,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core"
 import { matches } from "./matches"
 
 export const summonerMatches = pgTable(
@@ -7,6 +17,7 @@ export const summonerMatches = pgTable(
     id: uuid().primaryKey().defaultRandom(),
     puuid: text().notNull(),
     matchId: text("match_id").references(() => matches.matchId),
+    queueId: integer("queue_id"), // 420=Solo/Duo, 440=Flex
     championId: integer("champion_id"),
     championName: text("champion_name"),
     kills: integer(),
@@ -25,6 +36,7 @@ export const summonerMatches = pgTable(
     riftScore: real("rift_score"),
   },
   (t) => [
+    uniqueIndex("uniq_sm_puuid_match").on(t.puuid, t.matchId),
     index("idx_sm_puuid").on(t.puuid),
     index("idx_sm_game_creation").on(t.gameCreation),
     index("idx_sm_champion").on(t.puuid, t.championName),

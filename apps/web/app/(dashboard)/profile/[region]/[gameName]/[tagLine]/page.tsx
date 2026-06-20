@@ -13,6 +13,7 @@ import { ChampionStats } from "@/components/profile/ChampionStats"
 import { LpChart } from "@/components/profile/LpChart"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { RankedCard } from "@/components/profile/RankedCard"
+import { ingestProfile } from "@/lib/ingest"
 
 interface ProfilePageProps {
   params: Promise<{
@@ -76,7 +77,12 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
   let summary: ProfileSummary | null = null
   try {
     summary = await getProfileSummary(client, region as Region, name, tag)
-    void indexSummoner(region, summary)
+    const s = summary
+    // Best-effort persistence: ensure the row exists (name/icon/level), then
+    // ingest matches + LP snapshot + rank cache. Never blocks rendering.
+    void indexSummoner(region, s).then(() =>
+      ingestProfile(region as Region, s.puuid, s.soloRank).catch(() => {})
+    )
   } catch {
     // Riot lookup failed (bad key / unknown player) — render shells
   }
@@ -106,7 +112,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             puuid={summary?.puuid ?? null}
             soloRank={summary?.soloRank ?? null}
           />
-          <LpChart region={region} gameName={name} tagLine={tag} />
+          <LpChart region={region} gameName={name} tagLine={tag} puuid={summary?.puuid ?? null} />
           <ChampionStats region={region} puuid={summary?.puuid ?? null} />
         </div>
 
