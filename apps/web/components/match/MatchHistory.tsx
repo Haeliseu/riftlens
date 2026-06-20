@@ -32,6 +32,10 @@ function inQueueGroup(queueId: number | null, group: string): boolean {
   return queueId !== 420 && queueId !== 440 // OTHER (ARAM, Arena, normals…)
 }
 
+function placementLabel(p: number): string {
+  return p === 1 ? "1er" : `${p}e`
+}
+
 function carryColor(score: number): string {
   if (score >= 65) return "text-violet-400"
   if (score >= 45) return "text-blue-400"
@@ -242,6 +246,23 @@ export function MatchHistory({
                       {m.carryScore}
                     </p>
                     <p className="text-[10px] text-muted-foreground">carry</p>
+                  </div>
+                  <div className="w-12 flex-shrink-0 flex justify-center">
+                    {m.badge ? (
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                          m.badge === "MVP"
+                            ? "bg-amber-400/20 text-amber-400"
+                            : "bg-violet-400/20 text-violet-400"
+                        }`}
+                      >
+                        {m.badge}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        {placementLabel(m.placement)}
+                      </span>
+                    )}
                   </div>
                   <ChevronDown
                     className={`h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${

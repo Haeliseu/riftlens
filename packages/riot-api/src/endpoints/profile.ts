@@ -107,6 +107,10 @@ export interface MatchSummary {
   gameDurationS: number
   /** 0–100 contribution score (KP, damage share, KDA, CS) */
   carryScore: number
+  /** the player's rank by carry score among all 10 participants (1 = best) */
+  placement: number
+  /** best score on own team: "MVP" if won, "ACE" if lost, else null */
+  badge: "MVP" | "ACE" | null
 }
 
 /** Heuristic 0–100 "carry" contribution from kill participation, damage share, KDA, CS. */
@@ -157,9 +161,46 @@ export async function getMatchHistory(
         .then((m): MatchSummary | null => {
           const p = m.info.participants.find((x) => x.puuid === puuid)
           if (!p) return null
-          const team = m.info.participants.filter((x) => x.teamId === p.teamId)
-          const teamKills = team.reduce((sum, x) => sum + x.kills, 0)
-          const teamDamage = team.reduce((sum, x) => sum + (x.totalDamageDealtToChampions ?? 0), 0)
+          const dur = m.info.gameDuration
+
+          // Team aggregates (kills + damage) for every team.
+          const teamAgg = new Map<number, { kills: number; damage: number }>()
+          for (const x of m.info.participants) {
+            const t = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0 }
+            t.kills += x.kills
+            t.damage += x.totalDamageDealtToChampions ?? 0
+            teamAgg.set(x.teamId, t)
+          }
+
+          // Carry score for all 10 participants, to rank + detect team-best.
+          const scored = m.info.participants.map((x) => {
+            const ta = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0 }
+            const xcs = (x.totalMinionsKilled ?? 0) + (x.neutralMinionsKilled ?? 0)
+            return {
+              puuid: x.puuid,
+              teamId: x.teamId,
+              score: computeCarryScore({
+                kills: x.kills,
+                deaths: x.deaths,
+                assists: x.assists,
+                cs: xcs,
+                durationS: dur,
+                teamKills: ta.kills,
+                damage: x.totalDamageDealtToChampions ?? 0,
+                teamDamage: ta.damage,
+              }),
+            }
+          })
+
+          const ownScore = scored.find((s) => s.puuid === puuid)?.score ?? 0
+          const placement =
+            [...scored].sort((a, b) => b.score - a.score).findIndex((s) => s.puuid === puuid) + 1
+          const teamMax = Math.max(
+            ...scored.filter((s) => s.teamId === p.teamId).map((s) => s.score)
+          )
+          const badge: "MVP" | "ACE" | null = ownScore === teamMax ? (p.win ? "MVP" : "ACE") : null
+
+          const teamKills = teamAgg.get(p.teamId)?.kills ?? 0
           const cs = (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0)
           return {
             matchId: m.metadata.matchId,
@@ -174,17 +215,10 @@ export async function getMatchHistory(
             queueId: m.info.queueId ?? null,
             position: p.teamPosition ?? p.individualPosition ?? null,
             gameCreationMs: m.info.gameCreation,
-            gameDurationS: m.info.gameDuration,
-            carryScore: computeCarryScore({
-              kills: p.kills,
-              deaths: p.deaths,
-              assists: p.assists,
-              cs,
-              durationS: m.info.gameDuration,
-              teamKills,
-              damage: p.totalDamageDealtToChampions ?? 0,
-              teamDamage,
-            }),
+            gameDurationS: dur,
+            carryScore: ownScore,
+            placement,
+            badge,
           }
         })
         .catch(() => null)
