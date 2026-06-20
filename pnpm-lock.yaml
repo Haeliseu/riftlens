@@ -20,6 +20,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@riftlens/lcu':
+        specifier: workspace:*
+        version: link:../../packages/lcu
       '@riftlens/riot-api':
         specifier: workspace:*
         version: link:../../packages/riot-api
@@ -47,12 +50,18 @@ importers:
       next:
         specifier: 16.2.9
         version: 16.2.9(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      next-themes:
+        specifier: 0.4.6
+        version: 0.4.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react:
         specifier: 19.2.7
         version: 19.2.7
       react-dom:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
+      sonner:
+        specifier: 2.0.7
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     devDependencies:
       '@riftlens/config':
         specifier: workspace:*
@@ -292,6 +301,9 @@ importers:
       '@riftlens/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.21
       '@vitest/coverage-v8':
         specifier: 4.1.9
         version: 4.1.9(vitest@4.1.9)
@@ -314,6 +326,9 @@ importers:
       '@riftlens/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.21
       '@vitest/coverage-v8':
         specifier: 4.1.9
         version: 4.1.9(vitest@4.1.9)

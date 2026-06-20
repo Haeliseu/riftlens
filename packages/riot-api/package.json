@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@riftlens/config": "workspace:*",
+    "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "4.1.9",
     "msw": "2.7.0",
     "typescript": "6.0.3",

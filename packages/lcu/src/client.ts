@@ -32,7 +32,7 @@ export class LcuClient {
 
   async get<T>(path: string, schema: z.ZodType<T>): Promise<T> {
     const url = buildLcuUrl(this.credentials, path)
-    const res = await globalThis.fetch(url, {
+    const res = await fetch(url, {
       headers: { Authorization: this.authHeader },
     })
     if (!res.ok) {
@@ -43,7 +43,7 @@ export class LcuClient {
 
   async post<T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
     const url = buildLcuUrl(this.credentials, path)
-    const res = await globalThis.fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: this.authHeader,
@@ -59,7 +59,7 @@ export class LcuClient {
 
   async delete(path: string): Promise<void> {
     const url = buildLcuUrl(this.credentials, path)
-    const res = await globalThis.fetch(url, {
+    const res = await fetch(url, {
       method: "DELETE",
       headers: { Authorization: this.authHeader },
     })

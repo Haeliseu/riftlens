@@ -60,7 +60,7 @@ export class RiotApiClient {
     return per2MinQueue.add(() =>
       perSecondQueue.add(() =>
         withRetry(async () => {
-          const res = await globalThis.fetch(url, {
+          const res = await fetch(url, {
             headers: { "X-Riot-Token": this.apiKey },
           })
           if (!res.ok) {
