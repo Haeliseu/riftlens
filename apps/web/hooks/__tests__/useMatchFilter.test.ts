@@ -68,6 +68,34 @@ describe("useMatchFilter", () => {
     expect(allyResult.current[0]?.participantTeamId).toBe(allyResult.current[0]?.opponentTeamId)
   })
 
+  it("sub-filters enemy relation correctly", () => {
+    const { result } = renderHook(() =>
+      useMatchFilter(matches, {
+        period: "all",
+        opponentPuuid: "enemy-puuid",
+        opponentRelation: "enemy",
+      })
+    )
+    expect(result.current).toHaveLength(1)
+    expect(result.current[0]?.participantTeamId).not.toBe(result.current[0]?.opponentTeamId)
+  })
+
+  it("opponentRelation 'both' skips team filter", () => {
+    const { result } = renderHook(() =>
+      useMatchFilter(matches, {
+        period: "all",
+        opponentPuuid: "ally-puuid",
+        opponentRelation: "both",
+      })
+    )
+    expect(result.current).toHaveLength(1)
+  })
+
+  it("returns all matches with period 'all' and no filters", () => {
+    const { result } = renderHook(() => useMatchFilter(matches, { period: "all" }))
+    expect(result.current).toHaveLength(3)
+  })
+
   it("combines period and opponent filters", () => {
     vi.setSystemTime(new Date(NOW))
     const { result } = renderHook(() =>

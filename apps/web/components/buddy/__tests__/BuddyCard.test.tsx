@@ -10,13 +10,22 @@ const defaultProps = {
   division: "III",
   lp: 80,
   championName: "Ahri",
-  champWinRate: 58,
+  champWinRate: 50,
   champGames: 87,
   accountWinRate: 55,
   accountGames: 404,
   kda: "4.2",
   tags: [] as PlayerTag[],
 }
+
+const prev = (asAlly: number, asEnemy: number): PreviouslyPlayedInfo => ({
+  totalGames: asAlly + asEnemy,
+  asAlly,
+  asEnemy,
+  wins: asAlly,
+  losses: asEnemy,
+  lastPlayedMs: Date.now(),
+})
 
 describe("BuddyCard", () => {
   it("renders summoner name and tag", () => {
@@ -34,27 +43,38 @@ describe("BuddyCard", () => {
 
   it("displays champion WR with correct color class (green ≥55%)", () => {
     render(<BuddyCard {...defaultProps} champWinRate={60} />)
-    const wrText = screen.getByText(/WR champ S2/)
-    expect(wrText.className).toContain("color-win")
+    expect(screen.getByText(/WR champ S2/).className).toContain("color-win")
   })
 
   it("displays champion WR with red color class for <47%", () => {
     render(<BuddyCard {...defaultProps} champWinRate={45} />)
-    const wrText = screen.getByText(/WR champ S2/)
-    expect(wrText.className).toContain("color-loss")
+    expect(screen.getByText(/WR champ S2/).className).toContain("color-loss")
   })
 
-  it("shows 'déjà joué' badge when previouslyPlayed is provided", () => {
-    const prev: PreviouslyPlayedInfo = {
-      totalGames: 3,
-      asAlly: 2,
-      asEnemy: 1,
-      wins: 2,
-      losses: 1,
-      lastPlayedMs: Date.now(),
-    }
-    render(<BuddyCard {...defaultProps} previouslyPlayed={prev} />)
+  it("displays neutral WR class for 47-54%", () => {
+    render(<BuddyCard {...defaultProps} champWinRate={50} />)
+    const el = screen.getByText(/WR champ S2/)
+    expect(el.className).not.toContain("color-win")
+    expect(el.className).not.toContain("color-loss")
+  })
+
+  it("shows 'déjà joué' badge (ally > enemy → win color)", () => {
+    render(<BuddyCard {...defaultProps} previouslyPlayed={prev(2, 1)} />)
+    const badge = screen.getByTitle(/parties/)
+    expect(badge.className).toContain("color-win")
     expect(screen.getByText("3")).toBeInTheDocument()
+  })
+
+  it("shows 'déjà joué' badge (enemy > ally → loss color)", () => {
+    render(<BuddyCard {...defaultProps} previouslyPlayed={prev(1, 3)} />)
+    const badge = screen.getByTitle(/parties/)
+    expect(badge.className).toContain("color-loss")
+  })
+
+  it("shows 'déjà joué' badge (equal → neutral color)", () => {
+    render(<BuddyCard {...defaultProps} previouslyPlayed={prev(2, 2)} />)
+    const badge = screen.getByTitle(/parties/)
+    expect(badge.className).toContain("muted-foreground")
   })
 
   it("does not show badge when previouslyPlayed is null", () => {
@@ -67,11 +87,28 @@ describe("BuddyCard", () => {
     expect(screen.getByText("you")).toBeInTheDocument()
   })
 
+  it("shows session stats when isSelf with session data", () => {
+    render(<BuddyCard {...defaultProps} isSelf sessionWins={4} sessionLosses={2} />)
+    expect(screen.getByText(/Session/)).toBeInTheDocument()
+    expect(screen.getByText("4V")).toBeInTheDocument()
+    expect(screen.getByText("2D")).toBeInTheDocument()
+  })
+
+  it("does not show session stats without session data", () => {
+    render(<BuddyCard {...defaultProps} isSelf />)
+    expect(screen.queryByText(/Session/)).toBeNull()
+  })
+
+  it("renders tags when provided", () => {
+    render(<BuddyCard {...defaultProps} tags={["on-fire", "tilting"] as PlayerTag[]} />)
+    expect(screen.getByTitle("on-fire")).toBeInTheDocument()
+    expect(screen.getByTitle("tilting")).toBeInTheDocument()
+  })
+
   it("clicking player icon fires onPlayerClick callback", () => {
     const handler = vi.fn()
     render(<BuddyCard {...defaultProps} onPlayerClick={handler} />)
-    const btn = screen.getByRole("button")
-    fireEvent.click(btn)
+    fireEvent.click(screen.getByRole("button"))
     expect(handler).toHaveBeenCalledWith("TestPlayer", "EUW")
   })
 })
