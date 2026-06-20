@@ -1,4 +1,4 @@
-import type { Region } from "@riftlens/riot-api"
+import type { ApexTier, Region } from "@riftlens/riot-api"
 import {
   getAccountByPuuid,
   getApexLeague,
@@ -8,15 +8,23 @@ import {
 import { type NextRequest, NextResponse } from "next/server"
 
 const TOP_N = 20
+const TIERS: ApexTier[] = ["challenger", "grandmaster", "master"]
+const QUEUES = ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"]
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const region = (searchParams.get("region") ?? "EUW1") as Region
+  const tierParam = searchParams.get("tier") ?? "challenger"
+  const tier: ApexTier = TIERS.includes(tierParam as ApexTier)
+    ? (tierParam as ApexTier)
+    : "challenger"
+  const queueParam = searchParams.get("queue") ?? "RANKED_SOLO_5x5"
+  const queue = QUEUES.includes(queueParam) ? queueParam : "RANKED_SOLO_5x5"
   const routing = regionToRouting(region)
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
-    const league = await getApexLeague(client, region, "challenger")
+    const league = await getApexLeague(client, region, tier, queue)
     const top = league.entries
       .sort((a, b) => b.leaguePoints - a.leaguePoints)
       .slice(0, TOP_N)

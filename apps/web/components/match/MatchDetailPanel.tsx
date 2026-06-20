@@ -233,13 +233,15 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
   }
 
   // Aggregate ping breakdown across all players for the footer.
-  const pingTotals = new Map<string, number>()
+  const pingTotals = new Map<string, { icon: string; count: number }>()
   for (const p of data.participants) {
-    for (const ping of p.pings)
-      pingTotals.set(ping.label, (pingTotals.get(ping.label) ?? 0) + ping.count)
+    for (const ping of p.pings) {
+      const cur = pingTotals.get(ping.label)
+      pingTotals.set(ping.label, { icon: ping.icon, count: (cur?.count ?? 0) + ping.count })
+    }
   }
-  const pingRows = [...pingTotals.entries()].sort((a, b) => b[1] - a[1])
-  const totalPings = pingRows.reduce((s, [, c]) => s + c, 0)
+  const pingRows = [...pingTotals.entries()].sort((a, b) => b[1].count - a[1].count)
+  const totalPings = pingRows.reduce((s, [, v]) => s + v.count, 0)
 
   return (
     <div className="px-3 py-3">
@@ -279,10 +281,11 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
           )}
           <div className="mt-3 border-t pt-2">
             <p className="text-xs font-medium mb-1">Pings de la partie · {totalPings}</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-              {pingRows.map(([label, count]) => (
-                <span key={label}>
-                  {label} <span className="text-foreground font-medium">{count}</span>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-muted-foreground">
+              {pingRows.map(([label, v]) => (
+                <span key={label} className="flex items-center gap-1" title={label}>
+                  <Icon src={v.icon} size={16} alt={label} />
+                  <span className="text-foreground font-medium">{v.count}</span>
                 </span>
               ))}
             </div>

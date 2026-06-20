@@ -27,7 +27,7 @@ export interface MatchDetailParticipant {
     secondary: (string | null)[]
     shards: (string | null)[]
   }
-  pings: { label: string; count: number }[]
+  pings: { label: string; icon: string; count: number }[]
   totalPings: number
 }
 
