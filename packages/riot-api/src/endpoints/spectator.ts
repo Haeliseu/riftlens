@@ -1,5 +1,5 @@
-import type { RiotApiClient, Region } from "../client"
-import { LiveGameSchema, type LiveGame } from "../types/live-game"
+import type { Region, RiotApiClient } from "../client"
+import { type LiveGame, LiveGameSchema } from "../types/live-game"
 
 export async function getLiveGame(
   client: RiotApiClient,

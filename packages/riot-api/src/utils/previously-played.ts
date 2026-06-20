@@ -26,9 +26,7 @@ export interface CommonGame {
   gameCreation: number
 }
 
-export function aggregatePreviouslyPlayed(
-  commonGames: CommonGame[]
-): PreviouslyPlayedInfo | null {
+export function aggregatePreviouslyPlayed(commonGames: CommonGame[]): PreviouslyPlayedInfo | null {
   const seasonGames = commonGames.filter((g) => g.gameCreation >= SEASON_2_2026_START_MS)
   if (seasonGames.length === 0) return null
 

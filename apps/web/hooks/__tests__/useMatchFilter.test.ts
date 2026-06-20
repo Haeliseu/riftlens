@@ -1,6 +1,6 @@
+import { SEASON_2_2026_START_MS } from "@riftlens/riot-api"
 import { renderHook } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { SEASON_2_2026_START_MS } from "@riftlens/riot-api"
 import { useMatchFilter } from "../useMatchFilter"
 
 const NOW = SEASON_2_2026_START_MS + 30 * 86400000
@@ -34,9 +34,7 @@ const matches = [
 describe("useMatchFilter", () => {
   it("filters by 'day' to today only", () => {
     vi.setSystemTime(new Date(NOW))
-    const { result } = renderHook(() =>
-      useMatchFilter(matches, { period: "day" })
-    )
+    const { result } = renderHook(() => useMatchFilter(matches, { period: "day" }))
     expect(result.current).toHaveLength(1)
     expect(result.current[0]?.gameCreation).toBeGreaterThanOrEqual(TODAY_START.getTime())
     vi.useRealTimers()
@@ -44,9 +42,7 @@ describe("useMatchFilter", () => {
 
   it("filters by 'session' to current season + today", () => {
     vi.setSystemTime(new Date(NOW))
-    const { result } = renderHook(() =>
-      useMatchFilter(matches, { period: "session" })
-    )
+    const { result } = renderHook(() => useMatchFilter(matches, { period: "session" }))
     // Only today + season
     expect(result.current.every((m) => m.gameCreation >= SEASON_2_2026_START_MS)).toBe(true)
     vi.useRealTimers()
@@ -62,7 +58,11 @@ describe("useMatchFilter", () => {
 
   it("sub-filters ally vs enemy correctly", () => {
     const { result: allyResult } = renderHook(() =>
-      useMatchFilter(matches, { period: "all", opponentPuuid: "ally-puuid", opponentRelation: "ally" })
+      useMatchFilter(matches, {
+        period: "all",
+        opponentPuuid: "ally-puuid",
+        opponentRelation: "ally",
+      })
     )
     expect(allyResult.current).toHaveLength(1)
     expect(allyResult.current[0]?.participantTeamId).toBe(allyResult.current[0]?.opponentTeamId)

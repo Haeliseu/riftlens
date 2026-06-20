@@ -1,8 +1,8 @@
 "use client"
 
+import type { PlayerTag, PreviouslyPlayedInfo, TierName } from "@riftlens/riot-api"
 import { useRouter } from "next/navigation"
 import { BuddyCard } from "./BuddyCard"
-import type { TierName, PlayerTag, PreviouslyPlayedInfo } from "@riftlens/riot-api"
 
 export interface BuddyData {
   puuid: string

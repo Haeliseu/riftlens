@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query"
 import type { PreviouslyPlayedInfo } from "@riftlens/riot-api"
+import { useQuery } from "@tanstack/react-query"
 
 export function usePreviouslyPlayed(myPuuid: string | null, theirPuuid: string) {
   return useQuery({

@@ -39,7 +39,9 @@ export function MatchRow({ match, onOpponentFilter }: MatchRowProps) {
     <div
       className={cn(
         "flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent/50",
-        match.win ? "border-l-4 border-l-[var(--color-win)]" : "border-l-4 border-l-[var(--color-loss)]"
+        match.win
+          ? "border-l-4 border-l-[var(--color-win)]"
+          : "border-l-4 border-l-[var(--color-loss)]"
       )}
     >
       {/* Win/Loss indicator */}
@@ -80,7 +82,8 @@ export function MatchRow({ match, onOpponentFilter }: MatchRowProps) {
       {/* Previously played indicator */}
       {match.previouslyPlayed && match.opponentPuuid && (
         <button
-          onClick={() => onOpponentFilter?.(match.opponentPuuid!)}
+          type="button"
+          onClick={() => onOpponentFilter?.(match.opponentPuuid ?? "")}
           className="flex flex-col items-center rounded border px-2 py-1 text-xs hover:bg-accent transition-colors"
           title={`${match.previouslyPlayed.totalGames} parties · ${match.previouslyPlayed.asAlly} allié / ${match.previouslyPlayed.asEnemy} ennemi · ${match.previouslyPlayed.wins}V ${match.previouslyPlayed.losses}D`}
         >

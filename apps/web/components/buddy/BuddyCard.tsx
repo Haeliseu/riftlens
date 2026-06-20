@@ -1,8 +1,8 @@
 "use client"
 
-import { cn } from "@riftlens/ui"
-import type { PreviouslyPlayedInfo, PlayerTag, TierName } from "@riftlens/riot-api"
+import type { PlayerTag, PreviouslyPlayedInfo, TierName } from "@riftlens/riot-api"
 import { getRankIconUrl } from "@riftlens/riot-api"
+import { cn } from "@riftlens/ui"
 import Image from "next/image"
 
 interface BuddyCardProps {
@@ -83,12 +83,15 @@ export function BuddyCard({
       )}
     >
       {/* Heat bar */}
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg", HEAT_CLASS[heatKey])} />
+      <div
+        className={cn("absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg", HEAT_CLASS[heatKey])}
+      />
 
       <div className="pl-2 flex-1 min-w-0 space-y-1">
         {/* Header row */}
         <div className="flex items-center gap-1.5">
           <button
+            type="button"
             onClick={() => onPlayerClick?.(summonerName, tagLine)}
             className="relative flex-shrink-0"
           >
@@ -112,9 +115,7 @@ export function BuddyCard({
             <p className="text-xs font-semibold truncate">
               {summonerName}
               <span className="text-muted-foreground font-normal">#{tagLine}</span>
-              {isSelf && (
-                <span className="ml-1 text-[9px] text-blue-400 font-bold">you</span>
-              )}
+              {isSelf && <span className="ml-1 text-[9px] text-blue-400 font-bold">you</span>}
             </p>
             <div className="flex items-center gap-1">
               <Image
@@ -160,8 +161,7 @@ export function BuddyCard({
         {/* Session (self only) */}
         {isSelf && sessionWins !== undefined && sessionLosses !== undefined && (
           <p className="text-[10px] font-medium">
-            Session :{" "}
-            <span className="text-[var(--color-win)]">{sessionWins}V</span>{" "}
+            Session : <span className="text-[var(--color-win)]">{sessionWins}V</span>{" "}
             <span className="text-[var(--color-loss)]">{sessionLosses}D</span>
           </p>
         )}

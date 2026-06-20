@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { RiotApiClient, Region } from "../client"
+import type { Region, RiotApiClient } from "../client"
 
 const ChampionMasterySchema = z.object({
   puuid: z.string().optional(),

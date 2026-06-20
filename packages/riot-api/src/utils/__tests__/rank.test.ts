@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  computeAverageGameRank,
-  getRankIconUrl,
-  lpToTier,
-  tierToLP,
-} from "../rank"
+import { computeAverageGameRank, getRankIconUrl, lpToTier, tierToLP } from "../rank"
 
 describe("Rank utilities", () => {
   it("tierToLP converts Diamond II 50LP correctly", () => {

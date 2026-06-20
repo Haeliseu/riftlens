@@ -1,11 +1,18 @@
-import { getAccountByRiotId, RiotApiClient } from "@riftlens/riot-api"
 import type { RoutingRegion } from "@riftlens/riot-api"
-import { NextRequest, NextResponse } from "next/server"
+import { getAccountByRiotId, RiotApiClient } from "@riftlens/riot-api"
+import { type NextRequest, NextResponse } from "next/server"
 
 const REGION_TO_ROUTING: Record<string, RoutingRegion> = {
-  EUW1: "europe", EUN1: "europe", TR1: "europe", RU: "europe",
-  NA1: "americas", BR1: "americas", LA1: "americas", LA2: "americas",
-  KR: "asia", JP1: "asia",
+  EUW1: "europe",
+  EUN1: "europe",
+  TR1: "europe",
+  RU: "europe",
+  NA1: "americas",
+  BR1: "americas",
+  LA1: "americas",
+  LA2: "americas",
+  KR: "asia",
+  JP1: "asia",
   OC1: "sea",
 }
 
@@ -20,7 +27,7 @@ export async function GET(req: NextRequest) {
   }
 
   const routing = REGION_TO_ROUTING[region] ?? "europe"
-  const client = new RiotApiClient(process.env["RIOT_API_KEY"]!)
+  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
     const account = await getAccountByRiotId(client, routing, gameName, tagLine)

@@ -1,13 +1,4 @@
-import {
-  bigint,
-  boolean,
-  index,
-  integer,
-  pgTable,
-  real,
-  text,
-  uuid,
-} from "drizzle-orm/pg-core"
+import { bigint, boolean, index, integer, pgTable, real, text, uuid } from "drizzle-orm/pg-core"
 import { matches } from "./matches"
 
 export const summonerMatches = pgTable(

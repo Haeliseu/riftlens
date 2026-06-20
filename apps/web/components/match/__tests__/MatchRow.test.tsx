@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react"
+import type { PreviouslyPlayedInfo } from "@riftlens/riot-api"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { MatchRow } from "../MatchRow"
-import type { PreviouslyPlayedInfo } from "@riftlens/riot-api"
 
 const winMatch = {
   matchId: "EUW1_123",

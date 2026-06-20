@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
-import { ThemeProvider } from "next-themes"
 import { Geist } from "next/font/google"
+import { ThemeProvider } from "next-themes"
 
 const geist = Geist({ subsets: ["latin"] })
 

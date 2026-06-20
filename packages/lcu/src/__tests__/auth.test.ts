@@ -3,15 +3,13 @@ import { buildLcuUrl, parseLcuArgs } from "../client"
 
 describe("LCU auth parsing", () => {
   it("extracts port from process args", () => {
-    const args =
-      "LeagueClientUx.exe --app-port=54321 --remoting-auth-token=abc123def --region=EUW1"
+    const args = "LeagueClientUx.exe --app-port=54321 --remoting-auth-token=abc123def --region=EUW1"
     const creds = parseLcuArgs(args)
     expect(creds?.port).toBe(54321)
   })
 
   it("extracts auth token from process args", () => {
-    const args =
-      "LeagueClientUx.exe --app-port=54321 --remoting-auth-token=abc123def --region=EUW1"
+    const args = "LeagueClientUx.exe --app-port=54321 --remoting-auth-token=abc123def --region=EUW1"
     const creds = parseLcuArgs(args)
     expect(creds?.password).toBe("abc123def")
   })

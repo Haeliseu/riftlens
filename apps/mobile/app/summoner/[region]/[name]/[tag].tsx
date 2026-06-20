@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native"
 import { useLocalSearchParams } from "expo-router"
+import { ScrollView, StyleSheet, Text } from "react-native"
 
 export default function SummonerPage() {
   const { region, name, tag } = useLocalSearchParams<{

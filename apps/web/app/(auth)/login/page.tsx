@@ -32,7 +32,9 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
+            <label htmlFor="email" className="text-sm font-medium">
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -43,7 +45,9 @@ export default function LoginPage() {
             />
           </div>
           <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-medium">Mot de passe</label>
+            <label htmlFor="password" className="text-sm font-medium">
+              Mot de passe
+            </label>
             <input
               id="password"
               type="password"
@@ -73,6 +77,7 @@ export default function LoginPage() {
         </div>
 
         <button
+          type="button"
           onClick={handleDiscord}
           className="w-full rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
         >

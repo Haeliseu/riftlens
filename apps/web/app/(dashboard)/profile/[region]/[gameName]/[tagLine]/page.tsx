@@ -1,9 +1,9 @@
+import { MatchFilter } from "@/components/match/MatchFilter"
+import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
 import { LpChart } from "@/components/profile/LpChart"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { RankedCard } from "@/components/profile/RankedCard"
-import { MatchFilter } from "@/components/match/MatchFilter"
-import { MatchHistory } from "@/components/match/MatchHistory"
 
 interface ProfilePageProps {
   params: Promise<{

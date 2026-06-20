@@ -4,7 +4,11 @@ interface ChampionStatsProps {
   tagLine: string
 }
 
-export function ChampionStats({ region, gameName, tagLine }: ChampionStatsProps) {
+export function ChampionStats({
+  region: _region,
+  gameName: _gameName,
+  tagLine: _tagLine,
+}: ChampionStatsProps) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <h3 className="text-sm font-medium mb-3">Champions</h3>

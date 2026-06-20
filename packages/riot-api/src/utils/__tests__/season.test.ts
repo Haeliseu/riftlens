@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  SEASON_2_2026_START_MS,
-  filterCurrentSeason,
-  isCurrentSeason,
-} from "../season"
+import { filterCurrentSeason, isCurrentSeason, SEASON_2_2026_START_MS } from "../season"
 
 describe("Season filtering", () => {
   it("SEASON_2_2026_START_MS equals 2026-04-29T00:00:00Z", () => {

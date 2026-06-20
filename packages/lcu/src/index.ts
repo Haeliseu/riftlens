@@ -1,6 +1,6 @@
-export { LcuClient, parseLcuArgs, buildLcuUrl } from "./client"
 export type { LcuCredentials } from "./client"
+export { buildLcuUrl, LcuClient, parseLcuArgs } from "./client"
 export * from "./types/champ-select"
-export * from "./types/runes"
 export * from "./types/game-flow"
+export * from "./types/runes"
 export * from "./types/summoner"

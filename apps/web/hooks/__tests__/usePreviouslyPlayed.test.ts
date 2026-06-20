@@ -1,7 +1,7 @@
-import { renderHook, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { renderHook, waitFor } from "@testing-library/react"
 import { createElement } from "react"
-import { describe, expect, it, vi, afterEach } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { usePreviouslyPlayed } from "../usePreviouslyPlayed"
 
 function createWrapper() {
@@ -30,10 +30,9 @@ describe("usePreviouslyPlayed", () => {
       json: async () => null,
     } as Response)
 
-    const { result } = renderHook(
-      () => usePreviouslyPlayed("mock-puuid", "their-puuid"),
-      { wrapper: createWrapper() }
-    )
+    const { result } = renderHook(() => usePreviouslyPlayed("mock-puuid", "their-puuid"), {
+      wrapper: createWrapper(),
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toBeNull()
   })
@@ -44,10 +43,9 @@ describe("usePreviouslyPlayed", () => {
       json: async () => null,
     } as Response)
 
-    const { result } = renderHook(
-      () => usePreviouslyPlayed("mock-puuid", "their-puuid"),
-      { wrapper: createWrapper() }
-    )
+    const { result } = renderHook(() => usePreviouslyPlayed("mock-puuid", "their-puuid"), {
+      wrapper: createWrapper(),
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     // staleTime = 300_000ms, isStale should be false right after fetch
     expect(result.current.isStale).toBe(false)

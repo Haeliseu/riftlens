@@ -17,7 +17,9 @@ export function computeSessionStats(
   const startMs = todayStart.getTime()
 
   const todayMatches = matches
-    .filter((m) => m.puuid === puuid && m.gameCreation >= startMs && isCurrentSeason(m.gameCreation))
+    .filter(
+      (m) => m.puuid === puuid && m.gameCreation >= startMs && isCurrentSeason(m.gameCreation)
+    )
     .sort((a, b) => b.gameCreation - a.gameCreation)
 
   const wins = todayMatches.filter((m) => m.win).length

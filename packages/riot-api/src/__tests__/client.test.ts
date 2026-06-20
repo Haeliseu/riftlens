@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
-import { RiotApiError } from "../errors"
 import { RiotApiClient } from "../client"
+import { RiotApiError } from "../errors"
 
 describe("RiotApiClient", () => {
   const client = new RiotApiClient("test-api-key")

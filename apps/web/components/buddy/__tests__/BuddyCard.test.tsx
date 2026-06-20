@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from "@testing-library/react"
+import type { PlayerTag, PreviouslyPlayedInfo } from "@riftlens/riot-api"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { BuddyCard } from "../BuddyCard"
-import type { PreviouslyPlayedInfo, PlayerTag } from "@riftlens/riot-api"
 
 const defaultProps = {
   summonerName: "TestPlayer",

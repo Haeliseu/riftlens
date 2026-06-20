@@ -1,4 +1,4 @@
-import type { RiotApiClient, Region } from "../client"
+import type { Region, RiotApiClient } from "../client"
 import { LeagueEntriesSchema, type LeagueEntry } from "../types/ranked"
 
 export async function getLeagueEntriesBySummonerId(

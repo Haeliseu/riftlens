@@ -7,7 +7,23 @@ import { withRetry } from "./retry"
 const perSecondQueue = new PQueue({ interval: 1_000, intervalCap: 18 })
 const per2MinQueue = new PQueue({ interval: 120_000, intervalCap: 95 })
 
-export type Region = "EUW1" | "EUN1" | "NA1" | "KR" | "BR1" | "LA1" | "LA2" | "OC1" | "TR1" | "RU" | "JP1" | "PH2" | "SG2" | "TH2" | "TW2" | "VN2"
+export type Region =
+  | "EUW1"
+  | "EUN1"
+  | "NA1"
+  | "KR"
+  | "BR1"
+  | "LA1"
+  | "LA2"
+  | "OC1"
+  | "TR1"
+  | "RU"
+  | "JP1"
+  | "PH2"
+  | "SG2"
+  | "TH2"
+  | "TW2"
+  | "VN2"
 export type RoutingRegion = "europe" | "americas" | "asia" | "sea"
 
 const REGION_TO_ROUTING: Record<Region, RoutingRegion> = {

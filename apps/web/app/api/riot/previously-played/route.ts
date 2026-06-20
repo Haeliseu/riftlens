@@ -1,8 +1,8 @@
 import { db } from "@riftlens/db"
-import { matchParticipants, matches } from "@riftlens/db/schema"
+import { matches, matchParticipants } from "@riftlens/db/schema"
 import { aggregatePreviouslyPlayed } from "@riftlens/riot-api"
 import { and, eq } from "drizzle-orm"
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -22,11 +22,7 @@ export async function GET(req: NextRequest) {
     })
     .from(matchParticipants)
     .innerJoin(matches, eq(matchParticipants.matchId, matches.matchId))
-    .where(
-      and(
-        eq(matchParticipants.puuid, myPuuid)
-      )
-    )
+    .where(and(eq(matchParticipants.puuid, myPuuid)))
     .orderBy()
     .limit(50)
 

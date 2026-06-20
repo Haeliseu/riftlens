@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native"
 import { useRouter } from "expo-router"
+import { useState } from "react"
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 
 export default function SearchTab() {
   const [query, setQuery] = useState("")

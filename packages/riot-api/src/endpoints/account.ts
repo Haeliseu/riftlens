@@ -1,5 +1,5 @@
 import type { RiotApiClient, RoutingRegion } from "../client"
-import { AccountDtoSchema, type AccountDto } from "../types/account"
+import { type AccountDto, AccountDtoSchema } from "../types/account"
 
 export async function getAccountByRiotId(
   client: RiotApiClient,

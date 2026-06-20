@@ -7,14 +7,16 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/.next/**",
-      "**/out/**",
-      "**/coverage/**",
-      "**/migrations/**",
-      "apps/desktop/src-tauri/**"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/.next",
+      "!**/out",
+      "!**/coverage",
+      "!**/migrations",
+      "!apps/desktop/src-tauri",
+      "!**/globals.css"
     ]
   },
   "formatter": {
@@ -26,7 +28,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noExplicitAny": "error"
       },
@@ -45,7 +47,7 @@
   },
   "overrides": [
     {
-      "include": ["**/*.test.ts", "**/*.test.tsx", "**/test/**"],
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/test/**"],
       "linter": {
         "rules": {
           "suspicious": {

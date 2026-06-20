@@ -1,7 +1,6 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { MatchRow } from "./MatchRow"
 
 interface MatchHistoryProps {
   region: string
@@ -13,10 +12,16 @@ interface MatchHistoryProps {
 }
 
 // In production this fetches via TanStack Query
-export function MatchHistory({ region, gameName, tagLine, opponentPuuid, period }: MatchHistoryProps) {
+export function MatchHistory({
+  region,
+  gameName,
+  tagLine,
+  opponentPuuid,
+  period: _period,
+}: MatchHistoryProps) {
   const router = useRouter()
 
-  function handleOpponentFilter(puuid: string) {
+  function _handleOpponentFilter(puuid: string) {
     router.push(
       `/profile/${region}/${encodeURIComponent(gameName)}/${tagLine}?opponent=${puuid}&relation=both`,
       { scroll: false }
@@ -29,6 +34,7 @@ export function MatchHistory({ region, gameName, tagLine, opponentPuuid, period 
         <div className="flex items-center gap-2 rounded-md border bg-accent/50 px-3 py-2 text-sm">
           <span>Filtre : parties avec/contre ce joueur</span>
           <button
+            type="button"
             onClick={() =>
               router.push(`/profile/${region}/${encodeURIComponent(gameName)}/${tagLine}`)
             }

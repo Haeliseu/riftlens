@@ -1,6 +1,6 @@
-import { getTopChampionMasteries, RiotApiClient } from "@riftlens/riot-api"
 import type { Region } from "@riftlens/riot-api"
-import { NextRequest, NextResponse } from "next/server"
+import { getTopChampionMasteries, RiotApiClient } from "@riftlens/riot-api"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
   }
 
-  const client = new RiotApiClient(process.env["RIOT_API_KEY"]!)
+  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
     const masteries = await getTopChampionMasteries(client, region, puuid)

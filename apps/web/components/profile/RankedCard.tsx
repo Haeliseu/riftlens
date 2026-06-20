@@ -1,6 +1,4 @@
-import Image from "next/image"
-import { CURRENT_SEASON_LABEL, getRankIconUrl } from "@riftlens/riot-api"
-import type { TierName } from "@riftlens/riot-api"
+import { CURRENT_SEASON_LABEL } from "@riftlens/riot-api"
 
 interface RankedCardProps {
   region: string
@@ -10,7 +8,11 @@ interface RankedCardProps {
 
 // Data is fetched client-side via hooks in production
 // This is the presentational shell
-export function RankedCard({ region, gameName, tagLine }: RankedCardProps) {
+export function RankedCard({
+  region: _region,
+  gameName: _gameName,
+  tagLine: _tagLine,
+}: RankedCardProps) {
   return (
     <div className="rounded-xl border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">

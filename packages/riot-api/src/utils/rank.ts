@@ -54,9 +54,10 @@ export interface RankedEntry {
   leaguePoints: number
 }
 
-export function computeAverageGameRank(
-  participantRanks: RankedEntry[]
-): { tier: TierName; division: Division } {
+export function computeAverageGameRank(participantRanks: RankedEntry[]): {
+  tier: TierName
+  division: Division
+} {
   if (participantRanks.length === 0) {
     return { tier: "Gold", division: "IV" }
   }

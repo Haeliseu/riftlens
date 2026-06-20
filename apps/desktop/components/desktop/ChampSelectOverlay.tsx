@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { invoke } from "@tauri-apps/api/core"
-import { BuddyPanel } from "@riftlens/ui/../../../apps/web/components/buddy/BuddyPanel"
 import type { BuddyData } from "@riftlens/ui/../../../apps/web/components/buddy/BuddyPanel"
+import { BuddyPanel } from "@riftlens/ui/../../../apps/web/components/buddy/BuddyPanel"
+import { invoke } from "@tauri-apps/api/core"
+import { useEffect, useState } from "react"
 import { RuneImporter } from "./RuneImporter"
 
 export function ChampSelectOverlay() {
@@ -42,9 +42,7 @@ export function ChampSelectOverlay() {
       </div>
 
       {loading ? (
-        <div className="text-sm text-muted-foreground text-center py-8">
-          Connexion au client…
-        </div>
+        <div className="text-sm text-muted-foreground text-center py-8">Connexion au client…</div>
       ) : buddies.length === 0 ? (
         <div className="text-sm text-muted-foreground text-center py-8">
           Aucune session en cours

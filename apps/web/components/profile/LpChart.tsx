@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { CURRENT_SEASON_LABEL, getRankIconUrl } from "@riftlens/riot-api"
 import type { TierName } from "@riftlens/riot-api"
+import { CURRENT_SEASON_LABEL } from "@riftlens/riot-api"
+import { useState } from "react"
 
 interface LpDataPoint {
   dateMs: number
@@ -63,14 +63,9 @@ export function LpChart({ data = [] }: LpChartProps) {
     return PADDING.top + innerH - ((lp - minLp) / range) * innerH
   }
 
-  const pathD = data
-    .map((d, i) => `${i === 0 ? "M" : "L"} ${xPos(i)} ${yPos(d.lp)}`)
-    .join(" ")
+  const pathD = data.map((d, i) => `${i === 0 ? "M" : "L"} ${xPos(i)} ${yPos(d.lp)}`).join(" ")
 
-  const peakIndex = data.reduce(
-    (maxI, d, i) => (d.lp > (data[maxI]?.lp ?? 0) ? i : maxI),
-    0
-  )
+  const peakIndex = data.reduce((maxI, d, i) => (d.lp > (data[maxI]?.lp ?? 0) ? i : maxI), 0)
   const currentIndex = data.length - 1
   const hoveredPoint = hoverIndex !== null ? data[hoverIndex] : null
 
@@ -85,7 +80,10 @@ export function LpChart({ data = [] }: LpChartProps) {
         viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
         className="w-full"
         onMouseLeave={() => setHoverIndex(null)}
+        role="img"
+        aria-label="Graphique LP Saison 2 2026"
       >
+        <title>LP Chart S2 2026</title>
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <line
@@ -103,10 +101,11 @@ export function LpChart({ data = [] }: LpChartProps) {
         {/* LP line */}
         <path d={pathD} fill="none" stroke="#6366f1" strokeWidth={2} />
 
-        {/* Hover detection zones */}
-        {data.map((_, i) => (
+        {/* Hover detection zones — SVG mouse zones, keyboard nav N/A */}
+        {data.map((d, i) => (
+          // biome-ignore lint/a11y/noStaticElementInteractions: SVG hover zone, not interactive control
           <rect
-            key={i}
+            key={d.dateMs}
             x={xPos(i) - innerW / (2 * (data.length - 1))}
             y={PADDING.top}
             width={innerW / (data.length - 1)}
@@ -149,12 +148,7 @@ export function LpChart({ data = [] }: LpChartProps) {
               strokeDasharray="4 2"
               strokeWidth={1}
             />
-            <circle
-              cx={xPos(hoverIndex)}
-              cy={yPos(hoveredPoint.lp)}
-              r={3}
-              fill="#6366f1"
-            />
+            <circle cx={xPos(hoverIndex)} cy={yPos(hoveredPoint.lp)} r={3} fill="#6366f1" />
           </>
         )}
       </svg>

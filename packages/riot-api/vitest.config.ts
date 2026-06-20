@@ -1,5 +1,5 @@
-import { mergeConfig } from "vitest/config"
 import base from "@riftlens/config/vitest/base.config"
+import { mergeConfig } from "vitest/config"
 
 export default mergeConfig(base, {
   test: {

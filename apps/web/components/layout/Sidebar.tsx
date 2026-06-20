@@ -1,4 +1,4 @@
-import { BarChart2, Search, Trophy, Swords } from "lucide-react"
+import { BarChart2, Swords, Trophy } from "lucide-react"
 import Link from "next/link"
 
 const nav = [

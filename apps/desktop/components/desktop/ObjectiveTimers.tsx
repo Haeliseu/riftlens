@@ -16,12 +16,8 @@ export function ObjectiveTimers({ dragonTimer, baronTimer }: ObjectiveTimersProp
 
   return (
     <div className="flex items-center gap-4 rounded-md border bg-card px-3 py-1.5 text-xs font-mono">
-      {dragonTimer !== undefined && (
-        <span>🐉 {formatTimer(dragonTimer)}</span>
-      )}
-      {baronTimer !== undefined && (
-        <span>🟣 {formatTimer(baronTimer)}</span>
-      )}
+      {dragonTimer !== undefined && <span>🐉 {formatTimer(dragonTimer)}</span>}
+      {baronTimer !== undefined && <span>🟣 {formatTimer(baronTimer)}</span>}
     </div>
   )
 }

@@ -1,5 +1,5 @@
-import type { RiotApiClient, Region } from "../client"
-import { SummonerDtoSchema, type SummonerDto } from "../types/summoner"
+import type { Region, RiotApiClient } from "../client"
+import { type SummonerDto, SummonerDtoSchema } from "../types/summoner"
 
 export async function getSummonerByPuuid(
   client: RiotApiClient,

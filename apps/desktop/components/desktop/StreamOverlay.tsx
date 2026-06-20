@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { cn } from "@riftlens/ui"
 import type { TierName } from "@riftlens/riot-api"
-import { getRankIconUrl, CURRENT_SEASON_LABEL } from "@riftlens/riot-api"
+import { getRankIconUrl } from "@riftlens/riot-api"
+import { cn } from "@riftlens/ui"
 import Image from "next/image"
+import { useState } from "react"
 
 interface OverlayPlayer {
   name: string
@@ -66,9 +66,7 @@ function PlayerLine({ player }: { player: OverlayPlayer }) {
         className="flex-shrink-0"
       />
       <span className="text-[10px] truncate flex-1 font-medium">{player.name}</span>
-      <span className="text-[10px] text-muted-foreground tabular-nums">
-        {player.champWinRate}%
-      </span>
+      <span className="text-[10px] text-muted-foreground tabular-nums">{player.champWinRate}%</span>
       <span className="text-[10px] text-muted-foreground tabular-nums">
         {player.accountWinRate}%
       </span>
@@ -116,12 +114,7 @@ export function StreamOverlay({ data = MOCK_DATA }: { data?: StreamOverlayData }
       {/* Streamer card */}
       <div className="px-3 py-2 space-y-1.5 border-b border-white/10">
         <div className="flex items-center gap-1.5">
-          <Image
-            src={getRankIconUrl(streamer.tier)}
-            alt={streamer.tier}
-            width={20}
-            height={20}
-          />
+          <Image src={getRankIconUrl(streamer.tier)} alt={streamer.tier} width={20} height={20} />
           <div className="flex-1">
             <p className="font-bold text-[11px]">
               {streamer.name}
@@ -142,7 +135,9 @@ export function StreamOverlay({ data = MOCK_DATA }: { data?: StreamOverlayData }
         </div>
 
         <div className="flex justify-between text-[10px] text-white/60">
-          <span>WR S2 : {streamer.seasonWinRate}% ({streamer.seasonGames}g)</span>
+          <span>
+            WR S2 : {streamer.seasonWinRate}% ({streamer.seasonGames}g)
+          </span>
         </div>
 
         {/* Session — BIG for viewers */}
@@ -153,9 +148,7 @@ export function StreamOverlay({ data = MOCK_DATA }: { data?: StreamOverlayData }
           <span className="text-base font-bold text-[var(--color-loss)]">
             {streamer.sessionLosses}L
           </span>
-          <span className="text-base font-bold text-white/80">
-            {streamer.sessionWinRate}%
-          </span>
+          <span className="text-base font-bold text-white/80">{streamer.sessionWinRate}%</span>
         </div>
       </div>
 
@@ -163,6 +156,7 @@ export function StreamOverlay({ data = MOCK_DATA }: { data?: StreamOverlayData }
       {match && (
         <>
           <button
+            type="button"
             onClick={() => setMatchExpanded((v) => !v)}
             className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-white/5 transition-colors"
           >
@@ -194,10 +188,16 @@ export function StreamOverlay({ data = MOCK_DATA }: { data?: StreamOverlayData }
       {match && (match.dragonTimer !== undefined || match.baronTimer !== undefined) && (
         <div className="flex items-center gap-3 px-3 py-1.5 border-t border-white/10 text-[10px] font-mono text-white/60">
           {match.dragonTimer !== undefined && (
-            <span>🐉 {Math.floor(match.dragonTimer / 60)}:{String(match.dragonTimer % 60).padStart(2, "0")}</span>
+            <span>
+              🐉 {Math.floor(match.dragonTimer / 60)}:
+              {String(match.dragonTimer % 60).padStart(2, "0")}
+            </span>
           )}
           {match.baronTimer !== undefined && (
-            <span>🟣 {Math.floor(match.baronTimer / 60)}:{String(match.baronTimer % 60).padStart(2, "0")}</span>
+            <span>
+              🟣 {Math.floor(match.baronTimer / 60)}:
+              {String(match.baronTimer % 60).padStart(2, "0")}
+            </span>
           )}
         </div>
       )}

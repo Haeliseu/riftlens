@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { SEASON_2_2026_START_MS } from "../season"
 import { aggregatePreviouslyPlayed, type CommonGame } from "../previously-played"
+import { SEASON_2_2026_START_MS } from "../season"
 
 const S2_GAME_TIME = SEASON_2_2026_START_MS + 86400000
 
@@ -30,8 +30,8 @@ describe("Previously played detection", () => {
     ]
     const result = aggregatePreviouslyPlayed(games)
     expect(result).not.toBeNull()
-    expect(result!.asAlly).toBe(2)
-    expect(result!.asEnemy).toBe(1)
+    expect(result?.asAlly).toBe(2)
+    expect(result?.asEnemy).toBe(1)
   })
 
   it("counts wins and losses in common games", () => {
@@ -41,9 +41,9 @@ describe("Previously played detection", () => {
       { matchId: "m3", myTeamId: 100, theirTeamId: 100, myWin: true, gameCreation: S2_GAME_TIME },
     ]
     const result = aggregatePreviouslyPlayed(games)
-    expect(result!.wins).toBe(2)
-    expect(result!.losses).toBe(1)
-    expect(result!.totalGames).toBe(3)
+    expect(result?.wins).toBe(2)
+    expect(result?.losses).toBe(1)
+    expect(result?.totalGames).toBe(3)
   })
 
   it("returns most recent game timestamp", () => {
@@ -58,6 +58,6 @@ describe("Previously played detection", () => {
       },
     ]
     const result = aggregatePreviouslyPlayed(games)
-    expect(result!.lastPlayedMs).toBe(S2_GAME_TIME + 1000)
+    expect(result?.lastPlayedMs).toBe(S2_GAME_TIME + 1000)
   })
 })

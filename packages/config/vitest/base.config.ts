@@ -14,12 +14,7 @@ export default defineConfig({
         branches: 75,
         statements: 80,
       },
-      exclude: [
-        "**/node_modules/**",
-        "**/dist/**",
-        "**/*.config.*",
-        "**/migrations/**",
-      ],
+      exclude: ["**/node_modules/**", "**/dist/**", "**/*.config.*", "**/migrations/**"],
     },
   },
 })

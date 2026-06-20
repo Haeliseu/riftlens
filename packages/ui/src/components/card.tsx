@@ -1,4 +1,4 @@
-import * as React from "react"
+import type * as React from "react"
 import { cn } from "../lib/utils"
 
 const Card = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -28,4 +28,4 @@ const CardFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement
   <div className={cn("flex items-center p-6 pt-0", className)} {...props} />
 )
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }

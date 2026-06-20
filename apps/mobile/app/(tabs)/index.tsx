@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from "react-native"
 import { CURRENT_SEASON_LABEL } from "@riftlens/riot-api"
+import { StyleSheet, Text, View } from "react-native"
 
 export default function HomeTab() {
   return (

@@ -1,5 +1,5 @@
+import { isCurrentSeason } from "@riftlens/riot-api"
 import { useMemo } from "react"
-import { isCurrentSeason, SEASON_2_2026_START_MS } from "@riftlens/riot-api"
 
 export interface MatchFilters {
   period: "all" | "day" | "session"
