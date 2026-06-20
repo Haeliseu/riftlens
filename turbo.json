@@ -9,6 +9,7 @@
       "env": [
         "RIOT_API_KEY",
         "DATABASE_URL",
+        "DATABASE_URL_DIRECT",
         "BETTER_AUTH_SECRET",
         "BETTER_AUTH_URL",
         "NEXT_PUBLIC_APP_URL"
