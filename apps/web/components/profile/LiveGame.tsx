@@ -68,12 +68,18 @@ export function LiveGame({ puuid, region }: LiveGameProps) {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground">
+      <div className="rounded-xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
         Recherche d'une partie en cours…
       </div>
     )
   }
-  if (!data) return null // not in game
+  if (!data) {
+    return (
+      <div className="rounded-xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+        Le joueur n'est pas en partie actuellement.
+      </div>
+    )
+  }
 
   const blue = data.participants.filter((p) => p.teamId === 100)
   const red = data.participants.filter((p) => p.teamId === 200)

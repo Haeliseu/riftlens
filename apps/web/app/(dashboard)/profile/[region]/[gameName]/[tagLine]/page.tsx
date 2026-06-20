@@ -8,12 +8,12 @@ import {
 } from "@riftlens/riot-api"
 import { sql } from "drizzle-orm"
 import { after } from "next/server"
-import { MatchFilter } from "@/components/match/MatchFilter"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { LiveGame } from "@/components/profile/LiveGame"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
+import { ProfileTabs } from "@/components/profile/ProfileTabs"
 import { RankedCard } from "@/components/profile/RankedCard"
 import { RefreshButton } from "@/components/profile/RefreshButton"
 import { RolePerformance } from "@/components/profile/RolePerformance"
@@ -72,7 +72,7 @@ function safeDecode(value: string): string {
 
 export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
   const { region, gameName, tagLine } = await params
-  const { opponent, relation, period } = await searchParams
+  const { opponent, relation } = await searchParams
 
   const name = safeDecode(gameName)
   const tag = safeDecode(tagLine)
@@ -113,33 +113,35 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         </div>
       )}
 
-      {summary && <LiveGame puuid={summary.puuid} region={region} />}
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-1 space-y-4">
-          <RankedCard
-            region={region}
-            puuid={summary?.puuid ?? null}
-            soloRank={summary?.soloRank ?? null}
-          />
-          <ChampionStats region={region} puuid={summary?.puuid ?? null} />
-          <RolePerformance puuid={summary?.puuid ?? null} />
-          <CrossedPlayers puuid={summary?.puuid ?? null} region={region} />
-        </div>
-
-        <div className="lg:col-span-2 space-y-4">
-          <MatchFilter />
-          <MatchHistory
-            region={region}
-            gameName={name}
-            tagLine={tag}
-            puuid={summary?.puuid ?? null}
-            {...(opponent ? { opponentPuuid: opponent } : {})}
-            {...(relation ? { opponentRelation: relation } : {})}
-            {...(period ? { period } : {})}
-          />
-        </div>
-      </div>
+      {summary && (
+        <ProfileTabs
+          overview={
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="lg:col-span-1 space-y-4">
+                <RankedCard region={region} puuid={summary.puuid} soloRank={summary.soloRank} />
+              </div>
+              <div className="lg:col-span-2 space-y-4">
+                <MatchHistory
+                  region={region}
+                  gameName={name}
+                  tagLine={tag}
+                  puuid={summary.puuid}
+                  {...(opponent ? { opponentPuuid: opponent } : {})}
+                  {...(relation ? { opponentRelation: relation } : {})}
+                />
+              </div>
+            </div>
+          }
+          champions={<ChampionStats region={region} puuid={summary.puuid} />}
+          stats={
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <RolePerformance puuid={summary.puuid} />
+              <CrossedPlayers puuid={summary.puuid} region={region} />
+            </div>
+          }
+          live={<LiveGame puuid={summary.puuid} region={region} />}
+        />
+      )}
     </div>
   )
 }

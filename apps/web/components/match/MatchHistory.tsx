@@ -5,19 +5,17 @@ import { ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
+import { ROLES, roleIconUrl } from "@/lib/roles"
 import { MatchDetailPanel } from "./MatchDetailPanel"
 import { PerformanceSummary } from "./PerformanceSummary"
 
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
 
-const ROLES = [
-  { id: "ALL", label: "Tous" },
-  { id: "TOP", label: "Top" },
-  { id: "JUNGLE", label: "Jng" },
-  { id: "MIDDLE", label: "Mid" },
-  { id: "BOTTOM", label: "ADC" },
-  { id: "UTILITY", label: "Supp" },
-]
+const PERIODS = [
+  { id: "all", label: "None" },
+  { id: "day", label: "Jour" },
+  { id: "session", label: "Session" },
+] as const
 
 const QUEUE_GROUPS = [
   { id: "ALL", label: "Toutes" },
@@ -102,13 +100,13 @@ export function MatchHistory({
   tagLine,
   puuid,
   opponentPuuid,
-  period = "all",
 }: MatchHistoryProps) {
   const router = useRouter()
   const [count, setCount] = useState(30)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
+  const [period, setPeriod] = useState<"all" | "day" | "session">("all")
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
   let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
@@ -122,37 +120,60 @@ export function MatchHistory({
     <div className="space-y-2">
       {matches && matches.length > 0 && <PerformanceSummary matches={matches} />}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Role square icons — outline only on selected, toggle to clear */}
         <div className="flex gap-1">
+          {ROLES.map((r) => {
+            const active = role === r.id
+            return (
+              <button
+                key={r.id}
+                type="button"
+                title={r.label}
+                onClick={() => setRole(active ? "ALL" : r.id)}
+                className={`flex h-7 w-7 items-center justify-center rounded-md ${
+                  active ? "ring-2 ring-primary bg-accent" : "opacity-50 hover:opacity-100"
+                }`}
+              >
+                {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                <img src={roleIconUrl(r.id)} alt={r.label} className="h-4 w-4" />
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Period — single container, outline only on selected */}
+        <div className="flex gap-0.5 rounded-md border p-0.5">
+          {PERIODS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setPeriod(p.id)}
+              className={`rounded px-2.5 py-1 text-xs ${
+                period === p.id
+                  ? "ring-1 ring-primary bg-accent font-medium"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Queue group */}
+        <div className="flex gap-0.5 rounded-md border p-0.5">
           {QUEUE_GROUPS.map((g) => (
             <button
               key={g.id}
               type="button"
               onClick={() => setQueueGroup(g.id)}
-              className={`rounded-md px-2.5 py-1 text-xs ${
+              className={`rounded px-2.5 py-1 text-xs ${
                 queueGroup === g.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
+                  ? "ring-1 ring-primary bg-accent font-medium"
+                  : "text-muted-foreground"
               }`}
             >
               {g.label}
-            </button>
-          ))}
-        </div>
-        <div className="h-4 w-px bg-border" />
-        <div className="flex gap-1">
-          {ROLES.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setRole(r.id)}
-              className={`rounded-md px-2.5 py-1 text-xs ${
-                role === r.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {r.label}
             </button>
           ))}
         </div>
