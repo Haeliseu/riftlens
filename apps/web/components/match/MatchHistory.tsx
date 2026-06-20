@@ -1,8 +1,35 @@
 "use client"
 
-import { getChampionIconUrl, queueName } from "@riftlens/riot-api"
+import { getChampionIconUrl, type MatchSummary, queueName } from "@riftlens/riot-api"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
+
+const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
+
+function filterByPeriod(
+  matches: MatchSummary[],
+  period: "all" | "day" | "session"
+): MatchSummary[] {
+  if (period === "day") {
+    const start = new Date()
+    start.setHours(0, 0, 0, 0)
+    return matches.filter((m) => m.gameCreationMs >= start.getTime())
+  }
+  if (period === "session") {
+    const sorted = [...matches].sort((a, b) => b.gameCreationMs - a.gameCreationMs)
+    const out: MatchSummary[] = []
+    for (let i = 0; i < sorted.length; i++) {
+      const m = sorted[i]
+      if (!m) break
+      const prev = sorted[i - 1]
+      if (i === 0 || (prev && prev.gameCreationMs - m.gameCreationMs <= SESSION_GAP_MS)) out.push(m)
+      else break
+    }
+    return out
+  }
+  return matches
+}
 
 interface MatchHistoryProps {
   region: string
@@ -38,9 +65,14 @@ export function MatchHistory({
   tagLine,
   puuid,
   opponentPuuid,
+  period = "all",
 }: MatchHistoryProps) {
   const router = useRouter()
-  const { data: matches, isLoading, isError } = useMatchHistory(puuid, region)
+  const [count, setCount] = useState(10)
+  const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
+
+  const matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
+  const canLoadMore = (rawMatches?.length ?? 0) >= count && count < 50 && period === "all"
 
   return (
     <div className="space-y-2">
@@ -132,6 +164,17 @@ export function MatchHistory({
               </div>
             )
           })}
+
+          {canLoadMore && (
+            <button
+              type="button"
+              onClick={() => setCount((c) => Math.min(50, c + 10))}
+              disabled={isFetching}
+              className="w-full rounded-md border bg-card py-2 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
+            >
+              {isFetching ? "Chargement…" : "Voir plus de parties"}
+            </button>
+          )}
         </div>
       )}
     </div>

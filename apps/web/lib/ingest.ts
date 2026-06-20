@@ -126,11 +126,13 @@ async function storeMatch(region: string, m: MatchDto, targetPuuid: string): Pro
 export async function ingestRankedMatches(
   region: Region,
   puuid: string,
-  maxNew = 15
+  maxNew = 20
 ): Promise<void> {
   const routing = regionToRouting(region)
   const c = client()
-  const ids = await getMatchIds(c, routing, puuid, { type: "ranked", count: 40 })
+  // Pull a deep id list (1 cheap call); we persist up to `maxNew` new ones per
+  // view so the season backfills progressively across visits.
+  const ids = await getMatchIds(c, routing, puuid, { type: "ranked", count: 100 })
   if (ids.length === 0) return
 
   const existing = await db

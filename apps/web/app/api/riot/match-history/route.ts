@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const puuid = searchParams.get("puuid")
   const region = (searchParams.get("region") ?? "EUW1") as Region
-  const count = Math.min(20, Math.max(1, parseInt(searchParams.get("count") ?? "10", 10)))
+  const count = Math.min(50, Math.max(1, parseInt(searchParams.get("count") ?? "10", 10)))
 
   if (!puuid) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
