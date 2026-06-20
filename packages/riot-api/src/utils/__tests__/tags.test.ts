@@ -11,24 +11,11 @@ const baseSession: SessionStats = {
 }
 
 describe("Player tags", () => {
-  it("detects tilting at -3 streak", () => {
-    const tags = computePlayerTags({
-      session: { ...baseSession, streak: -3 },
-      champWinRate: 45,
-      champGames: 50,
-      totalGames: 100,
-      lastGameKDA: [1, 5, 2],
-      recentChampGames: 10,
-    })
-    expect(tags).toContain("tilting")
-  })
-
   it("detects on-fire at +3 streak", () => {
     const tags = computePlayerTags({
       session: { ...baseSession, streak: 3 },
       champWinRate: 45,
       champGames: 50,
-      totalGames: 100,
       lastGameKDA: [2, 3, 4],
       recentChampGames: 10,
     })
@@ -40,7 +27,6 @@ describe("Player tags", () => {
       session: baseSession,
       champWinRate: 50,
       champGames: 25, // >= 20
-      totalGames: 100,
       lastGameKDA: [2, 3, 4],
       recentChampGames: 20, // 20/30 = 66.7% >= 60%
     })
@@ -52,31 +38,28 @@ describe("Player tags", () => {
       session: baseSession,
       champWinRate: 60, // >= 58
       champGames: 50,
-      totalGames: 100,
       lastGameKDA: [8, 1, 5], // KDA = 13 >= 4.0
       recentChampGames: 10,
     })
     expect(tags).toContain("carry-potential")
   })
 
-  it("detects smurf-risk with low games but high WR", () => {
+  it("never emits shaming tags (Riot policy)", () => {
     const tags = computePlayerTags({
-      session: baseSession,
-      champWinRate: 75, // >= 70
-      champGames: 10,
-      totalGames: 15, // < 30
-      lastGameKDA: [3, 2, 4],
-      recentChampGames: 5,
+      session: { ...baseSession, streak: -10 },
+      champWinRate: 5,
+      champGames: 2,
+      lastGameKDA: [0, 15, 0],
+      recentChampGames: 0,
     })
-    expect(tags).toContain("smurf-risk")
+    expect(tags).toHaveLength(0)
   })
 
-  it("can combine multiple tags", () => {
+  it("can combine multiple honoring tags", () => {
     const tags = computePlayerTags({
       session: { ...baseSession, streak: 3 },
       champWinRate: 60,
       champGames: 10,
-      totalGames: 20,
       lastGameKDA: [16, 0, 5], // fed-last-game (15+ kills) + carry-potential
       recentChampGames: 5,
     })

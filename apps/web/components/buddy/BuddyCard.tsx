@@ -41,10 +41,8 @@ function getHeatKey(wr: number): string {
 
 const TAG_LABELS: Record<PlayerTag, string> = {
   "on-fire": "🔥",
-  tilting: "😤",
   "one-trick": "🎯",
   "carry-potential": "💪",
-  "smurf-risk": "🕵️",
   "fed-last-game": "🏆",
 }
 

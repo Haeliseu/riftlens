@@ -100,9 +100,9 @@ describe("BuddyCard", () => {
   })
 
   it("renders tags when provided", () => {
-    render(<BuddyCard {...defaultProps} tags={["on-fire", "tilting"] as PlayerTag[]} />)
+    render(<BuddyCard {...defaultProps} tags={["on-fire", "carry-potential"] as PlayerTag[]} />)
     expect(screen.getByTitle("on-fire")).toBeInTheDocument()
-    expect(screen.getByTitle("tilting")).toBeInTheDocument()
+    expect(screen.getByTitle("carry-potential")).toBeInTheDocument()
   })
 
   it("clicking player icon fires onPlayerClick callback", () => {
