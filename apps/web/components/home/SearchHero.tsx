@@ -26,12 +26,42 @@ interface RecentSearch {
   region: string
 }
 
+interface SoloRank {
+  tier: string
+  rank: string
+  leaguePoints: number
+}
+
 interface Suggestion {
   gameName: string
   tagLine: string
   region: string
   profileIconId: number | null
   summonerLevel: number | null
+  soloRank?: SoloRank | null
+}
+
+const RANK_FR: Record<string, string> = {
+  IRON: "Fer",
+  BRONZE: "Bronze",
+  SILVER: "Argent",
+  GOLD: "Or",
+  PLATINUM: "Platine",
+  EMERALD: "Émeraude",
+  DIAMOND: "Diamant",
+  MASTER: "Maître",
+  GRANDMASTER: "Grand Maître",
+  CHALLENGER: "Challenger",
+}
+
+function formatRank(r: SoloRank): string {
+  const tier = RANK_FR[r.tier] ?? r.tier
+  const apex = r.tier === "MASTER" || r.tier === "GRANDMASTER" || r.tier === "CHALLENGER"
+  return apex ? `${tier} ${r.leaguePoints} LP` : `${tier} ${r.rank} · ${r.leaguePoints} LP`
+}
+
+function profileIconUrl(id: number): string {
+  return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${id}.jpg`
 }
 
 function parseQuery(raw: string): { gameName: string; tagLine: string } | null {
@@ -95,20 +125,27 @@ export function SearchHero() {
     setError(null)
     debounceRef.current = setTimeout(async () => {
       try {
-        // If full Name#TAG typed, validate directly via Riot API
+        // If full Name#TAG typed, validate + enrich directly via Riot API
         if (hasTag && tagPart.length >= 2) {
           const res = await fetch(
-            `/api/riot/account?gameName=${encodeURIComponent(namePart)}&tagLine=${encodeURIComponent(tagPart)}&region=${region}`
+            `/api/riot/profile-summary?gameName=${encodeURIComponent(namePart)}&tagLine=${encodeURIComponent(tagPart)}&region=${region}`
           )
           if (res.ok) {
-            const account = (await res.json()) as { gameName: string; tagLine: string }
+            const p = (await res.json()) as {
+              gameName: string
+              tagLine: string
+              profileIconId: number | null
+              summonerLevel: number | null
+              soloRank: SoloRank | null
+            }
             setSuggestions([
               {
-                gameName: account.gameName,
-                tagLine: account.tagLine,
+                gameName: p.gameName,
+                tagLine: p.tagLine,
                 region,
-                profileIconId: null,
-                summonerLevel: null,
+                profileIconId: p.profileIconId,
+                summonerLevel: p.summonerLevel,
+                soloRank: p.soloRank,
               },
             ])
           } else if (res.status === 404) {
@@ -238,17 +275,29 @@ export function SearchHero() {
                     onClick={() => navigate(s.gameName, s.tagLine, s.region)}
                     className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-accent transition-colors text-left"
                   >
-                    <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {s.profileIconId != null ? (
+                        // biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed
+                        <img
+                          src={profileIconUrl(s.profileIconId)}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
                     </div>
-                    <span className="text-sm font-medium">{s.gameName}</span>
-                    <span className="text-muted-foreground text-sm">#{s.tagLine}</span>
-                    {s.summonerLevel && (
-                      <span className="text-xs text-muted-foreground ml-1">
-                        niv. {s.summonerLevel}
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm truncate">
+                        <span className="font-medium">{s.gameName}</span>
+                        <span className="text-muted-foreground">#{s.tagLine}</span>
                       </span>
-                    )}
-                    <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                      <span className="text-xs text-muted-foreground truncate">
+                        {s.soloRank ? formatRank(s.soloRank) : "Non classé"}
+                        {s.summonerLevel ? ` · niv. ${s.summonerLevel}` : ""}
+                      </span>
+                    </div>
+                    <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex-shrink-0">
                       {regionLabel(s.region)}
                     </span>
                   </button>

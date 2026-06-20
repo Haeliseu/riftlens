@@ -45,6 +45,11 @@ const REGION_TO_ROUTING: Record<Region, RoutingRegion> = {
   VN2: "sea",
 }
 
+/** Maps a platform region (EUW1, NA1, KR, …) to its regional routing cluster. */
+export function regionToRouting(region: string): RoutingRegion {
+  return REGION_TO_ROUTING[region as Region] ?? "europe"
+}
+
 export class RiotApiClient {
   private readonly apiKey: string
 

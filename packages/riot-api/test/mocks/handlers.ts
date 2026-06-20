@@ -38,6 +38,30 @@ export const handlers = [
       },
     ])
   ),
+  http.get("https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/:puuid", () =>
+    HttpResponse.json([
+      {
+        leagueId: "test-league-id",
+        summonerId: "test-summoner-id",
+        queueType: "RANKED_FLEX_SR",
+        tier: "PLATINUM",
+        rank: "I",
+        leaguePoints: 12,
+        wins: 30,
+        losses: 25,
+      },
+      {
+        leagueId: "test-league-id",
+        summonerId: "test-summoner-id",
+        queueType: "RANKED_SOLO_5x5",
+        tier: "DIAMOND",
+        rank: "III",
+        leaguePoints: 80,
+        wins: 450,
+        losses: 445,
+      },
+    ])
+  ),
   http.get("https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/:puuid", () =>
     HttpResponse.json({
       id: "test-summoner-id",
