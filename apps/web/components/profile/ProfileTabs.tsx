@@ -3,23 +3,21 @@
 import { Radio } from "lucide-react"
 import { type ReactNode, useState } from "react"
 
-type TabId = "overview" | "champions" | "stats" | "live"
+type TabId = "overview" | "champions" | "live"
 
 const TABS: { id: TabId; label: string; icon?: boolean }[] = [
   { id: "overview", label: "Aperçu" },
   { id: "champions", label: "Champions" },
-  { id: "stats", label: "Statistiques détaillées" },
   { id: "live", label: "En direct", icon: true },
 ]
 
 interface ProfileTabsProps {
   overview: ReactNode
   champions: ReactNode
-  stats: ReactNode
   live: ReactNode
 }
 
-export function ProfileTabs({ overview, champions, stats, live }: ProfileTabsProps) {
+export function ProfileTabs({ overview, champions, live }: ProfileTabsProps) {
   const [tab, setTab] = useState<TabId>("overview")
 
   return (
@@ -45,7 +43,6 @@ export function ProfileTabs({ overview, champions, stats, live }: ProfileTabsPro
       {/* Each branch only mounts when active → 'En direct' stays lazy. */}
       {tab === "overview" && overview}
       {tab === "champions" && champions}
-      {tab === "stats" && stats}
       {tab === "live" && live}
     </div>
   )

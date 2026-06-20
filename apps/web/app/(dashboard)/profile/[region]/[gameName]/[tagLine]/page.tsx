@@ -119,6 +119,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <div className="lg:col-span-1 space-y-4">
                 <RankedCard region={region} puuid={summary.puuid} soloRank={summary.soloRank} />
+                <RolePerformance puuid={summary.puuid} />
+                <CrossedPlayers puuid={summary.puuid} region={region} />
               </div>
               <div className="lg:col-span-2 space-y-4">
                 <MatchHistory
@@ -133,12 +135,6 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             </div>
           }
           champions={<ChampionStats region={region} puuid={summary.puuid} />}
-          stats={
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <RolePerformance puuid={summary.puuid} />
-              <CrossedPlayers puuid={summary.puuid} region={region} />
-            </div>
-          }
           live={<LiveGame puuid={summary.puuid} region={region} />}
         />
       )}
