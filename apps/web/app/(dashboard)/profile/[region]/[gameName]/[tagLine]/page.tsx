@@ -13,6 +13,7 @@ import { ChampionStats } from "@/components/profile/ChampionStats"
 import { LpChart } from "@/components/profile/LpChart"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { RankedCard } from "@/components/profile/RankedCard"
+import { RefreshButton } from "@/components/profile/RefreshButton"
 import { ingestProfile } from "@/lib/ingest"
 
 interface ProfilePageProps {
@@ -89,14 +90,17 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
   return (
     <div className="space-y-6">
-      <ProfileHeader
-        region={region}
-        gameName={name}
-        tagLine={tag}
-        profileIconId={summary?.profileIconId ?? null}
-        summonerLevel={summary?.summonerLevel ?? null}
-        soloRank={summary?.soloRank ?? null}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <ProfileHeader
+          region={region}
+          gameName={name}
+          tagLine={tag}
+          profileIconId={summary?.profileIconId ?? null}
+          summonerLevel={summary?.summonerLevel ?? null}
+          soloRank={summary?.soloRank ?? null}
+        />
+        {summary && <RefreshButton puuid={summary.puuid} region={region} />}
+      </div>
 
       {!summary && (
         <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">

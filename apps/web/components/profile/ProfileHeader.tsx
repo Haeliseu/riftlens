@@ -66,7 +66,7 @@ export function ProfileHeader({
             <img
               src={getRankIconUrl(capitalizeTier(soloRank.tier) as TierName)}
               alt=""
-              className="w-6 h-6 object-contain"
+              className="w-8 h-8 object-contain"
             />
             <span className="text-sm font-medium" style={{ color: tierColor(soloRank.tier) }}>
               {rankLabelFr(soloRank.tier, soloRank.rank)}

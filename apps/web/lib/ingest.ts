@@ -7,7 +7,14 @@ import {
   summoners,
 } from "@riftlens/db/schema"
 import type { Division, MatchDto, Region, TierName } from "@riftlens/riot-api"
-import { getMatch, getMatchIds, RiotApiClient, regionToRouting, tierToLP } from "@riftlens/riot-api"
+import {
+  getMatch,
+  getMatchIds,
+  RiotApiClient,
+  regionToRouting,
+  SEASON_2_2026_START_MS,
+  tierToLP,
+} from "@riftlens/riot-api"
 import { and, desc, eq, inArray, sql } from "drizzle-orm"
 
 function client() {
@@ -146,6 +153,51 @@ export async function ingestRankedMatches(
     const m = await getMatch(c, routing, id).catch(() => null)
     if (m) await storeMatch(region, m, puuid)
   }
+}
+
+export interface SyncResult {
+  added: number
+  remaining: number
+  hasMore: boolean
+}
+
+/**
+ * Season backfill: scans ALL ranked match ids since season start and ingests a
+ * bounded batch of not-yet-stored ones. Chain calls (hasMore) to cover the full
+ * season without exceeding the per-request rate-limit budget.
+ */
+export async function syncSeason(region: Region, puuid: string, budget = 40): Promise<SyncResult> {
+  const routing = regionToRouting(region)
+  const c = client()
+
+  const allIds: string[] = []
+  for (let start = 0; start < 1000; start += 100) {
+    const ids = await getMatchIds(c, routing, puuid, {
+      type: "ranked",
+      count: 100,
+      start,
+      startTime: SEASON_2_2026_START_MS,
+    })
+    allIds.push(...ids)
+    if (ids.length < 100) break
+  }
+  if (allIds.length === 0) return { added: 0, remaining: 0, hasMore: false }
+
+  const stored = await db
+    .select({ matchId: summonerMatches.matchId })
+    .from(summonerMatches)
+    .where(and(eq(summonerMatches.puuid, puuid), inArray(summonerMatches.matchId, allIds)))
+  const have = new Set(stored.map((e) => e.matchId))
+
+  const missing = allIds.filter((id) => !have.has(id))
+  const toFetch = missing.slice(0, budget)
+  for (const id of toFetch) {
+    const m = await getMatch(c, routing, id).catch(() => null)
+    if (m) await storeMatch(region, m, puuid)
+  }
+
+  const remaining = missing.length - toFetch.length
+  return { added: toFetch.length, remaining, hasMore: remaining > 0 }
 }
 
 /** Best-effort: never throws (DB/migration/Riot issues must not break the page). */

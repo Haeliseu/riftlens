@@ -39,15 +39,15 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
           <img
             src={getRankIconUrl(capitalizeTier(soloRank.tier) as TierName)}
             alt=""
-            className="w-12 h-12 object-contain flex-shrink-0"
+            className="w-16 h-16 object-contain flex-shrink-0"
           />
         ) : (
-          <div className="h-12 w-12 flex items-center justify-center text-2xl text-muted-foreground">
+          <div className="h-16 w-16 flex items-center justify-center text-3xl text-muted-foreground">
             —
           </div>
         )}
         <div>
-          <p className="text-base font-semibold" style={{ color }}>
+          <p className="text-lg font-semibold" style={{ color }}>
             {label}
           </p>
           <p className="text-xs text-muted-foreground font-mono">
@@ -80,7 +80,7 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
           ) : avg ? (
             <div className="flex items-center gap-2">
               {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
-              <img src={getRankIconUrl(avg.tier)} alt="" className="w-5 h-5 object-contain" />
+              <img src={getRankIconUrl(avg.tier)} alt="" className="w-7 h-7 object-contain" />
               <span className="text-sm font-medium" style={{ color: tierColor(avg.tier) }}>
                 {rankLabelFr(avg.tier, avg.division)}
               </span>
