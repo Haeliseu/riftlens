@@ -38,6 +38,38 @@ export const handlers = [
       },
     ])
   ),
+  http.get(
+    "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/:puuid/ids",
+    () => HttpResponse.json(["EUW1_1", "EUW1_2"])
+  ),
+  http.get("https://europe.api.riotgames.com/lol/match/v5/matches/:matchId", ({ params }) =>
+    HttpResponse.json({
+      metadata: { matchId: params.matchId, participants: ["test-puuid-123"] },
+      info: {
+        gameId: 1,
+        gameCreation: 1745884800000,
+        gameDuration: 1800,
+        gameMode: "CLASSIC",
+        gameType: "MATCHED_GAME",
+        queueId: 420,
+        participants: [
+          {
+            puuid: "test-puuid-123",
+            teamId: 100,
+            championId: 64,
+            championName: "LeeSin",
+            kills: 8,
+            deaths: 3,
+            assists: 10,
+            win: params.matchId === "EUW1_1",
+            totalMinionsKilled: 150,
+            neutralMinionsKilled: 50,
+            teamPosition: "JUNGLE",
+          },
+        ],
+      },
+    })
+  ),
   http.get("https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/:puuid", () =>
     HttpResponse.json([
       {

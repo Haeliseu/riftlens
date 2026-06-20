@@ -84,11 +84,19 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         summonerLevel={summary?.summonerLevel ?? null}
       />
 
+      {!summary && (
+        <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+          Aucune donnée Riot pour <strong>{decodeURIComponent(gameName)}</strong> sur{" "}
+          <strong>{region}</strong>. Vérifie la région (le compte joue peut-être sur une autre) ou
+          la validité de la clé API Riot.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-4">
           <RankedCard soloRank={summary?.soloRank ?? null} />
           <LpChart region={region} gameName={gameName} tagLine={tagLine} />
-          <ChampionStats region={region} gameName={gameName} tagLine={tagLine} />
+          <ChampionStats region={region} puuid={summary?.puuid ?? null} />
         </div>
 
         <div className="lg:col-span-2 space-y-4">
@@ -97,6 +105,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             region={region}
             gameName={gameName}
             tagLine={tagLine}
+            puuid={summary?.puuid ?? null}
             {...(opponent ? { opponentPuuid: opponent } : {})}
             {...(relation ? { opponentRelation: relation } : {})}
             {...(period ? { period } : {})}

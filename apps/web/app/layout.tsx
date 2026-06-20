@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
+import { Providers } from "./providers"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
@@ -16,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr" suppressHydrationWarning>
       <body className={geist.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {children}
+          <Providers>{children}</Providers>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>

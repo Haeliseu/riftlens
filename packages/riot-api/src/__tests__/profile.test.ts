@@ -1,8 +1,14 @@
-import { http, HttpResponse } from "msw"
+import { HttpResponse, http } from "msw"
 import { describe, expect, it } from "vitest"
-import { RiotApiClient } from "../client"
-import { getProfileIconUrl, getProfileSummary } from "../endpoints/profile"
 import { server } from "../../test/mocks/server"
+import { RiotApiClient } from "../client"
+import {
+  getChampionIconUrl,
+  getMatchHistory,
+  getProfileIconUrl,
+  getProfileSummary,
+  queueName,
+} from "../endpoints/profile"
 
 const client = new RiotApiClient("test-api-key")
 
@@ -46,10 +52,36 @@ describe("getProfileSummary", () => {
   })
 })
 
-describe("getProfileIconUrl", () => {
-  it("builds a CommunityDragon icon URL", () => {
+describe("getMatchHistory", () => {
+  it("reduces each match to the target player's line", async () => {
+    const matches = await getMatchHistory(client, "EUW1", "test-puuid-123", 2)
+
+    expect(matches).toHaveLength(2)
+    expect(matches[0]).toMatchObject({
+      championName: "LeeSin",
+      kills: 8,
+      deaths: 3,
+      assists: 10,
+      cs: 200,
+      queueId: 420,
+      position: "JUNGLE",
+    })
+    expect(matches.filter((m) => m.win)).toHaveLength(1)
+  })
+})
+
+describe("url + queue helpers", () => {
+  it("builds CommunityDragon icon URLs", () => {
     expect(getProfileIconUrl(42)).toBe(
       "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/42.jpg"
     )
+    expect(getChampionIconUrl(64)).toContain("champion-icons/64.png")
+  })
+
+  it("maps queue ids to names", () => {
+    expect(queueName(420)).toBe("Classé Solo/Duo")
+    expect(queueName(450)).toBe("ARAM")
+    expect(queueName(9999)).toBe("Autre")
+    expect(queueName(null)).toBe("Autre")
   })
 })
