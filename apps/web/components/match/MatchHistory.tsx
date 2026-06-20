@@ -1,9 +1,11 @@
 "use client"
 
 import { getChampionIconUrl, type MatchSummary, queueName } from "@riftlens/riot-api"
+import { ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
+import { MatchDetailPanel } from "./MatchDetailPanel"
 
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
 
@@ -69,6 +71,7 @@ export function MatchHistory({
 }: MatchHistoryProps) {
   const router = useRouter()
   const [count, setCount] = useState(10)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
   const matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
@@ -114,53 +117,67 @@ export function MatchHistory({
           {matches.map((m) => {
             const csPerMin = m.gameDurationS > 0 ? (m.cs / (m.gameDurationS / 60)).toFixed(1) : "0"
             const kp = m.teamKills > 0 ? Math.round(((m.kills + m.assists) / m.teamKills) * 100) : 0
+            const expanded = expandedId === m.matchId
             return (
               <div
                 key={m.matchId}
-                className={`flex items-center gap-3 rounded-r-md border border-l-[3px] px-3 py-2 ${
+                className={`rounded-r-md border border-l-[3px] ${
                   m.win ? "border-l-green-500 bg-green-500/5" : "border-l-red-500 bg-red-500/5"
                 }`}
               >
-                {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
-                <img
-                  src={getChampionIconUrl(m.championId)}
-                  alt={m.championName}
-                  className="h-9 w-9 rounded-md flex-shrink-0"
-                />
-                <div className="w-[88px] flex-shrink-0">
-                  <p
-                    className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {m.win ? "Victoire" : "Défaite"}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    {queueName(m.queueId)}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {duration(m.gameDurationS)} · {relativeTime(m.gameCreationMs)}
-                  </p>
-                </div>
-                <div className="w-[76px] flex-shrink-0">
-                  <p className="text-sm font-medium font-mono">
-                    {m.kills}
-                    <span className="text-muted-foreground font-normal"> / {m.deaths} / </span>
-                    {m.assists}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {kda(m.kills, m.deaths, m.assists)}
-                  </p>
-                </div>
-                <div className="w-[64px] flex-shrink-0">
-                  <p className="text-xs">{m.cs} CS</p>
-                  <p className="text-[11px] text-muted-foreground">{csPerMin} CS/min</p>
-                </div>
-                <div className="ml-auto text-right">
-                  <p className="text-xs font-medium">{kp}%</p>
-                  <p className="text-[11px] text-muted-foreground">KP</p>
-                </div>
-                <span className="text-xs font-medium text-muted-foreground w-12 text-right truncate">
-                  {m.championName}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(expanded ? null : m.matchId)}
+                  className="flex w-full items-center gap-3 px-3 py-2 text-left"
+                >
+                  {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
+                  <img
+                    src={getChampionIconUrl(m.championId)}
+                    alt={m.championName}
+                    className="h-9 w-9 rounded-md flex-shrink-0"
+                  />
+                  <div className="w-[88px] flex-shrink-0">
+                    <p
+                      className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {m.win ? "Victoire" : "Défaite"}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground truncate">
+                      {queueName(m.queueId)}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {duration(m.gameDurationS)} · {relativeTime(m.gameCreationMs)}
+                    </p>
+                  </div>
+                  <div className="w-[76px] flex-shrink-0">
+                    <p className="text-sm font-medium font-mono">
+                      {m.kills}
+                      <span className="text-muted-foreground font-normal"> / {m.deaths} / </span>
+                      {m.assists}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {kda(m.kills, m.deaths, m.assists)}
+                    </p>
+                  </div>
+                  <div className="w-[64px] flex-shrink-0">
+                    <p className="text-xs">{m.cs} CS</p>
+                    <p className="text-[11px] text-muted-foreground">{csPerMin} CS/min</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium">{kp}%</p>
+                    <p className="text-[11px] text-muted-foreground">KP</p>
+                  </div>
+                  <ChevronDown
+                    className={`ml-auto h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${
+                      expanded ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {expanded && (
+                  <div className="border-t">
+                    <MatchDetailPanel matchId={m.matchId} region={region} />
+                  </div>
+                )}
               </div>
             )
           })}
