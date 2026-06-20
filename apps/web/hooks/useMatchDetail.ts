@@ -7,14 +7,28 @@ export interface MatchDetailParticipant {
   teamId: number
   championId: number
   championName: string
+  champLevel: number
   win: boolean
   kills: number
   deaths: number
   assists: number
   cs: number
+  csPerMin: number
   goldEarned: number
+  damage: number
   visionScore: number
   position: string
+  items: (string | null)[]
+  trinket: string | null
+  spells: (string | null)[]
+  runes: {
+    keystone: string | null
+    primary: (string | null)[]
+    secondary: (string | null)[]
+    shards: (string | null)[]
+  }
+  pings: { label: string; count: number }[]
+  totalPings: number
 }
 
 export interface MatchDetail {

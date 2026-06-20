@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { server } from "../../test/mocks/server"
 import { RiotApiClient } from "../client"
 import {
+  computeCarryScore,
   getAverageGameRank,
   getChampionIconUrl,
   getChampionStats,
@@ -105,6 +106,34 @@ describe("getAverageGameRank", () => {
     )
     const avg = await getAverageGameRank(client, "EUW1", "test-puuid-123", 2)
     expect(avg).toBeNull()
+  })
+})
+
+describe("computeCarryScore", () => {
+  it("rewards high KP, damage share, KDA and CS", () => {
+    const hard = computeCarryScore({
+      kills: 15,
+      deaths: 2,
+      assists: 10,
+      cs: 300,
+      durationS: 1800,
+      teamKills: 30,
+      damage: 40000,
+      teamDamage: 100000,
+    })
+    const weak = computeCarryScore({
+      kills: 0,
+      deaths: 10,
+      assists: 1,
+      cs: 20,
+      durationS: 1800,
+      teamKills: 30,
+      damage: 2000,
+      teamDamage: 100000,
+    })
+    expect(hard).toBeGreaterThan(weak)
+    expect(hard).toBeLessThanOrEqual(100)
+    expect(weak).toBeGreaterThanOrEqual(0)
   })
 })
 

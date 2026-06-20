@@ -105,6 +105,32 @@ export interface MatchSummary {
   position: string | null
   gameCreationMs: number
   gameDurationS: number
+  /** 0–100 contribution score (KP, damage share, KDA, CS) */
+  carryScore: number
+}
+
+/** Heuristic 0–100 "carry" contribution from kill participation, damage share, KDA, CS. */
+export function computeCarryScore(p: {
+  kills: number
+  deaths: number
+  assists: number
+  cs: number
+  durationS: number
+  teamKills: number
+  damage: number
+  teamDamage: number
+}): number {
+  const kp = p.teamKills > 0 ? (p.kills + p.assists) / p.teamKills : 0
+  const dmgShare = p.teamDamage > 0 ? p.damage / p.teamDamage : 0
+  const kda = p.deaths === 0 ? p.kills + p.assists : (p.kills + p.assists) / p.deaths
+  const csPerMin = p.durationS > 0 ? p.cs / (p.durationS / 60) : 0
+  const score =
+    100 *
+    (0.3 * Math.min(kp, 1) +
+      0.3 * Math.min(dmgShare / 0.35, 1) +
+      0.25 * Math.min(kda / 5, 1) +
+      0.15 * Math.min(csPerMin / 10, 1))
+  return Math.round(Math.max(0, Math.min(100, score)))
 }
 
 /**
@@ -127,9 +153,10 @@ export async function getMatchHistory(
         .then((m): MatchSummary | null => {
           const p = m.info.participants.find((x) => x.puuid === puuid)
           if (!p) return null
-          const teamKills = m.info.participants
-            .filter((x) => x.teamId === p.teamId)
-            .reduce((sum, x) => sum + x.kills, 0)
+          const team = m.info.participants.filter((x) => x.teamId === p.teamId)
+          const teamKills = team.reduce((sum, x) => sum + x.kills, 0)
+          const teamDamage = team.reduce((sum, x) => sum + (x.totalDamageDealtToChampions ?? 0), 0)
+          const cs = (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0)
           return {
             matchId: m.metadata.matchId,
             championId: p.championId,
@@ -138,12 +165,22 @@ export async function getMatchHistory(
             kills: p.kills,
             deaths: p.deaths,
             assists: p.assists,
-            cs: (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0),
+            cs,
             teamKills,
             queueId: m.info.queueId ?? null,
             position: p.teamPosition ?? p.individualPosition ?? null,
             gameCreationMs: m.info.gameCreation,
             gameDurationS: m.info.gameDuration,
+            carryScore: computeCarryScore({
+              kills: p.kills,
+              deaths: p.deaths,
+              assists: p.assists,
+              cs,
+              durationS: m.info.gameDuration,
+              teamKills,
+              damage: p.totalDamageDealtToChampions ?? 0,
+              teamDamage,
+            }),
           }
         })
         .catch(() => null)

@@ -21,6 +21,49 @@ export const ParticipantSchema = z.object({
   neutralMinionsKilled: z.number().optional(),
   individualPosition: z.string().optional(),
   teamPosition: z.string().optional(),
+  champLevel: z.number().optional(),
+  // Items (0..6) + summoner spells
+  item0: z.number().optional(),
+  item1: z.number().optional(),
+  item2: z.number().optional(),
+  item3: z.number().optional(),
+  item4: z.number().optional(),
+  item5: z.number().optional(),
+  item6: z.number().optional(),
+  summoner1Id: z.number().optional(),
+  summoner2Id: z.number().optional(),
+  // Runes
+  perks: z
+    .object({
+      statPerks: z
+        .object({ offense: z.number(), flex: z.number(), defense: z.number() })
+        .optional(),
+      styles: z
+        .array(
+          z.object({
+            description: z.string().optional(),
+            style: z.number(),
+            selections: z.array(z.object({ perk: z.number() })),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  // Pings
+  allInPings: z.number().optional(),
+  assistMePings: z.number().optional(),
+  basicPings: z.number().optional(),
+  commandPings: z.number().optional(),
+  dangerPings: z.number().optional(),
+  enemyMissingPings: z.number().optional(),
+  enemyVisionPings: z.number().optional(),
+  getBackPings: z.number().optional(),
+  holdPings: z.number().optional(),
+  needVisionPings: z.number().optional(),
+  onMyWayPings: z.number().optional(),
+  pushPings: z.number().optional(),
+  retreatPings: z.number().optional(),
+  visionClearedPings: z.number().optional(),
 })
 
 export const MatchInfoSchema = z.object({

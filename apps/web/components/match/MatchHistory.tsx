@@ -9,6 +9,22 @@ import { MatchDetailPanel } from "./MatchDetailPanel"
 
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
 
+const ROLES = [
+  { id: "ALL", label: "Tous" },
+  { id: "TOP", label: "Top" },
+  { id: "JUNGLE", label: "Jng" },
+  { id: "MIDDLE", label: "Mid" },
+  { id: "BOTTOM", label: "ADC" },
+  { id: "UTILITY", label: "Supp" },
+]
+
+function carryColor(score: number): string {
+  if (score >= 65) return "text-violet-400"
+  if (score >= 45) return "text-blue-400"
+  if (score >= 30) return "text-muted-foreground"
+  return "text-red-400"
+}
+
 function filterByPeriod(
   matches: MatchSummary[],
   period: "all" | "day" | "session"
@@ -72,13 +88,32 @@ export function MatchHistory({
   const router = useRouter()
   const [count, setCount] = useState(10)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [role, setRole] = useState<string>("ALL")
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
-  const matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
+  let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
+  if (matches && role !== "ALL") matches = matches.filter((m) => m.position === role)
   const canLoadMore = (rawMatches?.length ?? 0) >= count && count < 50 && period === "all"
 
   return (
     <div className="space-y-2">
+      <div className="flex gap-1">
+        {ROLES.map((r) => (
+          <button
+            key={r.id}
+            type="button"
+            onClick={() => setRole(r.id)}
+            className={`rounded-md px-2.5 py-1 text-xs ${
+              role === r.id
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+
       {opponentPuuid && (
         <div className="flex items-center gap-2 rounded-md border bg-accent/50 px-3 py-2 text-sm">
           <span>Filtre : parties avec/contre ce joueur</span>
@@ -167,8 +202,14 @@ export function MatchHistory({
                     <p className="text-xs font-medium">{kp}%</p>
                     <p className="text-[11px] text-muted-foreground">KP</p>
                   </div>
+                  <div className="ml-auto text-center w-10 flex-shrink-0">
+                    <p className={`text-base font-bold leading-none ${carryColor(m.carryScore)}`}>
+                      {m.carryScore}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">carry</p>
+                  </div>
                   <ChevronDown
-                    className={`ml-auto h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${
+                    className={`h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${
                       expanded ? "rotate-180" : ""
                     }`}
                   />
