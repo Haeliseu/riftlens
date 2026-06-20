@@ -73,8 +73,8 @@ export function computeAverageGameRank(participantRanks: RankedEntry[]): {
 }
 
 const CDN =
-  "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests"
+  "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem"
 
 export function getRankIconUrl(tier: TierName): string {
-  return `${CDN}/ranked-mini-crest-${tier.toLowerCase()}.png`
+  return `${CDN}/emblem-${tier.toLowerCase()}.png`
 }
