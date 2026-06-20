@@ -57,6 +57,7 @@ export function SearchHero() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -78,22 +79,58 @@ export function SearchHero() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
-    const q = query.includes("#") ? (query.split("#")[0] ?? query) : query
+    const hasTag = query.includes("#")
+    const idx = query.indexOf("#")
+    const namePart = hasTag ? query.slice(0, idx) : query
+    const tagPart = hasTag ? query.slice(idx + 1) : ""
 
-    if (q.length < 2) {
+    if (namePart.length < 2) {
       setSuggestions([])
+      setError(null)
       setLoading(false)
       return
     }
 
     setLoading(true)
+    setError(null)
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&region=${region}`)
+        // If full Name#TAG typed, validate directly via Riot API
+        if (hasTag && tagPart.length >= 2) {
+          const res = await fetch(
+            `/api/riot/account?gameName=${encodeURIComponent(namePart)}&tagLine=${encodeURIComponent(tagPart)}&region=${region}`
+          )
+          if (res.ok) {
+            const account = (await res.json()) as { gameName: string; tagLine: string }
+            setSuggestions([
+              {
+                gameName: account.gameName,
+                tagLine: account.tagLine,
+                region,
+                profileIconId: null,
+                summonerLevel: null,
+              },
+            ])
+          } else if (res.status === 404) {
+            setSuggestions([])
+            setError("Joueur introuvable")
+          } else {
+            setSuggestions([])
+            setError("Recherche indisponible (vérifie la clé API Riot)")
+          }
+          return
+        }
+
+        // Otherwise search local DB
+        const res = await fetch(`/api/search?q=${encodeURIComponent(namePart)}&region=${region}`)
         const data = (await res.json()) as Suggestion[]
         setSuggestions(data)
+        if (data.length === 0) {
+          setError("Aucun résultat — tape le pseudo complet avec #TAG")
+        }
       } catch {
         setSuggestions([])
+        setError("Erreur réseau")
       } finally {
         setLoading(false)
       }
@@ -138,7 +175,8 @@ export function SearchHero() {
   }
 
   const showRecent = open && !query && recent.length > 0
-  const showSuggestions = open && query.length >= 2 && (suggestions.length > 0 || loading)
+  const showSuggestions =
+    open && query.length >= 2 && (suggestions.length > 0 || loading || error !== null)
 
   return (
     <div ref={ref} className="w-full max-w-xl relative">
@@ -190,6 +228,8 @@ export function SearchHero() {
             <>
               {loading ? (
                 <div className="px-4 py-3 text-xs text-muted-foreground">Recherche…</div>
+              ) : suggestions.length === 0 && error ? (
+                <div className="px-4 py-3 text-xs text-muted-foreground">{error}</div>
               ) : (
                 suggestions.map((s) => (
                   <button
