@@ -41,7 +41,11 @@ describe("LcuClient", () => {
   it("POST sends body as JSON with correct headers", async () => {
     const spy = mockFetch({ success: true })
     const client = new LcuClient(CREDS)
-    await client.post("/lol-item-sets/v1/item-sets/123/sets", { name: "runes" }, z.object({ success: z.boolean() }))
+    await client.post(
+      "/lol-item-sets/v1/item-sets/123/sets",
+      { name: "runes" },
+      z.object({ success: z.boolean() })
+    )
     const [, init] = spy.mock.calls[0] as [string, RequestInit]
     expect(init.method).toBe("POST")
     expect((init.headers as Record<string, string>)["Content-Type"]).toBe("application/json")

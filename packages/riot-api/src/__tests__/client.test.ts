@@ -45,4 +45,10 @@ describe("RiotApiClient", () => {
     const results = await Promise.all(promises)
     expect(results).toHaveLength(3)
   })
+
+  it("resolves routing region for platform region", () => {
+    expect(client.getRoutingRegion("EUW1")).toBe("europe")
+    expect(client.getRoutingRegion("NA1")).toBe("americas")
+    expect(client.getRoutingRegion("KR")).toBe("asia")
+  })
 })
