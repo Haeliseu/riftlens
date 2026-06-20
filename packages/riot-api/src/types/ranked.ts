@@ -2,7 +2,10 @@ import { z } from "zod"
 
 export const LeagueEntrySchema = z.object({
   leagueId: z.string().optional(),
-  summonerId: z.string(),
+  // Encrypted summonerId is being phased out and is absent from
+  // league-v4/entries/by-puuid responses — keep optional.
+  summonerId: z.string().optional(),
+  puuid: z.string().optional(),
   queueType: z.string(),
   tier: z.string(),
   rank: z.string(),
