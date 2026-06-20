@@ -138,6 +138,95 @@ export async function cachedRanks(
   return out
 }
 
+export interface RolePerf {
+  role: string
+  games: number
+  wins: number
+}
+
+/** Win/games per role from stored ranked games (role = stored teamPosition). */
+export async function rolePerformanceFromDb(puuid: string): Promise<RolePerf[]> {
+  const rows = await db
+    .select({ role: summonerMatches.role, win: summonerMatches.win })
+    .from(summonerMatches)
+    .where(eq(summonerMatches.puuid, puuid))
+
+  const byRole = new Map<string, RolePerf>()
+  for (const r of rows) {
+    const role = r.role || "UNKNOWN"
+    const agg = byRole.get(role) ?? { role, games: 0, wins: 0 }
+    agg.games += 1
+    agg.wins += r.win ? 1 : 0
+    byRole.set(role, agg)
+  }
+  return [...byRole.values()].sort((a, b) => b.games - a.games)
+}
+
+export interface CrossedPlayer {
+  puuid: string
+  gameName: string | null
+  tagLine: string | null
+  encounters: number
+  wins: number
+  asAlly: number
+  asEnemy: number
+}
+
+/** Players met in 2+ of the owner's stored games, with the owner's WR alongside them. */
+export async function crossedPlayersFromDb(puuid: string, limit = 5): Promise<CrossedPlayer[]> {
+  const own = await db
+    .select({
+      matchId: summonerMatches.matchId,
+      win: summonerMatches.win,
+      teamId: summonerMatches.teamId,
+    })
+    .from(summonerMatches)
+    .where(eq(summonerMatches.puuid, puuid))
+  const ids = own.map((o) => o.matchId).filter((x): x is string => x != null)
+  if (ids.length === 0) return []
+
+  const ownByMatch = new Map(own.filter((o) => o.matchId).map((o) => [o.matchId, o]))
+
+  const parts = await db
+    .select({
+      matchId: matchParticipants.matchId,
+      puuid: matchParticipants.puuid,
+      gameName: matchParticipants.gameName,
+      tagLine: matchParticipants.tagLine,
+      teamId: matchParticipants.teamId,
+    })
+    .from(matchParticipants)
+    .where(inArray(matchParticipants.matchId, ids))
+
+  const map = new Map<string, CrossedPlayer>()
+  for (const p of parts) {
+    if (p.puuid === puuid) continue
+    const own = p.matchId ? ownByMatch.get(p.matchId) : undefined
+    if (!own) continue
+    const c = map.get(p.puuid) ?? {
+      puuid: p.puuid,
+      gameName: p.gameName,
+      tagLine: p.tagLine,
+      encounters: 0,
+      wins: 0,
+      asAlly: 0,
+      asEnemy: 0,
+    }
+    c.encounters += 1
+    c.wins += own.win ? 1 : 0
+    if (own.teamId != null && p.teamId === own.teamId) c.asAlly += 1
+    else c.asEnemy += 1
+    if (!c.gameName && p.gameName) c.gameName = p.gameName
+    if (!c.tagLine && p.tagLine) c.tagLine = p.tagLine
+    map.set(p.puuid, c)
+  }
+
+  return [...map.values()]
+    .filter((c) => c.encounters >= 2)
+    .sort((a, b) => b.encounters - a.encounters)
+    .slice(0, limit)
+}
+
 /** Upsert a participant's Solo rank into the summoners cache. */
 export async function cacheParticipantRank(
   puuid: string,

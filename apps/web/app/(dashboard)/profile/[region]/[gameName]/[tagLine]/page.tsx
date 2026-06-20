@@ -10,10 +10,12 @@ import { sql } from "drizzle-orm"
 import { MatchFilter } from "@/components/match/MatchFilter"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
+import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { LpChart } from "@/components/profile/LpChart"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { RankedCard } from "@/components/profile/RankedCard"
 import { RefreshButton } from "@/components/profile/RefreshButton"
+import { RolePerformance } from "@/components/profile/RolePerformance"
 import { ingestProfile } from "@/lib/ingest"
 
 interface ProfilePageProps {
@@ -118,6 +120,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
           />
           <LpChart region={region} gameName={name} tagLine={tag} puuid={summary?.puuid ?? null} />
           <ChampionStats region={region} puuid={summary?.puuid ?? null} />
+          <RolePerformance puuid={summary?.puuid ?? null} />
+          <CrossedPlayers puuid={summary?.puuid ?? null} region={region} />
         </div>
 
         <div className="lg:col-span-2 space-y-4">

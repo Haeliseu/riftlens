@@ -115,7 +115,8 @@ async function storeMatch(region: string, m: MatchDto, targetPuuid: string): Pro
       deaths: p.deaths,
       assists: p.assists,
       win: p.win,
-      role: p.role ?? null,
+      // Store the reliable teamPosition in `role` (TOP/JUNGLE/MIDDLE/BOTTOM/UTILITY).
+      role: p.teamPosition ?? p.individualPosition ?? p.role ?? null,
       lane: p.lane ?? null,
       goldEarned: p.goldEarned ?? null,
       totalDamageDealt: p.totalDamageDealtToChampions ?? null,
