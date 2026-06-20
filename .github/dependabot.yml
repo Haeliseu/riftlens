@@ -1,0 +1,115 @@
+version: 2
+
+updates:
+
+  # ─────────────────────────────────────────────
+  # 📦 NPM — dépendances Node.js / Next.js
+  # Auto-merge : patch et minor (via workflow dependabot-auto-merge.yml)
+  # PR manuelle : major uniquement
+  # ─────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Guadeloupe"
+    open-pull-requests-limit: 8
+
+    allow:
+      - dependency-type: "all"  # inclut les dépendances indirectes (package-lock.json)
+
+    groups:
+      next-ecosystem:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "@mdx-js/*"
+          - "next-mdx-remote"
+        update-types:
+          - "minor"
+          - "patch"
+
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-*"
+          - "@types/react*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      once-ui:
+        patterns:
+          - "@once-ui-system/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      dev-tooling:
+        patterns:
+          - "@biomejs/*"
+          - "typescript"
+          - "lint-staged"
+          - "@types/*"
+          - "tzdata"
+        update-types:
+          - "minor"
+          - "patch"
+
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@next/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@once-ui-system/core"
+
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(dev-deps)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "npm"
+
+    reviewers:
+      - "Haeliseu"
+
+  # ─────────────────────────────────────────────
+  # 🐳 DOCKER — image de base node:alpine
+  # Épinglé sur Node.js 24 LTS "Krypton" (LTS depuis octobre 2025, support jusqu'en avril 2028)
+  # Dependabot proposera uniquement les patches 24.x.x — jamais un saut vers 26 (Current)
+  # Auto-merge : patch uniquement (via workflow dependabot-auto-merge.yml)
+  # PR manuelle : minor et major
+  # ─────────────────────────────────────────────
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Guadeloupe"
+    open-pull-requests-limit: 2
+
+    ignore:
+      # Bloquer tout passage vers une ligne majeure supérieure (ex: node:26 Current)
+      # On reste sur node:24-alpine jusqu'à ce que Node 26 passe en LTS (octobre 2026)
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+    labels:
+      - "dependencies"
+      - "docker"
+
+    reviewers:
+      - "Haeliseu"

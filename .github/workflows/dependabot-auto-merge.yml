@@ -1,0 +1,49 @@
+# Auto-merge des PR Dependabot (compatible GitHub Free — pas de branch protection)
+#
+# Stratégie : on attend que le workflow "CI" termine avec succès (workflow_run),
+# puis on merge directement la PR Dependabot associée. Le CI complet
+# (lint + typecheck + tests + build Vercel) sert de garde-fou : une mise à jour
+# cassante échoue au CI et n'est donc jamais mergée. Tous les niveaux
+# (patch / minor / major) sont auto-mergés dès lors que le CI passe.
+#
+# Pourquoi pas fetch-metadata : il ne fonctionne pas dans le contexte
+# workflow_run (dependabot/fetch-metadata#490). On s'en passe entièrement.
+name: Dependabot auto-merge
+
+on:
+  # Se déclenche quand le workflow CI termine (le nom doit matcher `name:` de ci.yml)
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge des PR Dependabot
+    runs-on: ubuntu-latest
+    # Seulement si : le CI a réussi + déclenché par une PR + autorée par Dependabot
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]'
+
+    steps:
+      - name: Trouver et merger la PR associee
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          PR_NUMBER=$(gh api "repos/${REPO}/pulls?state=open&sort=updated&direction=desc&per_page=20" \
+            --jq "[.[] | select(.head.sha == \"${HEAD_SHA}\" and .user.login == \"dependabot[bot]\")] | first | .number")
+
+          if [ -z "$PR_NUMBER" ] || [ "$PR_NUMBER" = "null" ]; then
+            echo "Aucune PR Dependabot trouvée pour le SHA ${HEAD_SHA}"
+            exit 0
+          fi
+
+          echo "Merge de la PR Dependabot #${PR_NUMBER} (CI vert)"
+          gh pr merge "$PR_NUMBER" --repo "$REPO" --squash --delete-branch

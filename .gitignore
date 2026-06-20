@@ -11,6 +11,7 @@ coverage/
 
 # Tauri
 apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
 
 # Mobile
 .expo/
@@ -20,3 +21,10 @@ ios/
 # Editor
 .DS_Store
 *.swp
+*.swo
+.idea/
+.vscode/settings.json
+
+# Logs
+*.log
+pnpm-debug.log*
