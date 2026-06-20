@@ -101,7 +101,11 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-4">
-          <RankedCard soloRank={summary?.soloRank ?? null} />
+          <RankedCard
+            region={region}
+            puuid={summary?.puuid ?? null}
+            soloRank={summary?.soloRank ?? null}
+          />
           <LpChart region={region} gameName={name} tagLine={tag} />
           <ChampionStats region={region} puuid={summary?.puuid ?? null} />
         </div>

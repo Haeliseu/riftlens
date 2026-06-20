@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { server } from "../../test/mocks/server"
 import { RiotApiClient } from "../client"
 import {
+  getAverageGameRank,
   getChampionIconUrl,
   getChampionStats,
   getMatchHistory,
@@ -83,6 +84,27 @@ describe("getChampionStats", () => {
     // mock matches are queueId 420 -> solo bucket only
     expect(lee?.solo.games).toBe(2)
     expect(lee?.flex.games).toBe(0)
+  })
+})
+
+describe("getAverageGameRank", () => {
+  it("computes the median rank of sampled participants", async () => {
+    const avg = await getAverageGameRank(client, "EUW1", "test-puuid-123", 2)
+
+    expect(avg).not.toBeNull()
+    expect(avg?.tier).toBe("Diamond")
+    expect(avg?.division).toBe("III")
+    expect(avg?.sampledPlayers).toBeGreaterThan(0)
+  })
+
+  it("returns null when no participant is ranked", async () => {
+    server.use(
+      http.get("https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/:puuid", () =>
+        HttpResponse.json([])
+      )
+    )
+    const avg = await getAverageGameRank(client, "EUW1", "test-puuid-123", 2)
+    expect(avg).toBeNull()
   })
 })
 

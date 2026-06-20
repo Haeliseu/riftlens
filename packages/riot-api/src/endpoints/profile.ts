@@ -1,9 +1,15 @@
 import type { Region, RiotApiClient } from "../client"
 import { regionToRouting } from "../client"
+import type { Division, RankedEntry, TierName } from "../utils/rank"
+import { computeAverageGameRank } from "../utils/rank"
 import { getAccountByRiotId } from "./account"
 import { getLeagueEntriesByPuuid } from "./league"
 import { getMatch, getMatchIds } from "./match"
 import { getSummonerByPuuid } from "./summoner"
+
+function capitalizeTier(tier: string): TierName {
+  return ((tier[0] ?? "") + tier.slice(1).toLowerCase()) as TierName
+}
 
 export interface SoloRank {
   tier: string
@@ -215,4 +221,63 @@ export async function getChampionStats(
   )
 
   return [...byChamp.values()].sort((a, b) => b.total.games - a.total.games)
+}
+
+export interface AverageGameRank {
+  tier: TierName
+  division: Division
+  /** how many recent games were sampled */
+  sampleGames: number
+  /** how many ranked participants contributed to the median */
+  sampledPlayers: number
+}
+
+/**
+ * The "rang moyen des parties" from the design — replaces a numeric MMR with the
+ * MEDIAN rank of every participant across the player's last `games` ranked games.
+ * Heavy on API calls (≈ games × 10 league lookups); keep `games` small and lazy.
+ */
+export async function getAverageGameRank(
+  client: RiotApiClient,
+  region: Region,
+  puuid: string,
+  games = 3,
+  queue = 420
+): Promise<AverageGameRank | null> {
+  const routing = regionToRouting(region)
+  const ids = await getMatchIds(client, routing, puuid, { queue, count: games })
+  const matches = await Promise.all(
+    ids.map((id) => getMatch(client, routing, id).catch(() => null))
+  )
+
+  const participantPuuids = new Set<string>()
+  let sampledGames = 0
+  for (const m of matches) {
+    if (!m) continue
+    sampledGames += 1
+    for (const p of m.info.participants) participantPuuids.add(p.puuid)
+  }
+  if (participantPuuids.size === 0) return null
+
+  const entries = await Promise.all(
+    [...participantPuuids].map((pid) =>
+      getLeagueEntriesByPuuid(client, region, pid).catch(() => [])
+    )
+  )
+
+  const ranks: RankedEntry[] = []
+  for (const list of entries) {
+    const solo = list.find((e) => e.queueType === "RANKED_SOLO_5x5")
+    if (solo) {
+      ranks.push({
+        tier: capitalizeTier(solo.tier),
+        division: solo.rank as Division,
+        leaguePoints: solo.leaguePoints,
+      })
+    }
+  }
+  if (ranks.length === 0) return null
+
+  const { tier, division } = computeAverageGameRank(ranks)
+  return { tier, division, sampleGames: sampledGames, sampledPlayers: ranks.length }
 }

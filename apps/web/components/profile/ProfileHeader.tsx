@@ -1,6 +1,11 @@
-import { CURRENT_SEASON_LABEL, getProfileIconUrl } from "@riftlens/riot-api"
+import {
+  CURRENT_SEASON_LABEL,
+  getProfileIconUrl,
+  getRankIconUrl,
+  type TierName,
+} from "@riftlens/riot-api"
 import { regionBadge } from "@/lib/regions"
-import { TierHex, tierColor } from "./TierHex"
+import { capitalizeTier, rankLabelFr, tierColor } from "@/lib/tiers"
 
 interface SoloRank {
   tier: string
@@ -17,21 +22,6 @@ interface ProfileHeaderProps {
   soloRank?: SoloRank | null
 }
 
-const RANK_FR: Record<string, string> = {
-  IRON: "Fer",
-  BRONZE: "Bronze",
-  SILVER: "Argent",
-  GOLD: "Or",
-  PLATINUM: "Platine",
-  EMERALD: "Émeraude",
-  DIAMOND: "Diamant",
-  MASTER: "Maître",
-  GRANDMASTER: "Grand Maître",
-  CHALLENGER: "Challenger",
-}
-
-const APEX = new Set(["MASTER", "GRANDMASTER", "CHALLENGER"])
-
 export function ProfileHeader({
   region,
   gameName,
@@ -41,11 +31,6 @@ export function ProfileHeader({
   soloRank,
 }: ProfileHeaderProps) {
   const rb = regionBadge(region)
-  const rankLabel = soloRank
-    ? APEX.has(soloRank.tier)
-      ? (RANK_FR[soloRank.tier] ?? soloRank.tier)
-      : `${RANK_FR[soloRank.tier] ?? soloRank.tier} ${soloRank.rank}`
-    : null
 
   return (
     <div className="flex items-center gap-4">
@@ -85,9 +70,14 @@ export function ProfileHeader({
         </div>
         {soloRank ? (
           <div className="flex items-center gap-2">
-            <TierHex tier={soloRank.tier} size={18} />
+            {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
+            <img
+              src={getRankIconUrl(capitalizeTier(soloRank.tier) as TierName)}
+              alt=""
+              className="w-6 h-6 object-contain"
+            />
             <span className="text-sm font-medium" style={{ color: tierColor(soloRank.tier) }}>
-              {rankLabel}
+              {rankLabelFr(soloRank.tier, soloRank.rank)}
             </span>
             <span className="text-xs text-muted-foreground">{soloRank.leaguePoints} LP</span>
           </div>
