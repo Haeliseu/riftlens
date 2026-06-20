@@ -25,6 +25,11 @@ export async function GET() {
   } catch (err) {
     info.ok = false
     info.error = String(err)
+    const cause = (err as { cause?: unknown }).cause
+    if (cause) {
+      info.cause = String(cause)
+      info.causeCode = (cause as { code?: string }).code ?? null
+    }
   }
 
   return NextResponse.json(info, { headers: { "Cache-Control": "no-store" } })
