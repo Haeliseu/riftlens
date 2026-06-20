@@ -94,6 +94,7 @@ export interface MatchSummary {
   deaths: number
   assists: number
   cs: number
+  teamKills: number
   queueId: number | null
   position: string | null
   gameCreationMs: number
@@ -120,6 +121,9 @@ export async function getMatchHistory(
         .then((m): MatchSummary | null => {
           const p = m.info.participants.find((x) => x.puuid === puuid)
           if (!p) return null
+          const teamKills = m.info.participants
+            .filter((x) => x.teamId === p.teamId)
+            .reduce((sum, x) => sum + x.kills, 0)
           return {
             matchId: m.metadata.matchId,
             championId: p.championId,
@@ -129,6 +133,7 @@ export async function getMatchHistory(
             deaths: p.deaths,
             assists: p.assists,
             cs: (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0),
+            teamKills,
             queueId: m.info.queueId ?? null,
             position: p.teamPosition ?? p.individualPosition ?? null,
             gameCreationMs: m.info.gameCreation,

@@ -89,6 +89,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
         tagLine={tag}
         profileIconId={summary?.profileIconId ?? null}
         summonerLevel={summary?.summonerLevel ?? null}
+        soloRank={summary?.soloRank ?? null}
       />
 
       {!summary && (
