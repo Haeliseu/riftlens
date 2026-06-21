@@ -138,6 +138,32 @@ export async function cachedRanks(
   return out
 }
 
+export interface PingStat {
+  key: string
+  count: number
+}
+
+/** Total ping counts (by Riot ping key) across stored matches. */
+export async function pingStatsFromDb(
+  puuid: string
+): Promise<{ total: number; byKey: PingStat[] }> {
+  const rows = await db
+    .select({ pings: summonerMatches.pings })
+    .from(summonerMatches)
+    .where(eq(summonerMatches.puuid, puuid))
+
+  const totals = new Map<string, number>()
+  for (const r of rows) {
+    const p = r.pings as Record<string, number> | null
+    if (!p) continue
+    for (const [k, v] of Object.entries(p)) totals.set(k, (totals.get(k) ?? 0) + (v ?? 0))
+  }
+  const byKey = [...totals.entries()]
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => b.count - a.count)
+  return { total: byKey.reduce((s, x) => s + x.count, 0), byKey }
+}
+
 export interface RolePerf {
   role: string
   games: number

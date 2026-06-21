@@ -17,6 +17,7 @@ import {
   tierToLP,
 } from "@riftlens/riot-api"
 import { and, desc, eq, inArray, sql } from "drizzle-orm"
+import { PING_FIELDS } from "./pings"
 
 function client() {
   return new RiotApiClient(process.env.RIOT_API_KEY ?? "")
@@ -104,6 +105,13 @@ async function storeMatch(region: string, m: MatchDto, targetPuuid: string): Pro
     .filter((x) => x.teamId === p.teamId)
     .reduce((s, x) => s + x.kills, 0)
 
+  const pp = p as unknown as Record<string, number | undefined>
+  const pings: Record<string, number> = {}
+  for (const f of PING_FIELDS) {
+    const c = pp[f.key] ?? 0
+    if (c > 0) pings[f.key] = c
+  }
+
   await db
     .insert(summonerMatches)
     .values({
@@ -127,6 +135,7 @@ async function storeMatch(region: string, m: MatchDto, targetPuuid: string): Pro
       killParticipation: teamKills > 0 ? (p.kills + p.assists) / teamKills : 0,
       gameCreation: m.info.gameCreation,
       teamId: p.teamId,
+      pings: Object.keys(pings).length > 0 ? pings : null,
     })
     .onConflictDoNothing()
 }

@@ -12,6 +12,7 @@ import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChampionStats } from "@/components/profile/ChampionStats"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { LiveGame } from "@/components/profile/LiveGame"
+import { PingStats } from "@/components/profile/PingStats"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { ProfileTabs } from "@/components/profile/ProfileTabs"
 import { RankedCard } from "@/components/profile/RankedCard"
@@ -121,6 +122,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                 <RankedCard region={region} puuid={summary.puuid} soloRank={summary.soloRank} />
                 <RolePerformance puuid={summary.puuid} />
                 <CrossedPlayers puuid={summary.puuid} region={region} />
+                <PingStats puuid={summary.puuid} />
               </div>
               <div className="lg:col-span-2 space-y-4">
                 <MatchHistory

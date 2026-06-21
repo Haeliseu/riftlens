@@ -1,0 +1,1 @@
+ALTER TABLE "summoner_matches" ADD COLUMN "pings" jsonb;

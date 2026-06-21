@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTable,
   real,
   text,
@@ -34,6 +35,8 @@ export const summonerMatches = pgTable(
     gameCreation: bigint("game_creation", { mode: "number" }),
     teamId: integer("team_id"), // 100=blue, 200=red
     riftScore: real("rift_score"),
+    // Per-game ping counts for the player, keyed by Riot ping field.
+    pings: jsonb("pings").$type<Record<string, number>>(),
   },
   (t) => [
     uniqueIndex("uniq_sm_puuid_match").on(t.puuid, t.matchId),

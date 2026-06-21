@@ -2,24 +2,7 @@ import type { Participant, Region } from "@riftlens/riot-api"
 import { getMatch, RiotApiClient, regionToRouting } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { resolveAssets } from "@/lib/cdragon"
-
-const PINGS_CDN = "https://raw.communitydragon.org/latest/game/assets/ux/minimap/pings"
-
-const PING_FIELDS: { key: keyof Participant; label: string; icon: string }[] = [
-  { key: "onMyWayPings", label: "En route", icon: "on_my_way_new.png" },
-  { key: "assistMePings", label: "Aidez-moi", icon: "assist.png" },
-  { key: "enemyMissingPings", label: "Ennemi absent", icon: "mia_new.png" },
-  { key: "dangerPings", label: "Danger", icon: "caution.png" },
-  { key: "getBackPings", label: "Repli", icon: "get_back_small.png" },
-  { key: "pushPings", label: "Pousser", icon: "push.png" },
-  { key: "needVisionPings", label: "Vision", icon: "need_ward.png" },
-  { key: "enemyVisionPings", label: "Vision ennemie", icon: "area_is_warded_small_red_new.png" },
-  { key: "holdPings", label: "Tenir", icon: "hold.png" },
-  { key: "allInPings", label: "All-in", icon: "all_in.png" },
-  { key: "commandPings", label: "Commande", icon: "ping.png" },
-  { key: "visionClearedPings", label: "Vision nettoyée", icon: "cleared.png" },
-  { key: "basicPings", label: "Basique", icon: "ping.png" },
-]
+import { PING_FIELDS, pingIconUrl } from "@/lib/pings"
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params
@@ -47,8 +30,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
 
       const pings = PING_FIELDS.map((f) => ({
         label: f.label,
-        icon: `${PINGS_CDN}/${f.icon}`,
-        count: (p[f.key] as number | undefined) ?? 0,
+        icon: pingIconUrl(f.icon),
+        count: (p[f.key as keyof Participant] as number | undefined) ?? 0,
       })).filter((x) => x.count > 0)
       const totalPings = pings.reduce((s, x) => s + x.count, 0)
 
