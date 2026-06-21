@@ -38,20 +38,37 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
   }
   const champs = [...byChamp.values()].sort((a, b) => b.games - a.games).slice(0, 3)
 
+  // Essence-style donut: blue arc (wins) over a red track (losses).
+  const R = 34
+  const C = 2 * Math.PI * R
+
   return (
     <div className="rounded-xl border bg-card p-4">
       <p className="text-sm font-medium mb-3">Performances sur les {n} dernières parties</p>
       <div className="flex flex-wrap items-center gap-6">
-        {/* Win/loss balance bar — blue (wins) vs red (losses), tilts with WR */}
-        <div className="min-w-[180px] flex-1">
-          <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="font-medium text-blue-500">{wins}V</span>
-            <span className="font-bold">{wr}%</span>
-            <span className="font-medium text-red-500">{losses}D</span>
-          </div>
-          <div className="flex h-2.5 overflow-hidden rounded-full">
-            <div className="bg-blue-500" style={{ width: `${wr}%` }} />
-            <div className="bg-red-500" style={{ width: `${100 - wr}%` }} />
+        {/* WR essence gauge — blue (wins) / red (losses) */}
+        <div className="relative flex-shrink-0" style={{ width: 84, height: 84 }}>
+          <svg width={84} height={84} viewBox="0 0 84 84">
+            <circle cx={42} cy={42} r={R} fill="none" stroke="#ef4444" strokeWidth={8} />
+            <circle
+              cx={42}
+              cy={42}
+              r={R}
+              fill="none"
+              stroke="#3b82f6"
+              strokeWidth={8}
+              strokeLinecap="round"
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - wr / 100)}
+              transform="rotate(-90 42 42)"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-lg font-bold">{wr}%</span>
+            <span className="text-[10px] text-muted-foreground">
+              <span className="text-blue-500">{wins}V</span>{" "}
+              <span className="text-red-500">{losses}D</span>
+            </span>
           </div>
         </div>
 
