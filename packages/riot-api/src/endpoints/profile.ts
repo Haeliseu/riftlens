@@ -132,7 +132,34 @@ export interface MatchSummary {
   enemyChampionIds: number[]
 }
 
-/** Heuristic 0–100 "carry" contribution from kill participation, damage share, KDA, CS. */
+// Reachable benchmarks (a full mark, not the theoretical max).
+const BENCH = { kp: 0.65, dmg: 0.28, kda: 4, cspm: 8, vpm: 2 }
+
+// Per-role weighting (each profile sums to 1). Supports are judged on
+// KP/vision, ADCs/mids on damage/CS, etc. — like opgg's role-aware OP Score.
+interface RoleWeight {
+  kp: number
+  dmg: number
+  kda: number
+  cs: number
+  vis: number
+}
+
+const DEFAULT_WEIGHTS: RoleWeight = { kp: 0.3, dmg: 0.3, kda: 0.25, cs: 0.15, vis: 0 }
+
+const ROLE_WEIGHTS: Record<string, RoleWeight> = {
+  TOP: { kp: 0.25, dmg: 0.3, kda: 0.25, cs: 0.15, vis: 0.05 },
+  JUNGLE: { kp: 0.35, dmg: 0.2, kda: 0.25, cs: 0.1, vis: 0.1 },
+  MIDDLE: { kp: 0.25, dmg: 0.35, kda: 0.25, cs: 0.15, vis: 0 },
+  BOTTOM: { kp: 0.2, dmg: 0.35, kda: 0.2, cs: 0.25, vis: 0 },
+  UTILITY: { kp: 0.35, dmg: 0.1, kda: 0.25, cs: 0, vis: 0.3 },
+}
+
+/**
+ * Raw 0–100 role-normalized performance score with reachable benchmarks.
+ * Match history then scales these so the best player in the game ≈ 100
+ * (relative, like dpm/opgg where the MVP tops out).
+ */
 export function computeCarryScore(p: {
   kills: number
   deaths: number
@@ -142,18 +169,23 @@ export function computeCarryScore(p: {
   teamKills: number
   damage: number
   teamDamage: number
+  visionScore?: number
+  role?: string | null
 }): number {
+  const w = ROLE_WEIGHTS[(p.role ?? "").toUpperCase()] ?? DEFAULT_WEIGHTS
   const kp = p.teamKills > 0 ? (p.kills + p.assists) / p.teamKills : 0
   const dmgShare = p.teamDamage > 0 ? p.damage / p.teamDamage : 0
   const kda = p.deaths === 0 ? p.kills + p.assists : (p.kills + p.assists) / p.deaths
   const csPerMin = p.durationS > 0 ? p.cs / (p.durationS / 60) : 0
+  const visPerMin = p.durationS > 0 ? (p.visionScore ?? 0) / (p.durationS / 60) : 0
   const score =
     100 *
-    (0.3 * Math.min(kp, 1) +
-      0.3 * Math.min(dmgShare / 0.35, 1) +
-      0.25 * Math.min(kda / 5, 1) +
-      0.15 * Math.min(csPerMin / 10, 1))
-  return Math.round(Math.max(0, Math.min(100, score)))
+    (w.kp * Math.min(kp / BENCH.kp, 1) +
+      w.dmg * Math.min(dmgShare / BENCH.dmg, 1) +
+      w.kda * Math.min(kda / BENCH.kda, 1) +
+      w.cs * Math.min(csPerMin / BENCH.cspm, 1) +
+      w.vis * Math.min(visPerMin / BENCH.vpm, 1))
+  return Math.max(0, Math.min(100, score))
 }
 
 /**
@@ -191,7 +223,7 @@ export async function getMatchHistory(
             teamAgg.set(x.teamId, t)
           }
 
-          // Carry score for all 10 participants, to rank + detect team-best.
+          // Raw role-normalized score for all 10, to rank + scale relative.
           const scored = m.info.participants.map((x) => {
             const ta = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0 }
             const xcs = (x.totalMinionsKilled ?? 0) + (x.neutralMinionsKilled ?? 0)
@@ -209,17 +241,22 @@ export async function getMatchHistory(
                 teamKills: ta.kills,
                 damage: x.totalDamageDealtToChampions ?? 0,
                 teamDamage: ta.damage,
+                visionScore: x.visionScore ?? 0,
+                role: x.teamPosition ?? x.individualPosition ?? null,
               }),
             }
           })
 
-          const ownScore = scored.find((s) => s.puuid === puuid)?.score ?? 0
+          const ownRaw = scored.find((s) => s.puuid === puuid)?.score ?? 0
+          // Relative: best player in the game → 100.
+          const gameMax = Math.max(...scored.map((s) => s.score), 1)
+          const carryScore = Math.round((100 * ownRaw) / gameMax)
           const placement =
             [...scored].sort((a, b) => b.score - a.score).findIndex((s) => s.puuid === puuid) + 1
           const teamMax = Math.max(
             ...scored.filter((s) => s.teamId === p.teamId).map((s) => s.score)
           )
-          const badge: "MVP" | "ACE" | null = ownScore === teamMax ? (p.win ? "MVP" : "ACE") : null
+          const badge: "MVP" | "ACE" | null = ownRaw === teamMax ? (p.win ? "MVP" : "ACE") : null
 
           const ownPos = p.teamPosition ?? p.individualPosition ?? null
           const enemies = scored.filter((s) => s.teamId !== p.teamId)
@@ -245,7 +282,7 @@ export async function getMatchHistory(
             position: ownPos,
             gameCreationMs: m.info.gameCreation,
             gameDurationS: dur,
-            carryScore: ownScore,
+            carryScore,
             placement,
             badge,
             laneOpponentChampionId: laneOpp?.championId ?? null,
