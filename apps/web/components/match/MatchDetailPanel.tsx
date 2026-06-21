@@ -1,6 +1,7 @@
 "use client"
 
 import { getChampionIconUrl, isSummonersRift } from "@riftlens/riot-api"
+import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { type MatchDetailParticipant, useMatchDetail } from "@/hooks/useMatchDetail"
@@ -13,6 +14,12 @@ interface MatchDetailPanelProps {
 }
 
 const SKILL_LABEL = ["", "Q", "W", "E", "R"]
+const SKILL_COLOR: Record<number, { bg: string; text: string }> = {
+  1: { bg: "bg-blue-500", text: "text-blue-400" },
+  2: { bg: "bg-amber-500", text: "text-amber-400" },
+  3: { bg: "bg-violet-500", text: "text-violet-400" },
+  4: { bg: "bg-red-500", text: "text-red-400" },
+}
 
 function BuildSkillOrder({
   matchId,
@@ -34,36 +41,45 @@ function BuildSkillOrder({
   data.skills.forEach((s, i) => slotLevels[s.slot]?.push(i + 1))
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div>
-        <p className="text-[11px] font-medium mb-1">Ordre d'achat</p>
-        <div className="flex flex-wrap items-center gap-1">
+        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">Ordre d'achat</p>
+        <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
           {data.build.map((b, i) => (
-            <div key={`b-${b.itemId}-${i}`} className="flex flex-col items-center">
-              <Icon src={b.icon} size={22} />
-              <span className="text-[8px] text-muted-foreground">{b.minute}'</span>
+            <div key={`b-${b.itemId}-${i}`} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div className="rounded-md ring-1 ring-border">
+                  <Icon src={b.icon} size={28} />
+                </div>
+                <span className="text-[9px] text-muted-foreground mt-0.5">{b.minute}'</span>
+              </div>
+              {i < data.build.length - 1 && (
+                <ChevronRight className="mx-0.5 h-3 w-3 text-muted-foreground/60 self-start mt-2" />
+              )}
             </div>
           ))}
         </div>
       </div>
       <div>
-        <p className="text-[11px] font-medium mb-1">Ordre des sorts</p>
-        <div className="space-y-0.5">
+        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
+          Ordre des sorts
+        </p>
+        <div className="space-y-1">
           {[1, 2, 3, 4].map((slot) => (
-            <div key={slot} className="flex items-center gap-1">
-              <span className="w-4 text-[11px] font-semibold">{SKILL_LABEL[slot]}</span>
+            <div key={slot} className="flex items-center gap-1.5">
+              <span className={`w-5 text-center text-xs font-bold ${SKILL_COLOR[slot]?.text}`}>
+                {SKILL_LABEL[slot]}
+              </span>
               <div className="flex gap-0.5">
                 {Array.from({ length: 18 }, (_, lvl) => {
                   const leveled = slotLevels[slot]?.includes(lvl + 1)
                   return (
                     <span
                       key={lvl}
-                      className={`flex h-4 w-4 items-center justify-center rounded text-[8px] ${
+                      className={`flex h-4 w-4 items-center justify-center rounded text-[8px] font-medium ${
                         leveled
-                          ? slot === 4
-                            ? "bg-red-500/80 text-white"
-                            : "bg-blue-500/80 text-white"
-                          : "bg-muted"
+                          ? `${SKILL_COLOR[slot]?.bg} text-white`
+                          : "bg-muted/60 text-muted-foreground/40"
                       }`}
                     >
                       {leveled ? lvl + 1 : ""}
@@ -196,34 +212,46 @@ function DetailsRow({ p, region }: { p: MatchDetailParticipant; region: string }
   )
 }
 
-function RunesRow({ p, region }: { p: MatchDetailParticipant; region: string }) {
+function RuneCard({ p, region }: { p: MatchDetailParticipant; region: string }) {
   return (
-    <div className="flex items-center gap-2 py-1.5">
-      <Icon src={getChampionIconUrl(p.championId)} size={24} alt={p.championName} />
-      <Link href={playerHref(region, p)} className="text-xs truncate hover:underline w-20 min-w-0">
+    <div
+      className={`flex flex-col items-center gap-1.5 rounded-lg border bg-background/40 p-2 ${
+        p.win ? "border-green-500/30" : "border-red-500/30"
+      }`}
+    >
+      <Icon src={getChampionIconUrl(p.championId)} size={30} alt={p.championName} />
+      <Link
+        href={playerHref(region, p)}
+        className="text-[10px] truncate hover:underline w-full text-center"
+      >
         {p.gameName || p.championName}
       </Link>
       {p.runes.keystone ? (
         <>
+          {/* Keystone */}
+          <Icon src={p.runes.keystone} size={34} />
+          {/* Primary minor runes */}
           <div className="flex items-center gap-1">
-            {p.runes.primary.map((r, i) => (
-              <Icon key={`pr-${p.puuid}-${i}`} src={r} size={i === 0 ? 22 : 16} />
+            {p.runes.primary.slice(1).map((r, i) => (
+              <Icon key={`pr-${p.puuid}-${i}`} src={r} size={20} />
             ))}
           </div>
-          <span className="text-muted-foreground">·</span>
+          <div className="h-px w-8 bg-border" />
+          {/* Secondary */}
           <div className="flex items-center gap-1">
             {p.runes.secondary.map((r, i) => (
-              <Icon key={`sr-${p.puuid}-${i}`} src={r} size={16} />
+              <Icon key={`sr-${p.puuid}-${i}`} src={r} size={18} />
             ))}
           </div>
-          <div className="ml-auto flex items-center gap-0.5">
+          {/* Stat shards */}
+          <div className="flex items-center gap-1">
             {p.runes.shards.map((r, i) => (
               <Icon key={`sh-${p.puuid}-${i}`} src={r} size={12} />
             ))}
           </div>
         </>
       ) : (
-        <span className="text-[11px] text-muted-foreground">—</span>
+        <span className="py-4 text-[11px] text-muted-foreground">—</span>
       )}
     </div>
   )
@@ -302,11 +330,11 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
       )}
       {tab === "runes" &&
         (data.participants.some((p) => p.runes.keystone) ? (
-          <Teams
-            data={data.participants}
-            region={region}
-            render={(p) => <RunesRow p={p} region={region} />}
-          />
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+            {data.participants.map((p) => (
+              <RuneCard key={p.puuid} p={p} region={region} />
+            ))}
+          </div>
         ) : (
           <p className="py-3 text-xs text-muted-foreground">Pas de runes dans ce mode de jeu.</p>
         ))}
