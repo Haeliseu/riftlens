@@ -1,7 +1,12 @@
-import type { Region } from "@riftlens/riot-api"
+import type { ChampionBucket, Region } from "@riftlens/riot-api"
 import { getChampionStats, RiotApiClient } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
-import { championStatsFromDb } from "@/lib/profile-db"
+import { type ChampDetailBucket, type ChampionDetail, championStatsFromDb } from "@/lib/profile-db"
+
+// Map the live (basic) aggregate into the detailed shape (extra fields 0).
+function toDetailBucket(b: ChampionBucket): ChampDetailBucket {
+  return { ...b, csPerMin: 0, kp: 0, gold: 0, damage: 0, vision: 0 }
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -29,7 +34,14 @@ export async function GET(req: NextRequest) {
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
   try {
     const stats = await getChampionStats(client, region, puuid, count)
-    return NextResponse.json(stats, {
+    const detailed: ChampionDetail[] = stats.map((c) => ({
+      championId: c.championId,
+      championName: c.championName,
+      total: toDetailBucket(c.total),
+      solo: toDetailBucket(c.solo),
+      flex: toDetailBucket(c.flex),
+    }))
+    return NextResponse.json(detailed, {
       headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
     })
   } catch (err) {

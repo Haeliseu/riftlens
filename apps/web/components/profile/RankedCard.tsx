@@ -107,10 +107,11 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
             {soloRank.wins}V · {soloRank.losses}D ·{" "}
             <span className="text-foreground font-medium">{winRate}% WR</span> · {games} games
           </p>
-          <div className="h-1 rounded-full bg-muted overflow-hidden">
+          {/* LP progress within the division: 10 LP = 10% */}
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
             <div
               className="h-full rounded-full"
-              style={{ width: `${winRate}%`, backgroundColor: color }}
+              style={{ width: `${Math.min(100, soloRank.leaguePoints)}%`, backgroundColor: color }}
             />
           </div>
         </>

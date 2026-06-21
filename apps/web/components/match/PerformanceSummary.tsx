@@ -29,7 +29,6 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
   const mvp = matches.filter((m) => m.badge === "MVP").length
   const ace = matches.filter((m) => m.badge === "ACE").length
 
-  // Top champions by games
   const byChamp = new Map<number, { id: number; games: number; wins: number }>()
   for (const m of matches) {
     const c = byChamp.get(m.championId) ?? { id: m.championId, games: 0, wins: 0 }
@@ -39,47 +38,20 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
   }
   const champs = [...byChamp.values()].sort((a, b) => b.games - a.games).slice(0, 3)
 
-  // Donut gauge geometry
-  const R = 34
-  const C = 2 * Math.PI * R
-  const wrColor = wr >= 55 ? "#22c55e" : wr >= 47 ? "#6366f1" : "#ef4444"
-
   return (
     <div className="rounded-xl border bg-card p-4">
       <p className="text-sm font-medium mb-3">Performances sur les {n} dernières parties</p>
       <div className="flex flex-wrap items-center gap-6">
-        {/* Essence-style WR gauge */}
-        <div className="relative flex-shrink-0" style={{ width: 84, height: 84 }}>
-          <svg width={84} height={84} viewBox="0 0 84 84">
-            <circle
-              cx={42}
-              cy={42}
-              r={R}
-              fill="none"
-              stroke="currentColor"
-              strokeOpacity={0.12}
-              strokeWidth={8}
-            />
-            <circle
-              cx={42}
-              cy={42}
-              r={R}
-              fill="none"
-              stroke={wrColor}
-              strokeWidth={8}
-              strokeLinecap="round"
-              strokeDasharray={C}
-              strokeDashoffset={C * (1 - wr / 100)}
-              transform="rotate(-90 42 42)"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-bold" style={{ color: wrColor }}>
-              {wr}%
-            </span>
-            <span className="text-[10px] text-muted-foreground">
-              {wins}V {losses}D
-            </span>
+        {/* Win/loss balance bar — blue (wins) vs red (losses), tilts with WR */}
+        <div className="min-w-[180px] flex-1">
+          <div className="mb-1 flex items-center justify-between text-xs">
+            <span className="font-medium text-blue-500">{wins}V</span>
+            <span className="font-bold">{wr}%</span>
+            <span className="font-medium text-red-500">{losses}D</span>
+          </div>
+          <div className="flex h-2.5 overflow-hidden rounded-full">
+            <div className="bg-blue-500" style={{ width: `${wr}%` }} />
+            <div className="bg-red-500" style={{ width: `${100 - wr}%` }} />
           </div>
         </div>
 
@@ -91,15 +63,22 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           <span className="font-medium">{perGameKda}</span>
           <span className="text-muted-foreground text-xs">Note de carry moy.</span>
           <span className="font-medium text-violet-400">{avgCarry}</span>
-          <span className="text-muted-foreground text-xs">MVP / ACE</span>
-          <span className="font-medium">
-            <span className="text-amber-400">{mvp}</span> /{" "}
-            <span className="text-violet-400">{ace}</span>
-          </span>
+        </div>
+
+        {/* MVP and ACE — separate, label over count */}
+        <div className="flex gap-4">
+          <div className="text-center">
+            <p className="text-[11px] font-semibold text-amber-400">MVP</p>
+            <p className="text-lg font-bold">{mvp}x</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[11px] font-semibold text-violet-400">ACE</p>
+            <p className="text-lg font-bold">{ace}x</p>
+          </div>
         </div>
 
         {/* Top champions */}
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="ml-auto flex items-center gap-3">
           {champs.map((c) => {
             const cwr = Math.round((c.wins / c.games) * 100)
             return (

@@ -53,10 +53,12 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
   if (data.length < 2) {
     return (
       <div className={cardClass}>
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium">LP Chart</span>
-          <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
-        </div>
+        {!embedded && (
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium">LP Chart</span>
+            <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
+          </div>
+        )}
         <div
           className="flex items-center justify-center text-center text-muted-foreground text-xs px-4"
           style={{ height: CHART_HEIGHT }}
@@ -99,10 +101,12 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
 
   return (
     <div className={cardClass}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium">LP Chart</span>
-        <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
-      </div>
+      {!embedded && (
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium">LP Chart</span>
+          <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
+        </div>
+      )}
 
       <svg
         viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
