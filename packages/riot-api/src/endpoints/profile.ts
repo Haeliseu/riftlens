@@ -84,11 +84,22 @@ const QUEUE_NAMES: Record<number, string> = {
   450: "ARAM",
   490: "Partie rapide",
   700: "Clash",
+  720: "Clash ARAM",
+  900: "ARURF",
+  1020: "Un pour tous",
+  1300: "Nexus Blitz",
   1700: "Arena",
+  1710: "Arena",
+  1900: "URF",
 }
 
 export function queueName(queueId: number | null | undefined): string {
   return queueId != null ? (QUEUE_NAMES[queueId] ?? "Autre") : "Autre"
+}
+
+/** Classic Summoner's Rift queues (have meaningful build/skill order). */
+export function isSummonersRift(queueId: number | null | undefined): boolean {
+  return queueId != null && [400, 420, 430, 440, 490, 700].includes(queueId)
 }
 
 export interface MatchSummary {

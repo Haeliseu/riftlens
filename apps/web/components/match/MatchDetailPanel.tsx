@@ -1,6 +1,6 @@
 "use client"
 
-import { getChampionIconUrl } from "@riftlens/riot-api"
+import { getChampionIconUrl, isSummonersRift } from "@riftlens/riot-api"
 import Link from "next/link"
 import { useState } from "react"
 import { type MatchDetailParticipant, useMatchDetail } from "@/hooks/useMatchDetail"
@@ -120,10 +120,12 @@ function GeneralRow({ p, region }: { p: MatchDetailParticipant; region: string }
           <Icon key={`sp-${p.puuid}-${i}`} src={s} size={13} />
         ))}
       </div>
-      <div className="flex flex-col gap-0.5">
-        <Icon src={p.runes.keystone} size={13} />
-        <Icon src={p.runes.secondary[0] ?? null} size={13} />
-      </div>
+      {p.runes.keystone && (
+        <div className="flex flex-col gap-0.5">
+          <Icon src={p.runes.keystone} size={13} />
+          <Icon src={p.runes.secondary[0] ?? null} size={13} />
+        </div>
+      )}
       <Link href={playerHref(region, p)} className="text-xs truncate hover:underline w-24 min-w-0">
         {p.gameName || p.championName}
       </Link>
@@ -201,22 +203,28 @@ function RunesRow({ p, region }: { p: MatchDetailParticipant; region: string }) 
       <Link href={playerHref(region, p)} className="text-xs truncate hover:underline w-20 min-w-0">
         {p.gameName || p.championName}
       </Link>
-      <div className="flex items-center gap-1">
-        {p.runes.primary.map((r, i) => (
-          <Icon key={`pr-${p.puuid}-${i}`} src={r} size={i === 0 ? 22 : 16} />
-        ))}
-      </div>
-      <span className="text-muted-foreground">·</span>
-      <div className="flex items-center gap-1">
-        {p.runes.secondary.map((r, i) => (
-          <Icon key={`sr-${p.puuid}-${i}`} src={r} size={16} />
-        ))}
-      </div>
-      <div className="ml-auto flex items-center gap-0.5">
-        {p.runes.shards.map((r, i) => (
-          <Icon key={`sh-${p.puuid}-${i}`} src={r} size={12} />
-        ))}
-      </div>
+      {p.runes.keystone ? (
+        <>
+          <div className="flex items-center gap-1">
+            {p.runes.primary.map((r, i) => (
+              <Icon key={`pr-${p.puuid}-${i}`} src={r} size={i === 0 ? 22 : 16} />
+            ))}
+          </div>
+          <span className="text-muted-foreground">·</span>
+          <div className="flex items-center gap-1">
+            {p.runes.secondary.map((r, i) => (
+              <Icon key={`sr-${p.puuid}-${i}`} src={r} size={16} />
+            ))}
+          </div>
+          <div className="ml-auto flex items-center gap-0.5">
+            {p.runes.shards.map((r, i) => (
+              <Icon key={`sh-${p.puuid}-${i}`} src={r} size={12} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <span className="text-[11px] text-muted-foreground">—</span>
+      )}
     </div>
   )
 }
@@ -274,7 +282,7 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
             region={region}
             render={(p) => <DetailsRow p={p} region={region} />}
           />
-          {ownerPuuid && (
+          {ownerPuuid && isSummonersRift(data.queueId) && (
             <div className="mt-3 border-t pt-2">
               <BuildSkillOrder matchId={matchId} region={region} puuid={ownerPuuid} />
             </div>
@@ -292,13 +300,16 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
           </div>
         </>
       )}
-      {tab === "runes" && (
-        <Teams
-          data={data.participants}
-          region={region}
-          render={(p) => <RunesRow p={p} region={region} />}
-        />
-      )}
+      {tab === "runes" &&
+        (data.participants.some((p) => p.runes.keystone) ? (
+          <Teams
+            data={data.participants}
+            region={region}
+            render={(p) => <RunesRow p={p} region={region} />}
+          />
+        ) : (
+          <p className="py-3 text-xs text-muted-foreground">Pas de runes dans ce mode de jeu.</p>
+        ))}
     </div>
   )
 }
