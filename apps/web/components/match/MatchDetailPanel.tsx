@@ -67,7 +67,9 @@ function BuildSkillOrder({
 
   // Skill order grid: for each of Q/W/E/R, mark the level numbers where it was leveled.
   const slotLevels: Record<number, number[]> = { 1: [], 2: [], 3: [], 4: [] }
-  data.skills.forEach((s, i) => slotLevels[s.slot]?.push(i + 1))
+  data.skills.forEach((s, i) => {
+    slotLevels[s.slot]?.push(i + 1)
+  })
   const a = data.at15
 
   // Group items bought in the same shop visit (close timestamps) so they render
@@ -183,7 +185,8 @@ function BuildSkillOrder({
                   const leveled = slotLevels[slot]?.includes(lvl + 1)
                   return (
                     <span
-                      key={lvl}
+                      // biome-ignore lint/suspicious/noArrayIndexKey: level number is the stable identity
+                      key={`lvl-${lvl + 1}`}
                       className={`flex h-4 w-4 items-center justify-center rounded text-[8px] font-medium ${
                         leveled
                           ? `${SKILL_COLOR[slot]?.bg} text-white`
@@ -211,7 +214,6 @@ const TABS: { id: Tab; label: TranslationKey }[] = [
   { id: "runes", label: "detail.tab.runes" },
 ]
 
-// biome-ignore lint/performance/noImgElement: external CDN icons throughout
 function Icon({ src, size = 20, alt = "" }: { src: string | null; size?: number; alt?: string }) {
   if (!src) {
     return (
@@ -259,6 +261,7 @@ function GeneralRow({ p, region }: { p: MatchDetailParticipant; region: string }
       </div>
       <div className="flex flex-col gap-0.5">
         {p.spells.map((s, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional spell slots
           <Icon key={`sp-${p.puuid}-${i}`} src={s} size={13} />
         ))}
       </div>
@@ -292,6 +295,7 @@ function GeneralRow({ p, region }: { p: MatchDetailParticipant; region: string }
 
       <div className="flex gap-0.5 flex-shrink-0">
         {p.items.map((it, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional item slots
           <Icon key={`it-${p.puuid}-${i}`} src={it} size={20} />
         ))}
         <Icon src={p.trinket} size={20} />
@@ -358,12 +362,10 @@ function TeamObjectives({ team }: { team: MatchTeam | undefined }) {
 
 function Teams({
   data,
-  region,
   render,
   teams,
 }: {
   data: MatchDetailParticipant[]
-  region: string
   render: (p: MatchDetailParticipant) => React.ReactNode
   teams?: MatchTeam[]
 }) {
@@ -449,6 +451,7 @@ function RuneCard({ p, region }: { p: MatchDetailParticipant; region: string }) 
           {/* Primary minor runes */}
           <div className="flex items-center gap-1">
             {p.runes.primary.slice(1).map((r, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional rune slots
               <Icon key={`pr-${p.puuid}-${i}`} src={r} size={20} />
             ))}
           </div>
@@ -456,12 +459,14 @@ function RuneCard({ p, region }: { p: MatchDetailParticipant; region: string }) 
           {/* Secondary */}
           <div className="flex items-center gap-1">
             {p.runes.secondary.map((r, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional rune slots
               <Icon key={`sr-${p.puuid}-${i}`} src={r} size={18} />
             ))}
           </div>
           {/* Stat shards */}
           <div className="flex items-center gap-1">
             {p.runes.shards.map((r, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional shard slots
               <Icon key={`sh-${p.puuid}-${i}`} src={r} size={12} />
             ))}
           </div>
@@ -598,18 +603,13 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
       {tab === "general" && (
         <Teams
           data={data.participants}
-          region={region}
           teams={data.teams}
           render={(p) => <GeneralRow p={p} region={region} />}
         />
       )}
       {tab === "details" && (
         <>
-          <Teams
-            data={data.participants}
-            region={region}
-            render={(p) => <DetailsRow p={p} region={region} />}
-          />
+          <Teams data={data.participants} render={(p) => <DetailsRow p={p} region={region} />} />
           {owner && (
             <div className="mt-3 border-t pt-2">
               <FocusedStats p={owner} />

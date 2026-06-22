@@ -77,15 +77,21 @@ export function ChampionFilterModal({
 }: Props) {
   const { t } = useI18n()
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-close
+    // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click/Escape to close
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose()
+      }}
     >
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation on panel */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("champFilter.title")}
         className="w-full max-w-2xl rounded-xl border bg-card p-4 shadow-xl"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold">{t("champFilter.title")}</h3>

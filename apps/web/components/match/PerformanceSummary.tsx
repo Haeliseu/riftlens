@@ -64,7 +64,7 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
       <div className="flex flex-wrap items-center justify-between gap-6">
         {/* WR essence gauge — blue (wins) / red (losses) */}
         <div className="relative flex-shrink-0" style={{ width: 84, height: 84 }}>
-          <svg width={84} height={84} viewBox="0 0 84 84">
+          <svg width={84} height={84} viewBox="0 0 84 84" aria-hidden="true">
             <circle cx={42} cy={42} r={R} fill="none" stroke="#ef4444" strokeWidth={8} />
             <circle
               cx={42}

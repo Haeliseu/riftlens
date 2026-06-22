@@ -421,19 +421,20 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                       )}
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      {[m.keystoneIcon, m.secondaryIcon].map((url, i) =>
+                      {[
+                        { slot: "keystone", url: m.keystoneIcon },
+                        { slot: "secondary", url: m.secondaryIcon },
+                      ].map(({ slot, url }) =>
                         url ? (
                           // biome-ignore lint/performance/noImgElement: external CDN icon
-                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed rune slots
                           <img
-                            key={i}
+                            key={slot}
                             src={url}
                             alt=""
-                            className={`h-[18px] w-[18px] rounded-full ${i === 1 ? "bg-muted/40 p-0.5" : ""}`}
+                            className={`h-[18px] w-[18px] rounded-full ${slot === "secondary" ? "bg-muted/40 p-0.5" : ""}`}
                           />
                         ) : (
-                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed rune slots
-                          <span key={i} className="h-[18px] w-[18px] rounded-full bg-muted/40" />
+                          <span key={slot} className="h-[18px] w-[18px] rounded-full bg-muted/40" />
                         )
                       )}
                     </div>
