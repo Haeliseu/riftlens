@@ -12,6 +12,7 @@ import { queueKey } from "@/lib/queues"
 import { ROLES, roleIconUrl } from "@/lib/roles"
 import { ChampionFilterModal } from "./ChampionFilterModal"
 import { MatchDetailPanel } from "./MatchDetailPanel"
+import { MatchupVs } from "./MatchupVs"
 import { PerformanceSummary } from "./PerformanceSummary"
 
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
@@ -416,38 +417,13 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     })}
                   </div>
 
-                  {/* 5. Matchup: lane opponent in front, enemy team's top-score
-                      player stacked behind it; "vs" below. */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-12">
-                    {m.laneOpponentChampionId != null ? (
-                      <>
-                        <div className="relative h-9 w-9">
-                          {m.enemyCarryChampionId != null &&
-                            m.enemyCarryChampionId !== m.laneOpponentChampionId && (
-                              // biome-ignore lint/performance/noImgElement: external CDN icon
-                              <img
-                                src={getChampionIconUrl(m.enemyCarryChampionId)}
-                                alt={t("history.enemyCarry")}
-                                title={t("history.enemyCarry")}
-                                className="absolute -top-1 -left-1.5 h-7 w-7 rounded-sm opacity-70 ring-1 ring-amber-400/60"
-                              />
-                            )}
-                          {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                          <img
-                            src={getChampionIconUrl(m.laneOpponentChampionId)}
-                            alt={t("history.laneOpponent")}
-                            title={t("history.laneOpponent")}
-                            className="absolute bottom-0 right-0 h-8 w-8 rounded-md ring-2 ring-background"
-                          />
-                        </div>
-                        <span className="text-[8px] font-bold text-muted-foreground">
-                          {t("history.vs")}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </div>
+                  {/* 5. Matchup: player champ vs lane opponent, diagonal "VS" tile. */}
+                  <MatchupVs
+                    championId={m.championId}
+                    championName={m.championName}
+                    laneOpponentChampionId={m.laneOpponentChampionId}
+                    position={m.position}
+                  />
 
                   {/* 6. Carry score (no label) + MVP / ACE / placement */}
                   <div className="flex flex-col items-center justify-center w-12 flex-shrink-0">
