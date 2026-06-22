@@ -187,7 +187,9 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   if (matches && withChamp != null) matches = matches.filter((m) => m.championId === withChamp)
   if (matches && againstChamp != null)
     matches = matches.filter((m) => m.enemyChampionIds.includes(againstChamp))
-  const canLoadMore = (rawMatches?.length ?? 0) >= count && count < 100
+  // Keep the button until the cap, independent of how many matches actually came
+  // back (rate-limited fetches can return fewer than `count`).
+  const canLoadMore = !isLoading && (rawMatches?.length ?? 0) > 0 && count < 100
 
   return (
     <div className="space-y-2">

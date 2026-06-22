@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
-    const masteries = await getTopChampionMasteries(client, region, puuid)
+    const masteries = await getTopChampionMasteries(client, region, puuid, 20)
     return NextResponse.json(masteries, {
       headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
     })

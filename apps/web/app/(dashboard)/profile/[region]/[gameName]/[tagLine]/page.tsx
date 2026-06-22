@@ -135,8 +135,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 <FlexCard region={region} puuid={summary.puuid} flexRank={summary.flexRank} />
                 <CoachingCard puuid={summary.puuid} />
                 <ChampionPerformance puuid={summary.puuid} region={region} />
-                <MasteryCard puuid={summary.puuid} region={region} />
-                <ChallengesCard puuid={summary.puuid} region={region} />
                 <RolePerformance puuid={summary.puuid} />
                 <CrossedPlayers puuid={summary.puuid} region={region} />
                 <PingStats puuid={summary.puuid} />
@@ -147,6 +145,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </div>
           }
           champions={<ChampionStats region={region} puuid={summary.puuid} />}
+          mastery={
+            <div className="max-w-md">
+              <MasteryCard puuid={summary.puuid} region={region} />
+            </div>
+          }
+          challenges={
+            <div className="max-w-md">
+              <ChallengesCard puuid={summary.puuid} region={region} />
+            </div>
+          }
           live={<LiveGame puuid={summary.puuid} region={region} />}
         />
       )}

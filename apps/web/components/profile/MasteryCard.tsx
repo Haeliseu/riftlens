@@ -19,7 +19,7 @@ export function MasteryCard({ puuid, region }: Props) {
   const { data, isLoading } = useMastery(puuid, region)
   const { data: champions } = useChampions()
   const nameOf = new Map((champions ?? []).map((c) => [c.id, c.name]))
-  const top = (data ?? []).slice(0, 5)
+  const top = (data ?? []).slice(0, 15)
 
   return (
     <div className="rounded-xl border bg-card p-4">

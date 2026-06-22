@@ -5,21 +5,25 @@ import { type ReactNode, useState } from "react"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 
-type TabId = "overview" | "champions" | "live"
+type TabId = "overview" | "champions" | "mastery" | "challenges" | "live"
 
 const TABS: { id: TabId; label: TranslationKey; icon?: boolean }[] = [
   { id: "overview", label: "tab.overview" },
   { id: "champions", label: "tab.champions" },
+  { id: "mastery", label: "mastery.title" },
+  { id: "challenges", label: "challenges.title" },
   { id: "live", label: "tab.live", icon: true },
 ]
 
 interface ProfileTabsProps {
   overview: ReactNode
   champions: ReactNode
+  mastery: ReactNode
+  challenges: ReactNode
   live: ReactNode
 }
 
-export function ProfileTabs({ overview, champions, live }: ProfileTabsProps) {
+export function ProfileTabs({ overview, champions, mastery, challenges, live }: ProfileTabsProps) {
   const { t } = useI18n()
   const [tab, setTab] = useState<TabId>("overview")
 
@@ -43,9 +47,11 @@ export function ProfileTabs({ overview, champions, live }: ProfileTabsProps) {
         ))}
       </div>
 
-      {/* Each branch only mounts when active → 'live' stays lazy. */}
+      {/* Each branch only mounts when active → heavy tabs stay lazy. */}
       {tab === "overview" && overview}
       {tab === "champions" && champions}
+      {tab === "mastery" && mastery}
+      {tab === "challenges" && challenges}
       {tab === "live" && live}
     </div>
   )
