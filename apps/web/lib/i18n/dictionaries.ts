@@ -148,6 +148,24 @@ export const dictionaries = {
 
     // role performance
     "champPerf.title": "Performances par champion",
+    "coach.title": "Coaching",
+    "coach.empty": "Pas encore assez de parties classées pour analyser.",
+    "coach.subtitle": "{role} · {games} parties · {wr}% VIC",
+    "coach.your": "Toi",
+    "coach.target": "Objectif",
+    "coach.metric.csPerMin": "CS / min",
+    "coach.metric.vision": "Score de vision",
+    "coach.metric.kp": "Participation aux kills",
+    "coach.metric.deaths": "Morts / partie",
+    "coach.tip.csPerMin":
+      "Travaille tes derniers coups : last-hit sous tour, ne rate pas les vagues entre les trades.",
+    "coach.tip.vision":
+      "Pose et détruis plus de balises : achète un pink à chaque retour, ward les entrées de jungle.",
+    "coach.tip.kp":
+      "Sois plus présent autour de la carte : roam après ta vague, rejoins les fights et objectifs.",
+    "coach.tip.deaths":
+      "Réduis tes morts : surveille la minimap, garde un repli, ne force pas sans vision ni avantage.",
+    "coach.good": "Bon",
     "mastery.title": "Maestria",
     "mastery.level": "Niv. {n}",
     "mastery.empty": "Aucune donnée de maestria.",
@@ -516,6 +534,24 @@ export const dictionaries = {
     "ranked.lpChart.empty": "Not enough data yet to draw the chart.",
 
     "champPerf.title": "Performance by champion",
+    "coach.title": "Coaching",
+    "coach.empty": "Not enough ranked games yet to analyze.",
+    "coach.subtitle": "{role} · {games} games · {wr}% WR",
+    "coach.your": "You",
+    "coach.target": "Target",
+    "coach.metric.csPerMin": "CS / min",
+    "coach.metric.vision": "Vision score",
+    "coach.metric.kp": "Kill participation",
+    "coach.metric.deaths": "Deaths / game",
+    "coach.tip.csPerMin":
+      "Work on last-hitting: farm under tower, don't miss waves between trades.",
+    "coach.tip.vision":
+      "Place and clear more wards: buy a control ward each back, ward jungle entrances.",
+    "coach.tip.kp":
+      "Be more present around the map: roam after your wave, join fights and objectives.",
+    "coach.tip.deaths":
+      "Cut your deaths: watch the minimap, keep an escape, don't force without vision or a lead.",
+    "coach.good": "Good",
     "mastery.title": "Mastery",
     "mastery.level": "Lv. {n}",
     "mastery.empty": "No mastery data.",

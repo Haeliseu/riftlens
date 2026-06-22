@@ -285,6 +285,89 @@ export async function pingStatsFromDb(
   return { total: byKey.reduce((s, x) => s + x.count, 0), byKey }
 }
 
+export interface CoachInput {
+  role: string
+  games: number
+  csPerMin: number
+  kp: number // 0..1
+  deathsPerGame: number
+  kda: number
+  visionPerGame: number
+  winRate: number // 0..100
+}
+
+/** Aggregate the player's main role from stored ranked games for the coaching engine. */
+export async function coachingFromDb(puuid: string): Promise<CoachInput | null> {
+  const rows = await db
+    .select({
+      role: summonerMatches.role,
+      kills: summonerMatches.kills,
+      deaths: summonerMatches.deaths,
+      assists: summonerMatches.assists,
+      win: summonerMatches.win,
+      visionScore: summonerMatches.visionScore,
+      csPerMin: summonerMatches.csPerMin,
+      kp: summonerMatches.killParticipation,
+    })
+    .from(summonerMatches)
+    .where(and(eq(summonerMatches.puuid, puuid), inArray(summonerMatches.queueId, [420, 440])))
+
+  if (rows.length === 0) return null
+
+  type Agg = {
+    games: number
+    wins: number
+    kills: number
+    deaths: number
+    assists: number
+    vision: number
+    csPerMin: number
+    kp: number
+  }
+  const byRole = new Map<string, Agg>()
+  for (const r of rows) {
+    const role = r.role || "UNKNOWN"
+    const a = byRole.get(role) ?? {
+      games: 0,
+      wins: 0,
+      kills: 0,
+      deaths: 0,
+      assists: 0,
+      vision: 0,
+      csPerMin: 0,
+      kp: 0,
+    }
+    a.games += 1
+    a.wins += r.win ? 1 : 0
+    a.kills += r.kills ?? 0
+    a.deaths += r.deaths ?? 0
+    a.assists += r.assists ?? 0
+    a.vision += r.visionScore ?? 0
+    a.csPerMin += r.csPerMin ?? 0
+    a.kp += r.kp ?? 0
+    byRole.set(role, a)
+  }
+
+  // Main role = most games (ignore UNKNOWN unless it's the only one).
+  const ranked = [...byRole.entries()]
+    .filter(([role]) => role !== "UNKNOWN")
+    .sort((a, b) => b[1].games - a[1].games)
+  const [role, a] = ranked[0] ?? [...byRole.entries()][0]!
+  if (!a) return null
+
+  const kda = a.deaths === 0 ? a.kills + a.assists : (a.kills + a.assists) / a.deaths
+  return {
+    role,
+    games: a.games,
+    csPerMin: a.csPerMin / a.games,
+    kp: a.kp / a.games,
+    deathsPerGame: a.deaths / a.games,
+    kda,
+    visionPerGame: a.vision / a.games,
+    winRate: Math.round((a.wins / a.games) * 100),
+  }
+}
+
 export interface RolePerf {
   role: string
   games: number

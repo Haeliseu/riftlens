@@ -12,6 +12,7 @@ import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChallengesCard } from "@/components/profile/ChallengesCard"
 import { ChampionPerformance } from "@/components/profile/ChampionPerformance"
 import { ChampionStats } from "@/components/profile/ChampionStats"
+import { CoachingCard } from "@/components/profile/CoachingCard"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { FlexCard } from "@/components/profile/FlexCard"
 import { LiveGame } from "@/components/profile/LiveGame"
@@ -132,6 +133,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <div className="lg:col-span-1 space-y-4">
                 <RankedCard region={region} puuid={summary.puuid} soloRank={summary.soloRank} />
                 <FlexCard region={region} puuid={summary.puuid} flexRank={summary.flexRank} />
+                <CoachingCard puuid={summary.puuid} />
                 <ChampionPerformance puuid={summary.puuid} region={region} />
                 <MasteryCard puuid={summary.puuid} region={region} />
                 <ChallengesCard puuid={summary.puuid} region={region} />
