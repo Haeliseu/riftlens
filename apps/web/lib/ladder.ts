@@ -9,36 +9,53 @@ import {
 import { withCache } from "@/lib/cache"
 import type { SeasonChamp } from "@/lib/profile-db"
 
-export interface LadderPlayer {
+/** Cheap identity: name + avatar (2 Riot calls). */
+export interface LadderId {
   gameName: string | null
   tagLine: string | null
   profileIconId: number | null
+}
+
+/** Heavier season aggregate: main role + top champions (needs match fetches). */
+export interface LadderSeason {
   mainRole: string | null
   topChampions: SeasonChamp[]
 }
 
-const SEASON_MATCHES = 10
+const SEASON_MATCHES = 8
 
-/**
- * Compute a ladder player's card (name, avatar, main role, top season champions)
- * straight from Riot — no DB ingestion. Matches are cached (immutable) so
- * premades + the match-detail view share them.
- */
-export async function computeLadderPlayer(
+export async function computeLadderId(
   client: RiotApiClient,
   region: Region,
   puuid: string
-): Promise<LadderPlayer> {
+): Promise<LadderId> {
   const routing = regionToRouting(region)
-  const [acc, summoner, ids] = await Promise.all([
+  const [acc, summoner] = await Promise.all([
     getAccountByPuuid(client, routing, puuid).catch(() => null),
     getSummonerByPuuid(client, region, puuid).catch(() => null),
-    getMatchIds(client, routing, puuid, { type: "ranked", count: SEASON_MATCHES }).catch(() => []),
   ])
+  return {
+    gameName: acc?.gameName ?? null,
+    tagLine: acc?.tagLine ?? null,
+    profileIconId: summoner?.profileIconId ?? null,
+  }
+}
+
+export async function computeLadderSeason(
+  client: RiotApiClient,
+  region: Region,
+  puuid: string
+): Promise<LadderSeason> {
+  const routing = regionToRouting(region)
+  const ids = await getMatchIds(client, routing, puuid, {
+    type: "ranked",
+    count: SEASON_MATCHES,
+  }).catch(() => [])
 
   const roleGames = new Map<string, number>()
   const byChamp = new Map<number, SeasonChamp>()
   for (const id of ids) {
+    // Matches are immutable → cached and shared with the match-detail view.
     const m = await withCache(`match:${routing}:${id}`, 2_592_000, () =>
       getMatch(client, routing, id)
     ).catch(() => null)
@@ -63,9 +80,6 @@ export async function computeLadderPlayer(
   }
 
   return {
-    gameName: acc?.gameName ?? null,
-    tagLine: acc?.tagLine ?? null,
-    profileIconId: summoner?.profileIconId ?? null,
     mainRole: [...roleGames.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null,
     topChampions: [...byChamp.values()].sort((a, b) => b.games - a.games).slice(0, 3),
   }

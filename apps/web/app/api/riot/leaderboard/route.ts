@@ -1,16 +1,17 @@
 import type { ApexTier, Region } from "@riftlens/riot-api"
 import { getApexLeague, RiotApiClient } from "@riftlens/riot-api"
-import { type NextRequest, NextResponse } from "next/server"
+import { after, type NextRequest, NextResponse } from "next/server"
 import { cacheGet, cacheSet, withCache } from "@/lib/cache"
-import { computeLadderPlayer, type LadderPlayer } from "@/lib/ladder"
+import { computeLadderId, computeLadderSeason, type LadderSeason } from "@/lib/ladder"
 
 const PAGE = 20
 const TIERS: ApexTier[] = ["challenger", "grandmaster", "master"]
 const QUEUES = ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"]
-// How many not-yet-cached players to enrich live per load (the rest fill in on
-// later loads). Each one costs ~12 Riot calls, so keep it small.
-const ENRICH_BUDGET = 3
-const PLAYER_TTL = 24 * 3600
+// Season (top champions) is the costly part (~8 match calls/player) so it's
+// enriched in the background, several players per load; the cache persists.
+const SEASON_BUDGET = 10
+const ID_TTL = 24 * 3600
+const SEASON_TTL = 24 * 3600
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -33,37 +34,48 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.leaguePoints - a.leaguePoints)
     const pageEntries = ranked.slice(offset, offset + PAGE)
 
-    let budget = ENRICH_BUDGET
+    const seasonMisses: string[] = []
     const rows = await Promise.all(
       pageEntries.map(async (e, i) => {
         const puuid = e.puuid as string
-        const key = `lb:p:${region}:${puuid}`
-        let player = await cacheGet<LadderPlayer>(key)
-        if (!player && budget > 0) {
-          budget -= 1
-          player = await computeLadderPlayer(client, region, puuid).catch(() => null)
-          if (player) await cacheSet(key, player, PLAYER_TTL)
-        }
+        // Identity (name + avatar): cheap, resolved synchronously for everyone.
+        const id = await withCache(`lb:id:${region}:${puuid}`, ID_TTL, () =>
+          computeLadderId(client, region, puuid)
+        ).catch(() => null)
+        // Season (top champions): from cache only here; misses filled in the background.
+        const season = await cacheGet<LadderSeason>(`lb:season:${region}:${puuid}`)
+        if (!season) seasonMisses.push(puuid)
         const games = e.wins + e.losses
         return {
           rank: offset + i + 1,
           puuid,
-          gameName: player?.gameName ?? null,
-          tagLine: player?.tagLine ?? null,
-          profileIconId: player?.profileIconId ?? null,
+          gameName: id?.gameName ?? null,
+          tagLine: id?.tagLine ?? null,
+          profileIconId: id?.profileIconId ?? null,
           leaguePoints: e.leaguePoints,
           wins: e.wins,
           losses: e.losses,
           winRate: games > 0 ? Math.round((e.wins / games) * 100) : 0,
-          mainRole: player?.mainRole ?? null,
-          topChampions: player?.topChampions ?? [],
+          mainRole: season?.mainRole ?? null,
+          topChampions: season?.topChampions ?? [],
         }
       })
     )
 
+    // Backfill season aggregates in the background so the cache fills quickly
+    // across loads without slowing the response.
+    if (seasonMisses.length > 0) {
+      after(async () => {
+        for (const puuid of seasonMisses.slice(0, SEASON_BUDGET)) {
+          const s = await computeLadderSeason(client, region, puuid).catch(() => null)
+          if (s) await cacheSet(`lb:season:${region}:${puuid}`, s, SEASON_TTL)
+        }
+      })
+    }
+
     return NextResponse.json(
       { tier: league.tier, region, rows, total: ranked.length, offset },
-      { headers: { "Cache-Control": "public, s-maxage=900, stale-while-revalidate=86400" } }
+      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400" } }
     )
   } catch (err) {
     const status = (err as { status?: number }).status ?? 500

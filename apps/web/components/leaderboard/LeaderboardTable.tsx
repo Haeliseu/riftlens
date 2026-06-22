@@ -64,7 +64,8 @@ function useLeaderboard(region: string, tier: string, queue: string) {
       const next = last.offset + last.rows.length
       return next < last.total ? next : undefined
     },
-    staleTime: 3_600_000,
+    // Short so champions backfilled in the background show up on the next visit.
+    staleTime: 60_000,
   })
 }
 
@@ -192,31 +193,15 @@ export function LeaderboardTable() {
                   )}
                 </div>
                 <div className="w-[120px] hidden sm:flex justify-end gap-1">
-                  {r.topChampions.map((c) => {
-                    const cwr = c.games > 0 ? Math.round((c.wins / c.games) * 100) : 0
-                    const kda = (
-                      c.deaths === 0 ? c.kills + c.assists : (c.kills + c.assists) / c.deaths
-                    ).toFixed(2)
-                    return (
-                      <div
-                        key={c.championId}
-                        className="relative"
-                        title={`${c.games}g · ${cwr}% · ${kda} KDA`}
-                      >
-                        {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                        <img
-                          src={getChampionIconUrl(c.championId)}
-                          alt=""
-                          className="h-7 w-7 rounded"
-                        />
-                        <span
-                          className={`absolute -bottom-1 left-1/2 -translate-x-1/2 rounded px-0.5 text-[8px] font-bold leading-none ${cwr >= 50 ? "bg-blue-500" : "bg-red-500"} text-white`}
-                        >
-                          {cwr}
-                        </span>
-                      </div>
-                    )
-                  })}
+                  {r.topChampions.map((c) => (
+                    // biome-ignore lint/performance/noImgElement: external CDN icon
+                    <img
+                      key={c.championId}
+                      src={getChampionIconUrl(c.championId)}
+                      alt=""
+                      className="h-7 w-7 rounded"
+                    />
+                  ))}
                 </div>
                 <span className="w-16 text-right text-sm font-mono">{r.leaguePoints}</span>
                 <span className="w-24 text-right text-xs text-muted-foreground">
