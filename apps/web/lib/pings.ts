@@ -23,6 +23,7 @@ export const PING_FIELDS: PingField[] = [
   },
   { key: "holdPings", labelKey: "ping.hold", icon: "hold.png" },
   { key: "allInPings", labelKey: "ping.allIn", icon: "all_in.png" },
+  { key: "baitPings", labelKey: "ping.bait", icon: "bait.png" },
   { key: "commandPings", labelKey: "ping.command", icon: "ping.png" },
   { key: "visionClearedPings", labelKey: "ping.visionCleared", icon: "cleared.png" },
   { key: "basicPings", labelKey: "ping.basic", icon: "ping.png" },

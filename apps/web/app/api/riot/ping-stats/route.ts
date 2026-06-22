@@ -9,6 +9,9 @@ export async function GET(req: NextRequest) {
       headers: { "Cache-Control": "no-store" },
     })
   } catch {
-    return NextResponse.json({ total: 0, byKey: [] }, { headers: { "Cache-Control": "no-store" } })
+    return NextResponse.json(
+      { total: 0, games: 0, byKey: [] },
+      { headers: { "Cache-Control": "no-store" } }
+    )
   }
 }

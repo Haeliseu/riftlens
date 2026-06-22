@@ -63,9 +63,10 @@ export const ParticipantSchema = z.object({
         .optional(),
     })
     .optional(),
-  // Pings
+  // Pings (real match-v5 ParticipantDto fields)
   allInPings: z.number().optional(),
   assistMePings: z.number().optional(),
+  baitPings: z.number().optional(),
   basicPings: z.number().optional(),
   commandPings: z.number().optional(),
   dangerPings: z.number().optional(),
@@ -76,7 +77,6 @@ export const ParticipantSchema = z.object({
   needVisionPings: z.number().optional(),
   onMyWayPings: z.number().optional(),
   pushPings: z.number().optional(),
-  retreatPings: z.number().optional(),
   visionClearedPings: z.number().optional(),
 })
 

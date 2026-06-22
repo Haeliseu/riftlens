@@ -309,6 +309,7 @@ export const dictionaries = {
     // pings
     "pings.titleUsed": "Pings utilisés",
     "pings.total": "{n} au total",
+    "pings.games": "sur {n} parties analysées",
     "pings.syncHint": "Aucune donnée — synchronise pour enregistrer les pings de tes parties.",
     "ping.onMyWay": "En route",
     "ping.assistMe": "Aidez-moi",
@@ -320,6 +321,7 @@ export const dictionaries = {
     "ping.enemyVision": "Vision ennemie",
     "ping.hold": "Tenir",
     "ping.allIn": "All-in",
+    "ping.bait": "Appât",
     "ping.command": "Commande",
     "ping.visionCleared": "Vision nettoyée",
     "ping.basic": "Basique",
@@ -702,6 +704,7 @@ export const dictionaries = {
 
     "pings.titleUsed": "Pings used",
     "pings.total": "{n} total",
+    "pings.games": "across {n} analyzed games",
     "pings.syncHint": "No data — sync to record the pings from your games.",
     "ping.onMyWay": "On my way",
     "ping.assistMe": "Assist me",
@@ -713,6 +716,7 @@ export const dictionaries = {
     "ping.enemyVision": "Enemy vision",
     "ping.hold": "Hold",
     "ping.allIn": "All-in",
+    "ping.bait": "Bait",
     "ping.command": "Command",
     "ping.visionCleared": "Vision cleared",
     "ping.basic": "Basic",
