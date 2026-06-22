@@ -1,9 +1,8 @@
 "use client"
 
-import { getRankEmblemUrl, getRankIconUrl, type TierName } from "@riftlens/riot-api"
+import { getRankEmblemUrl, type TierName } from "@riftlens/riot-api"
 import { ChevronDown } from "lucide-react"
 import { useState } from "react"
-import { useAverageRank } from "@/hooks/useAverageRank"
 import { useI18n } from "@/lib/i18n"
 import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
 import type { SoloRank } from "./RankedCard"
@@ -14,11 +13,9 @@ interface FlexCardProps {
   flexRank?: SoloRank | null
 }
 
-export function FlexCard({ region, puuid, flexRank }: FlexCardProps) {
+export function FlexCard({ flexRank }: FlexCardProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
-  // Same query key as RankedCard → React Query shares the cached result (no extra call).
-  const { data: avg, isLoading: avgLoading } = useAverageRank(puuid, region)
 
   const games = flexRank ? flexRank.wins + flexRank.losses : 0
   const winRate = games > 0 ? Math.round(((flexRank?.wins ?? 0) / games) * 100) : null
@@ -96,26 +93,6 @@ export function FlexCard({ region, puuid, flexRank }: FlexCardProps) {
               </div>
             </>
           )}
-
-          <div className="mt-3 rounded-lg border bg-muted/40 px-3 py-2">
-            <p className="text-[10px] text-muted-foreground mb-1">{t("ranked.avgGameRank")}</p>
-            {avgLoading ? (
-              <div className="h-4 w-24 rounded bg-muted animate-pulse" />
-            ) : avg ? (
-              <div className="flex items-center gap-2">
-                {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                <img src={getRankIconUrl(avg.tier)} alt="" className="w-7 h-7 object-contain" />
-                <span className="text-sm font-medium" style={{ color: tierColor(avg.tier) }}>
-                  {rankLabel(t, avg.tier, avg.division)}
-                </span>
-                <span className="text-[10px] text-muted-foreground ml-auto">
-                  {t("ranked.lastN", { n: avg.sampleGames })}
-                </span>
-              </div>
-            ) : (
-              <span className="text-xs text-muted-foreground">—</span>
-            )}
-          </div>
         </div>
       )}
     </div>
