@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import { useState } from "react"
 import { REGIONS } from "@/components/home/SearchHero"
+import { useLiveStatus } from "@/hooks/useLiveStatus"
 import { useI18n } from "@/lib/i18n"
 import { ROLES, roleIconUrl } from "@/lib/roles"
 
@@ -81,6 +82,10 @@ export function LeaderboardTable() {
   // Role filter is best-effort: it only matches players whose season data is in
   // our DB (others fill in over time as the ladder is backfilled).
   const rows = role === "ALL" ? allRows : allRows.filter((r) => r.mainRole === role)
+  const { data: liveStatus } = useLiveStatus(
+    region,
+    rows.map((r) => r.puuid)
+  )
 
   return (
     <div className="space-y-4">
@@ -190,6 +195,15 @@ export function LeaderboardTable() {
                     </Link>
                   ) : (
                     <span className="text-sm text-muted-foreground">{t("leaderboard.hidden")}</span>
+                  )}
+                  {liveStatus?.[r.puuid] && (
+                    <span
+                      title={t("leaderboard.inGame")}
+                      className="flex flex-shrink-0 items-center gap-1 rounded bg-[var(--color-win)]/15 px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-win)]"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-win)] animate-pulse" />
+                      {t("leaderboard.live")}
+                    </span>
                   )}
                 </div>
                 <div className="w-[120px] hidden sm:flex justify-end gap-1">
