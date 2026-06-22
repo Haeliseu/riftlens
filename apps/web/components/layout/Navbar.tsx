@@ -119,7 +119,7 @@ export function Navbar() {
             {badge.label}
           </button>
           {regionOpen && (
-            <div className="absolute right-0 top-full mt-1 z-50 grid grid-cols-2 gap-1 rounded-md border bg-popover p-1 shadow-xl">
+            <div className="absolute right-0 top-full mt-1 z-50 flex flex-wrap justify-end gap-1.5 rounded-md border bg-popover p-2 shadow-xl w-40">
               {REGIONS.map((id) => {
                 const b = regionBadge(id)
                 return (
@@ -130,7 +130,7 @@ export function Navbar() {
                       setRegion(id)
                       setRegionOpen(false)
                     }}
-                    className={`rounded px-2 py-1 text-xs font-semibold text-white ${
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-semibold text-white ${
                       id === region ? "ring-1 ring-foreground" : ""
                     }`}
                     style={{ backgroundColor: b.color }}
