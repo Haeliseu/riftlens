@@ -15,12 +15,12 @@ export function RolePerformance({ puuid }: Props) {
 
   return (
     <div className="rounded-xl border bg-card p-4">
-      <h3 className="text-sm font-medium mb-3">{t("roles.title")}</h3>
+      <h3 className="text-base font-semibold mb-3">{t("roles.title")}</h3>
       {!puuid || (!isLoading && rows.length === 0) ? (
-        <p className="text-xs text-muted-foreground py-1">{t("roles.syncHint")}</p>
+        <p className="text-sm text-muted-foreground py-1">{t("roles.syncHint")}</p>
       ) : (
-        <div className="space-y-1.5">
-          <div className="flex text-[10px] text-muted-foreground uppercase">
+        <div className="space-y-2">
+          <div className="flex text-xs text-muted-foreground uppercase">
             <span className="flex-1">{t("roles.col.role")}</span>
             <span className="w-12 text-right">{t("roles.col.games")}</span>
             <span className="w-12 text-right">{t("roles.col.wr")}</span>
@@ -28,7 +28,7 @@ export function RolePerformance({ puuid }: Props) {
           {rows.map((r) => {
             const wr = Math.round((r.wins / r.games) * 100)
             return (
-              <div key={r.role} className="flex items-center text-xs">
+              <div key={r.role} className="flex items-center text-sm">
                 <span className="flex-1">{t(roleKey(r.role))}</span>
                 <span className="w-12 text-right text-muted-foreground">{r.games}</span>
                 <span

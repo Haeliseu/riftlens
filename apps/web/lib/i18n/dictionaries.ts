@@ -24,7 +24,7 @@ export const dictionaries = {
     "common.player": "Joueur",
 
     // navbar / layout
-    "nav.search.placeholder": "Pseudo#TAG",
+    "nav.search.placeholder": "Rechercher un joueur",
     "nav.toggleTheme": "Basculer le thème",
     "nav.language": "Langue",
     "nav.login": "Se connecter",
@@ -76,6 +76,8 @@ export const dictionaries = {
     "history.placement.first": "1er",
     "history.placement.nth": "{n}e",
     "history.vs": "VS",
+    "history.laneOpponent": "Adversaire de lane",
+    "history.enemyCarry": "Carry adverse",
     "time.now": "à l'instant",
     "time.hoursAgo": "il y a {h} h",
     "time.daysAgo": "il y a {d} j",
@@ -334,7 +336,7 @@ export const dictionaries = {
     "common.loss": "Defeat",
     "common.player": "Player",
 
-    "nav.search.placeholder": "Name#TAG",
+    "nav.search.placeholder": "Search a player",
     "nav.toggleTheme": "Toggle theme",
     "nav.language": "Language",
     "nav.login": "Sign in",
@@ -381,6 +383,8 @@ export const dictionaries = {
     "history.placement.first": "1st",
     "history.placement.nth": "{n}th",
     "history.vs": "VS",
+    "history.laneOpponent": "Lane opponent",
+    "history.enemyCarry": "Enemy carry",
     "time.now": "just now",
     "time.hoursAgo": "{h}h ago",
     "time.daysAgo": "{d}d ago",

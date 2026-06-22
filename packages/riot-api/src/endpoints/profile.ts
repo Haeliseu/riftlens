@@ -139,6 +139,12 @@ export interface MatchSummary {
   enemyChampionIds: number[]
   /** items equipped at the end of the game (slots 0–6, 0 = empty) */
   items: number[]
+  /** the two summoner spell ids the player ran */
+  summonerSpellIds: number[]
+  /** keystone rune id (primary tree first selection) */
+  keystoneId: number | null
+  /** secondary tree first selection rune id */
+  secondaryPerkId: number | null
 }
 
 // Reachable benchmarks (a full mark, not the theoretical max).
@@ -331,6 +337,9 @@ export async function getMatchHistory(
             items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6].map(
               (i) => i ?? 0
             ),
+            summonerSpellIds: [p.summoner1Id ?? 0, p.summoner2Id ?? 0],
+            keystoneId: p.perks?.styles?.[0]?.selections?.[0]?.perk ?? null,
+            secondaryPerkId: p.perks?.styles?.[1]?.selections?.[0]?.perk ?? null,
           }
         })
         .catch(() => null)

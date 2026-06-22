@@ -3,20 +3,18 @@
 import { Search } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useI18n } from "@/lib/i18n"
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
+import { regionBadge } from "@/lib/regions"
 import { LanguageToggle } from "./LanguageToggle"
 import { ThemeToggle } from "./ThemeToggle"
 
-const REGIONS = [
-  { id: "EUW1", label: "EUW" },
-  { id: "NA1", label: "NA" },
-  { id: "KR", label: "KR" },
-  { id: "EUN1", label: "EUNE" },
-  { id: "BR1", label: "BR" },
-  { id: "JP1", label: "JP" },
-  { id: "OC1", label: "OCE" },
-  { id: "TR1", label: "TR" },
+const REGIONS = ["EUW1", "EUN1", "NA1", "KR", "BR1", "JP1", "OC1", "TR1", "LA1", "LA2", "RU"]
+
+const NAV_LINKS: { href: string; label: TranslationKey }[] = [
+  { href: "/leaderboard", label: "leaderboard.title" },
+  { href: "/champions", label: "champions.title" },
 ]
 
 export function Navbar() {
@@ -24,6 +22,30 @@ export function Navbar() {
   const { t } = useI18n()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
+  const [regionOpen, setRegionOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const regionRef = useRef<HTMLDivElement>(null)
+
+  // Ctrl/Cmd+K focuses the search input.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
+
+  // Close the region dropdown on outside click.
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (regionRef.current && !regionRef.current.contains(e.target as Node)) setRegionOpen(false)
+    }
+    document.addEventListener("mousedown", onClick)
+    return () => document.removeEventListener("mousedown", onClick)
+  }, [])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -39,26 +61,37 @@ export function Navbar() {
     setQuery("")
   }
 
+  const badge = regionBadge(region)
+
   return (
-    <header className="flex h-14 items-center border-b px-4 gap-3">
+    <header className="flex h-14 items-center border-b px-4 gap-4">
+      <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+        <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
+          <span className="text-[11px] font-bold text-primary-foreground">RL</span>
+        </div>
+        <span className="font-bold tracking-tight hidden sm:inline">RiftLens</span>
+      </Link>
+
+      <nav className="hidden md:flex items-center gap-1 flex-shrink-0">
+        {NAV_LINKS.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="px-3 py-1.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            {t(l.label)}
+          </Link>
+        ))}
+      </nav>
+
       <form
         onSubmit={handleSearch}
-        className="flex flex-1 items-center gap-0 max-w-md rounded-md border overflow-hidden"
+        className="flex flex-1 items-center max-w-md rounded-md border overflow-hidden"
       >
-        <select
-          value={region}
-          onChange={(e) => setRegion(e.target.value)}
-          className="bg-muted border-r text-xs font-medium px-2 h-9 focus:outline-none cursor-pointer text-foreground flex-shrink-0"
-        >
-          {REGIONS.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.label}
-            </option>
-          ))}
-        </select>
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <input
+            ref={inputRef}
             type="text"
             placeholder={t("nav.search.placeholder")}
             value={query}
@@ -67,15 +100,53 @@ export function Navbar() {
             autoComplete="off"
             spellCheck={false}
           />
+          <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border px-1 text-[10px] text-muted-foreground pointer-events-none">
+            ⌘K
+          </kbd>
+        </div>
+
+        {/* Region pill (same colours as profile region badges) + dropdown */}
+        <div ref={regionRef} className="relative border-l flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setRegionOpen((o) => !o)}
+            className="h-9 px-2.5 text-xs font-semibold text-white"
+            style={{ backgroundColor: badge.color }}
+          >
+            {badge.label}
+          </button>
+          {regionOpen && (
+            <div className="absolute right-0 top-full mt-1 z-50 grid grid-cols-2 gap-1 rounded-md border bg-popover p-1 shadow-xl">
+              {REGIONS.map((id) => {
+                const b = regionBadge(id)
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      setRegion(id)
+                      setRegionOpen(false)
+                    }}
+                    className={`rounded px-2 py-1 text-xs font-semibold text-white ${
+                      id === region ? "ring-1 ring-foreground" : ""
+                    }`}
+                    style={{ backgroundColor: b.color }}
+                  >
+                    {b.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       </form>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2 flex-shrink-0">
         <LanguageToggle />
         <ThemeToggle />
         <Link
           href="/login"
-          className="text-xs px-3 py-1.5 rounded-md border border-border hover:bg-accent transition-colors font-medium"
+          className="text-xs px-3 py-1.5 rounded-md border border-border hover:bg-accent transition-colors font-medium whitespace-nowrap"
         >
           {t("nav.login")}
         </Link>

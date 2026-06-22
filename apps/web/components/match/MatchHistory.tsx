@@ -1,7 +1,7 @@
 "use client"
 
 import { getChampionIconUrl, getItemIconUrl, type MatchSummary } from "@riftlens/riot-api"
-import { ChevronDown } from "lucide-react"
+import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
@@ -17,9 +17,9 @@ import { PerformanceSummary } from "./PerformanceSummary"
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
 
 const PERIODS: { id: "all" | "day" | "session"; label: TranslationKey }[] = [
-  { id: "all", label: "filter.period.all" },
   { id: "day", label: "filter.period.day" },
   { id: "session", label: "filter.period.session" },
+  { id: "all", label: "filter.period.all" },
 ]
 
 const QUEUE_GROUPS: { id: string; label: TranslationKey }[] = [
@@ -43,10 +43,10 @@ function carryColor(score: number): string {
   return "text-red-400"
 }
 
-function filterByPeriod(
-  matches: MatchSummary[],
+function filterByPeriod<M extends MatchSummary>(
+  matches: M[],
   period: "all" | "day" | "session"
-): MatchSummary[] {
+): M[] {
   if (period === "day") {
     const start = new Date()
     start.setHours(0, 0, 0, 0)
@@ -54,7 +54,7 @@ function filterByPeriod(
   }
   if (period === "session") {
     const sorted = [...matches].sort((a, b) => b.gameCreationMs - a.gameCreationMs)
-    const out: MatchSummary[] = []
+    const out: M[] = []
     for (let i = 0; i < sorted.length; i++) {
       const m = sorted[i]
       if (!m) break
@@ -93,6 +93,25 @@ function relativeTime(t: T, ms: number): string {
 
 function placementLabel(t: T, p: number): string {
   return p === 1 ? t("history.placement.first") : t("history.placement.nth", { n: p })
+}
+
+/** Per-game LP with a promotion/demotion arrow; em dash when unknown. */
+function LpDelta({ value, t }: { value: number | undefined; t: T }) {
+  if (value === undefined) {
+    return <p className="text-[11px] text-muted-foreground">—</p>
+  }
+  const positive = value >= 0
+  const Arrow = positive ? ArrowUp : ArrowDown
+  return (
+    <p
+      className={`flex items-center gap-0.5 text-[11px] font-semibold ${
+        positive ? "text-green-500" : "text-red-500"
+      }`}
+    >
+      <Arrow className="h-3 w-3" />
+      {t("history.lp", { value: `${value > 0 ? "+" : ""}${value}` })}
+    </p>
+  )
 }
 
 export function MatchHistory({ region, puuid }: MatchHistoryProps) {
@@ -244,49 +263,8 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                   onClick={() => setExpandedId(expanded ? null : m.matchId)}
                   className="flex w-full items-center gap-3 px-3 py-2 text-left"
                 >
-                  {/* Matchup: played champion on top, "vs lane opponent" below it
-                      (enemy carry shown as a small badge on the opponent). */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-11">
-                    {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
-                    <img
-                      src={getChampionIconUrl(m.championId)}
-                      alt={m.championName}
-                      className="h-9 w-9 rounded-md"
-                    />
-                    {m.laneOpponentChampionId != null && (
-                      <div className="flex items-center gap-1">
-                        <span className="text-[8px] font-bold text-muted-foreground">
-                          {t("history.vs")}
-                        </span>
-                        <div className="relative">
-                          {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                          <img
-                            src={getChampionIconUrl(m.laneOpponentChampionId)}
-                            alt="adversaire de lane"
-                            title="Adversaire de lane"
-                            className="h-5 w-5 rounded-sm opacity-90"
-                          />
-                          {m.enemyCarryChampionId != null &&
-                            m.enemyCarryChampionId !== m.laneOpponentChampionId && (
-                              // biome-ignore lint/performance/noImgElement: external CDN icon
-                              <img
-                                src={getChampionIconUrl(m.enemyCarryChampionId)}
-                                alt="carry adverse"
-                                title="Carry adverse"
-                                className="absolute -top-1 -right-1 h-3 w-3 rounded-sm border border-background shadow ring-1 ring-amber-400/70"
-                              />
-                            )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="w-[88px] flex-shrink-0">
-                    <p
-                      className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
-                    >
-                      {m.win ? t("common.win") : t("common.loss")}
-                    </p>
+                  {/* 1. Result info: queue, win/loss, duration·date, LP ± with arrow */}
+                  <div className="w-[96px] flex-shrink-0 space-y-0.5">
                     {m.queueId === 420 ? (
                       <p className="text-[11px] text-muted-foreground truncate">
                         {t(queueKey(m.queueId))}
@@ -296,34 +274,70 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                         {t(queueKey(m.queueId))}
                       </span>
                     )}
+                    <p
+                      className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {m.win ? t("common.win") : t("common.loss")}
+                    </p>
                     <p className="text-[11px] text-muted-foreground">
                       {duration(m.gameDurationS)} · {relativeTime(t, m.gameCreationMs)}
                     </p>
-                    {lpPerGame?.matchLp[m.matchId] !== undefined && (
-                      <p
-                        className={`text-[11px] font-semibold ${
-                          (lpPerGame.matchLp[m.matchId] ?? 0) >= 0
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }`}
-                      >
-                        {t("history.lp", {
-                          value: `${(lpPerGame.matchLp[m.matchId] ?? 0) > 0 ? "+" : ""}${lpPerGame.matchLp[m.matchId]}`,
-                        })}
-                      </p>
-                    )}
+                    <LpDelta value={lpPerGame?.matchLp[m.matchId]} t={t} />
                   </div>
-                  <div className="w-[84px] flex-shrink-0">
+
+                  {/* 2. Player identity: champion + summoner spells + runes */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                    <img
+                      src={getChampionIconUrl(m.championId)}
+                      alt={m.championName}
+                      className="h-10 w-10 rounded-md"
+                    />
+                    <div className="flex flex-col gap-0.5">
+                      {m.spellIcons.map((url, i) =>
+                        url ? (
+                          // biome-ignore lint/performance/noImgElement: external CDN icon
+                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed spell slots
+                          <img key={i} src={url} alt="" className="h-[18px] w-[18px] rounded" />
+                        ) : (
+                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed spell slots
+                          <span key={i} className="h-[18px] w-[18px] rounded bg-muted/40" />
+                        )
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      {[m.keystoneIcon, m.secondaryIcon].map((url, i) =>
+                        url ? (
+                          // biome-ignore lint/performance/noImgElement: external CDN icon
+                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed rune slots
+                          <img
+                            key={i}
+                            src={url}
+                            alt=""
+                            className={`h-[18px] w-[18px] rounded-full ${i === 1 ? "bg-muted/40 p-0.5" : ""}`}
+                          />
+                        ) : (
+                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed rune slots
+                          <span key={i} className="h-[18px] w-[18px] rounded-full bg-muted/40" />
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. KDA · CS · KP */}
+                  <div className="w-[78px] flex-shrink-0">
                     <p className="text-sm font-medium font-mono whitespace-nowrap">
                       {m.kills}
-                      <span className="text-muted-foreground font-normal"> / {m.deaths} / </span>
+                      <span className="text-muted-foreground font-normal">{" / "}</span>
+                      {m.deaths}
+                      <span className="text-muted-foreground font-normal">{" / "}</span>
                       {m.assists}
                     </p>
                     <p className="text-[11px] text-muted-foreground">
                       {kdaLabel(t, m.kills, m.deaths, m.assists)}
                     </p>
                   </div>
-                  <div className="w-[64px] flex-shrink-0">
+                  <div className="w-[58px] flex-shrink-0">
                     <p className="text-xs">{t("history.cs", { cs: m.cs })}</p>
                     <p className="text-[11px] text-muted-foreground">
                       {t("history.csPerMin", { value: csPerMin })}
@@ -333,34 +347,74 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     <p className="text-xs font-medium">{kp}%</p>
                     <p className="text-[11px] text-muted-foreground">{t("history.kp")}</p>
                   </div>
-                  {/* Items equipped at the end of the game, filling the empty space */}
-                  <div className="ml-auto flex gap-0.5 flex-shrink-0">
-                    {m.items.map((id, i) => {
-                      const url = getItemIconUrl(id)
+
+                  {/* 4. End-game items: 2 rows of 4 (items + trinket) */}
+                  <div className="ml-auto grid grid-cols-4 grid-rows-2 gap-0.5 flex-shrink-0">
+                    {Array.from({ length: 8 }, (_, i) => {
+                      const url = getItemIconUrl(m.items[i] ?? 0)
                       return (
                         <div
                           // biome-ignore lint/suspicious/noArrayIndexKey: fixed item slots
                           key={i}
-                          className="h-5 w-5 rounded-sm bg-muted/40"
+                          className="h-[22px] w-[22px] rounded-sm bg-muted/40"
                         >
                           {url && (
                             // biome-ignore lint/performance/noImgElement: external CDN icon
-                            <img src={url} alt="" className="h-5 w-5 rounded-sm" />
+                            <img src={url} alt="" className="h-[22px] w-[22px] rounded-sm" />
                           )}
                         </div>
                       )
                     })}
                   </div>
-                  <div className="text-center w-10 flex-shrink-0">
+
+                  {/* 5. Matchup: lane opponent + VS + enemy carry (with role icon) */}
+                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-11">
+                    {m.laneOpponentChampionId != null ? (
+                      <>
+                        {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                        <img
+                          src={getChampionIconUrl(m.laneOpponentChampionId)}
+                          alt={t("history.laneOpponent")}
+                          title={t("history.laneOpponent")}
+                          className="h-8 w-8 rounded-md"
+                        />
+                        <div className="flex items-center gap-0.5">
+                          <span className="text-[8px] font-bold text-muted-foreground">
+                            {t("history.vs")}
+                          </span>
+                          {m.enemyCarryChampionId != null && (
+                            // biome-ignore lint/performance/noImgElement: external CDN icon
+                            <img
+                              src={getChampionIconUrl(m.enemyCarryChampionId)}
+                              alt={t("history.enemyCarry")}
+                              title={t("history.enemyCarry")}
+                              className="h-4 w-4 rounded-sm ring-1 ring-amber-400/70"
+                            />
+                          )}
+                          {m.enemyCarryPosition && (
+                            // biome-ignore lint/performance/noImgElement: external CDN icon
+                            <img
+                              src={roleIconUrl(m.enemyCarryPosition)}
+                              alt=""
+                              className="h-3 w-3"
+                            />
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </div>
+
+                  {/* 6. Carry score + MVP/ACE/placement stacked in one column */}
+                  <div className="flex flex-col items-center justify-center w-12 flex-shrink-0">
                     <p className={`text-base font-bold leading-none ${carryColor(m.carryScore)}`}>
                       {m.carryScore}
                     </p>
                     <p className="text-[10px] text-muted-foreground">{t("history.carry")}</p>
-                  </div>
-                  <div className="w-12 flex-shrink-0 flex justify-center">
                     {m.badge ? (
                       <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                        className={`mt-1 rounded px-1.5 py-0.5 text-[10px] font-bold ${
                           m.badge === "MVP"
                             ? "bg-amber-400/20 text-amber-400"
                             : "bg-violet-400/20 text-violet-400"
@@ -369,11 +423,12 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                         {m.badge}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="mt-1 text-[11px] text-muted-foreground">
                         {placementLabel(t, m.placement)}
                       </span>
                     )}
                   </div>
+
                   <ChevronDown
                     className={`h-4 w-4 flex-shrink-0 text-muted-foreground transition-transform ${
                       expanded ? "rotate-180" : ""

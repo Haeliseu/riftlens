@@ -1,6 +1,7 @@
 import type { Region } from "@riftlens/riot-api"
 import { getMatchHistory, RiotApiClient } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
+import { resolveAssets } from "@/lib/cdragon"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -15,8 +16,19 @@ export async function GET(req: NextRequest) {
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
-    const matches = await getMatchHistory(client, region, puuid, count)
-    return NextResponse.json(matches, {
+    const [matches, assets] = await Promise.all([
+      getMatchHistory(client, region, puuid, count),
+      resolveAssets(),
+    ])
+    // Attach resolved CDN icon URLs for the player's summoner spells + runes so
+    // the history row can render them inline (à la DPM) without a per-row fetch.
+    const enriched = matches.map((m) => ({
+      ...m,
+      spellIcons: m.summonerSpellIds.map((id) => assets.spell(id)),
+      keystoneIcon: assets.perk(m.keystoneId ?? undefined),
+      secondaryIcon: assets.perk(m.secondaryPerkId ?? undefined),
+    }))
+    return NextResponse.json(enriched, {
       headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
     })
   } catch (err) {

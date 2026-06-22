@@ -16,11 +16,11 @@ export function CrossedPlayers({ puuid, region }: Props) {
 
   return (
     <div className="rounded-xl border bg-card p-4">
-      <h3 className="text-sm font-medium mb-3">{t("crossed.title")}</h3>
+      <h3 className="text-base font-semibold mb-3">{t("crossed.title")}</h3>
       {!puuid || (!isLoading && rows.length === 0) ? (
-        <p className="text-xs text-muted-foreground py-1">{t("crossed.empty")}</p>
+        <p className="text-sm text-muted-foreground py-1">{t("crossed.empty")}</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {rows.map((c) => {
             const wr = c.encounters > 0 ? Math.round((c.wins / c.encounters) * 100) : 0
             const name = c.gameName || t("common.player")
@@ -29,7 +29,7 @@ export function CrossedPlayers({ puuid, region }: Props) {
                 ? `/profile/${region}/${encodeURIComponent(c.gameName)}/${encodeURIComponent(c.tagLine)}`
                 : null
             return (
-              <div key={c.puuid} className="flex items-center gap-2 text-xs">
+              <div key={c.puuid} className="flex items-center gap-2 text-sm">
                 <div className="flex-1 min-w-0">
                   {href ? (
                     <Link href={href} className="font-medium truncate hover:underline">
@@ -38,7 +38,7 @@ export function CrossedPlayers({ puuid, region }: Props) {
                   ) : (
                     <span className="font-medium truncate">{name}</span>
                   )}
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {t("crossed.detail", {
                       n: c.encounters,
                       ally: c.asAlly,
