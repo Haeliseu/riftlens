@@ -120,6 +120,7 @@ export interface MatchSummary {
   cs: number
   teamKills: number
   queueId: number | null
+  gameMode: string
   position: string | null
   gameCreationMs: number
   gameDurationS: number
@@ -323,6 +324,7 @@ export async function getMatchHistory(
             cs,
             teamKills,
             queueId: m.info.queueId ?? null,
+            gameMode: m.info.gameMode,
             position: ownPos,
             gameCreationMs: m.info.gameCreation,
             gameDurationS: dur,

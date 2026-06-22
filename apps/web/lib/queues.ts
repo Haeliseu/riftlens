@@ -32,8 +32,32 @@ const QUEUE_KEY: Record<number, TranslationKey> = {
   2300: "queue.2300", // Brawl
 }
 
-/** Localized queue label. Falls back to "other" for unmapped / null queues. */
-export function queueKey(queueId: number | null | undefined): TranslationKey {
-  if (queueId == null) return "queue.other"
-  return QUEUE_KEY[queueId] ?? "queue.other"
+/**
+ * Match-v5 `gameMode` → dictionary key. Used as a fallback when the queueId
+ * isn't in our table (new/variant ids), since gameMode is stable + descriptive.
+ */
+const MODE_KEY: Record<string, TranslationKey> = {
+  ARAM: "queue.450",
+  CHERRY: "queue.1700", // Arena
+  URF: "queue.1900",
+  ARURF: "queue.900",
+  ONEFORALL: "queue.1020",
+  NEXUSBLITZ: "queue.1300",
+  ULTBOOK: "queue.1400",
+  BRAWL: "queue.2300",
+}
+
+/**
+ * Localized queue label. Prefers the precise queueId mapping, then the
+ * gameMode fallback, then "other".
+ */
+export function queueKey(
+  queueId: number | null | undefined,
+  gameMode?: string | null
+): TranslationKey {
+  const byId = queueId != null ? QUEUE_KEY[queueId] : undefined
+  if (byId) return byId
+  const byMode = gameMode ? MODE_KEY[gameMode.toUpperCase()] : undefined
+  if (byMode) return byMode
+  return "queue.other"
 }

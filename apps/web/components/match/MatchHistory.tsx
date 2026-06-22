@@ -301,11 +301,11 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                   <div className="w-[96px] flex-shrink-0 space-y-0.5">
                     {m.queueId === 420 ? (
                       <p className="text-[11px] text-muted-foreground truncate">
-                        {t(queueKey(m.queueId))}
+                        {t(queueKey(m.queueId, m.gameMode))}
                       </p>
                     ) : (
                       <span className="inline-block rounded bg-accent px-1.5 py-px text-[10px] font-medium text-foreground/80">
-                        {t(queueKey(m.queueId))}
+                        {t(queueKey(m.queueId, m.gameMode))}
                       </span>
                     )}
                     <p className="text-[11px] text-muted-foreground">
