@@ -26,6 +26,7 @@ export interface ProfileSummary {
   profileIconId: number
   summonerLevel: number
   soloRank: SoloRank | null
+  flexRank: SoloRank | null
 }
 
 /**
@@ -47,6 +48,17 @@ export async function getProfileSummary(
   ])
 
   const solo = entries.find((e) => e.queueType === "RANKED_SOLO_5x5")
+  const flex = entries.find((e) => e.queueType === "RANKED_FLEX_SR")
+  const toRank = (e: typeof solo): SoloRank | null =>
+    e
+      ? {
+          tier: e.tier,
+          rank: e.rank,
+          leaguePoints: e.leaguePoints,
+          wins: e.wins,
+          losses: e.losses,
+        }
+      : null
 
   return {
     puuid: account.puuid,
@@ -54,15 +66,8 @@ export async function getProfileSummary(
     tagLine: account.tagLine ?? tagLine,
     profileIconId: summoner.profileIconId,
     summonerLevel: summoner.summonerLevel,
-    soloRank: solo
-      ? {
-          tier: solo.tier,
-          rank: solo.rank,
-          leaguePoints: solo.leaguePoints,
-          wins: solo.wins,
-          losses: solo.losses,
-        }
-      : null,
+    soloRank: toRank(solo),
+    flexRank: toRank(flex),
   }
 }
 

@@ -1,0 +1,123 @@
+"use client"
+
+import { getRankEmblemUrl, getRankIconUrl, type TierName } from "@riftlens/riot-api"
+import { ChevronDown } from "lucide-react"
+import { useState } from "react"
+import { useAverageRank } from "@/hooks/useAverageRank"
+import { useI18n } from "@/lib/i18n"
+import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
+import type { SoloRank } from "./RankedCard"
+
+interface FlexCardProps {
+  region: string
+  puuid?: string | null
+  flexRank?: SoloRank | null
+}
+
+export function FlexCard({ region, puuid, flexRank }: FlexCardProps) {
+  const { t } = useI18n()
+  const [open, setOpen] = useState(false)
+  // Same query key as RankedCard → React Query shares the cached result (no extra call).
+  const { data: avg, isLoading: avgLoading } = useAverageRank(puuid, region)
+
+  const games = flexRank ? flexRank.wins + flexRank.losses : 0
+  const winRate = games > 0 ? Math.round(((flexRank?.wins ?? 0) / games) * 100) : null
+  const color = flexRank ? tierColor(flexRank.tier) : undefined
+  const label = flexRank ? rankLabel(t, flexRank.tier, flexRank.rank) : t("profile.unranked")
+
+  return (
+    <div className="rounded-xl border bg-card">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-2 px-4 py-3 text-left"
+      >
+        <span className="text-xs text-muted-foreground">{t("ranked.flex")}</span>
+        {flexRank && (
+          <span className="text-sm font-bold" style={{ color }}>
+            {label}
+          </span>
+        )}
+        {flexRank && (
+          <span className="text-xs text-muted-foreground">
+            {t("history.lp", { value: flexRank.leaguePoints })}
+          </span>
+        )}
+        <ChevronDown
+          className={`ml-auto h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-4 mb-2">
+            {flexRank ? (
+              <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
+                {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                <img
+                  src={getRankEmblemUrl(capitalizeTier(flexRank.tier) as TierName)}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-contain scale-[3.2] drop-shadow"
+                />
+              </div>
+            ) : (
+              <div className="h-20 w-20 flex items-center justify-center text-4xl text-muted-foreground">
+                —
+              </div>
+            )}
+            <div>
+              <p className="text-lg font-bold" style={{ color }}>
+                {label}
+              </p>
+              <p className="text-sm text-muted-foreground font-mono">
+                {t("history.lp", { value: flexRank ? flexRank.leaguePoints : 0 })}
+              </p>
+            </div>
+          </div>
+
+          {winRate != null && flexRank && (
+            <>
+              <p className="text-xs text-muted-foreground mb-1.5">
+                {t("ranked.wlLine", {
+                  wins: flexRank.wins,
+                  losses: flexRank.losses,
+                  wr: winRate,
+                  games,
+                })}
+              </p>
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${Math.min(100, flexRank.leaguePoints)}%`,
+                    backgroundColor: color,
+                  }}
+                />
+              </div>
+            </>
+          )}
+
+          <div className="mt-3 rounded-lg border bg-muted/40 px-3 py-2">
+            <p className="text-[10px] text-muted-foreground mb-1">{t("ranked.avgGameRank")}</p>
+            {avgLoading ? (
+              <div className="h-4 w-24 rounded bg-muted animate-pulse" />
+            ) : avg ? (
+              <div className="flex items-center gap-2">
+                {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                <img src={getRankIconUrl(avg.tier)} alt="" className="w-7 h-7 object-contain" />
+                <span className="text-sm font-medium" style={{ color: tierColor(avg.tier) }}>
+                  {rankLabel(t, avg.tier, avg.division)}
+                </span>
+                <span className="text-[10px] text-muted-foreground ml-auto">
+                  {t("ranked.lastN", { n: avg.sampleGames })}
+                </span>
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground">—</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

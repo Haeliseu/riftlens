@@ -146,6 +146,7 @@ export const dictionaries = {
     "ranked.lpChart.empty": "Pas encore assez de données pour tracer la courbe.",
 
     // role performance
+    "champPerf.title": "Performances par champion",
     "roles.title": "Performances par rôle",
     "roles.empty": "Pas encore de données par rôle.",
     "roles.games": "{n} parties",
@@ -499,6 +500,7 @@ export const dictionaries = {
     "ranked.lpChart": "LP history",
     "ranked.lpChart.empty": "Not enough data yet to draw the chart.",
 
+    "champPerf.title": "Performance by champion",
     "roles.title": "Performance by role",
     "roles.empty": "No role data yet.",
     "roles.games": "{n} games",

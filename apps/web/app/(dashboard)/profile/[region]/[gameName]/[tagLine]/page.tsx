@@ -9,8 +9,10 @@ import {
 import { sql } from "drizzle-orm"
 import { after } from "next/server"
 import { MatchHistory } from "@/components/match/MatchHistory"
+import { ChampionPerformance } from "@/components/profile/ChampionPerformance"
 import { ChampionStats } from "@/components/profile/ChampionStats"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
+import { FlexCard } from "@/components/profile/FlexCard"
 import { LiveGame } from "@/components/profile/LiveGame"
 import { PingStats } from "@/components/profile/PingStats"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
@@ -115,6 +117,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <div className="lg:col-span-1 space-y-4">
                 <RankedCard region={region} puuid={summary.puuid} soloRank={summary.soloRank} />
+                <FlexCard region={region} puuid={summary.puuid} flexRank={summary.flexRank} />
+                <ChampionPerformance puuid={summary.puuid} region={region} />
                 <RolePerformance puuid={summary.puuid} />
                 <CrossedPlayers puuid={summary.puuid} region={region} />
                 <PingStats puuid={summary.puuid} />
