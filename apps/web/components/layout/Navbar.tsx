@@ -84,33 +84,36 @@ export function Navbar() {
         ))}
       </nav>
 
-      <form
-        onSubmit={handleSearch}
-        className="flex flex-1 items-center max-w-md rounded-md border overflow-hidden"
-      >
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder={t("nav.search.placeholder")}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-9 w-full bg-transparent pl-8 pr-3 text-sm focus:outline-none placeholder:text-muted-foreground"
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border px-1 text-[10px] text-muted-foreground pointer-events-none">
-            ⌘K
-          </kbd>
-        </div>
+      <div className="flex flex-1 items-center max-w-md">
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-1 items-center rounded-l-md border border-r-0 overflow-hidden"
+        >
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder={t("nav.search.placeholder")}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="h-9 w-full bg-transparent pl-8 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border px-1 text-[10px] text-muted-foreground pointer-events-none">
+              ⌘K
+            </kbd>
+          </div>
+        </form>
 
-        {/* Region pill (same colours as profile region badges) + dropdown */}
-        <div ref={regionRef} className="relative border-l flex-shrink-0">
+        {/* Region pill (same colours as profile region badges) + dropdown.
+            Kept OUTSIDE the form so the dropdown isn't clipped by overflow. */}
+        <div ref={regionRef} className="relative flex-shrink-0">
           <button
             type="button"
             onClick={() => setRegionOpen((o) => !o)}
-            className="h-9 px-2.5 text-xs font-semibold text-white"
+            className="h-9 rounded-r-md border border-l-0 px-2.5 text-xs font-semibold text-white"
             style={{ backgroundColor: badge.color }}
           >
             {badge.label}
@@ -139,7 +142,7 @@ export function Navbar() {
             </div>
           )}
         </div>
-      </form>
+      </div>
 
       <div className="ml-auto flex items-center gap-2 flex-shrink-0">
         <LanguageToggle />
