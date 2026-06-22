@@ -1,8 +1,10 @@
 "use client"
 
 import { getChampionIconUrl } from "@riftlens/riot-api"
+import { ArrowDown, ArrowUp } from "lucide-react"
 import { useState } from "react"
 import { useChampionStats } from "@/hooks/useChampionStats"
+import { useLpPerGame } from "@/hooks/useLpPerGame"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import type { ChampDetailBucket } from "@/lib/profile-db"
@@ -30,10 +32,31 @@ function kda(b: ChampDetailBucket): string {
   return r.toFixed(2)
 }
 
+/** Net LP on a champion: blue up arrow when positive, red down arrow when negative. */
+function LpCell({ value }: { value: number | undefined }) {
+  if (!value) return <span className="w-14 text-right text-muted-foreground">—</span>
+  const up = value > 0
+  const Arrow = up ? ArrowUp : ArrowDown
+  return (
+    <span
+      className={`w-14 flex items-center justify-end gap-0.5 font-medium tabular-nums ${
+        up ? "text-blue-500" : "text-red-500"
+      }`}
+    >
+      <Arrow className="h-3.5 w-3.5" />
+      {up ? "+" : ""}
+      {value}
+    </span>
+  )
+}
+
 export function ChampionPerformance({ puuid, region }: Props) {
   const { t } = useI18n()
   const [mode, setMode] = useState<Mode>("solo")
   const { data, isLoading } = useChampionStats(puuid, region)
+  const { data: lp } = useLpPerGame(puuid)
+  // Net LP is only tracked for Solo/Duo (queue 420), like the per-game LP.
+  const showLp = mode === "solo"
   const champs = (data ?? [])
     .filter((c) => c[mode].games > 0)
     .sort((a, b) => b[mode].games - a[mode].games)
@@ -67,6 +90,7 @@ export function ChampionPerformance({ puuid, region }: Props) {
             <span className="w-12 text-right">{t("roles.col.games")}</span>
             <span className="w-14 text-right">{t("champStats.col.kda")}</span>
             <span className="w-14 text-right">{t("champStats.col.csPerMin")}</span>
+            {showLp && <span className="w-14 text-right">{t("champStats.col.lp")}</span>}
             <span className="w-12 text-right">{t("champStats.col.wr")}</span>
           </div>
           {champs.map((c) => {
@@ -88,6 +112,7 @@ export function ChampionPerformance({ puuid, region }: Props) {
                 <span className="w-14 text-right text-muted-foreground">
                   {avg(b.csPerMin, b.games).toFixed(1)}
                 </span>
+                {showLp && <LpCell value={lp?.byChampion[c.championId]} />}
                 <span
                   className={`w-12 text-right font-semibold ${wr >= 50 ? "text-blue-500" : "text-red-500"}`}
                 >
