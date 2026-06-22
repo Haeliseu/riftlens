@@ -133,26 +133,39 @@ export interface MatchSummary {
 }
 
 // Reachable benchmarks (a full mark, not the theoretical max).
-const BENCH = { kp: 0.65, dmg: 0.28, kda: 4, cspm: 8, vpm: 2 }
+const BENCH = { kp: 0.65, dmg: 0.28, kda: 4, cspm: 8, vpm: 2, obj: 6, cc: 25, gold: 0.24 }
 
-// Per-role weighting (each profile sums to 1). Supports are judged on
-// KP/vision, ADCs/mids on damage/CS, etc. — like opgg's role-aware OP Score.
+// Per-role weighting. Weights are normalized by their sum, so they don't need
+// to add up to 1. Supports lean on KP/vision/CC, ADCs/mids on damage/CS/gold,
+// junglers/tops on objectives — role-aware like opgg's OP Score.
 interface RoleWeight {
   kp: number
   dmg: number
   kda: number
   cs: number
   vis: number
+  obj: number
+  cc: number
+  gold: number
 }
 
-const DEFAULT_WEIGHTS: RoleWeight = { kp: 0.3, dmg: 0.3, kda: 0.25, cs: 0.15, vis: 0 }
+const DEFAULT_WEIGHTS: RoleWeight = {
+  kp: 0.2,
+  dmg: 0.22,
+  kda: 0.18,
+  cs: 0.12,
+  vis: 0.04,
+  obj: 0.12,
+  cc: 0.06,
+  gold: 0.06,
+}
 
 const ROLE_WEIGHTS: Record<string, RoleWeight> = {
-  TOP: { kp: 0.25, dmg: 0.3, kda: 0.25, cs: 0.15, vis: 0.05 },
-  JUNGLE: { kp: 0.35, dmg: 0.2, kda: 0.25, cs: 0.1, vis: 0.1 },
-  MIDDLE: { kp: 0.25, dmg: 0.35, kda: 0.25, cs: 0.15, vis: 0 },
-  BOTTOM: { kp: 0.2, dmg: 0.35, kda: 0.2, cs: 0.25, vis: 0 },
-  UTILITY: { kp: 0.35, dmg: 0.1, kda: 0.25, cs: 0, vis: 0.3 },
+  TOP: { kp: 0.18, dmg: 0.22, kda: 0.18, cs: 0.12, vis: 0.03, obj: 0.14, cc: 0.06, gold: 0.07 },
+  JUNGLE: { kp: 0.22, dmg: 0.13, kda: 0.15, cs: 0.05, vis: 0.08, obj: 0.24, cc: 0.06, gold: 0.07 },
+  MIDDLE: { kp: 0.2, dmg: 0.28, kda: 0.18, cs: 0.12, vis: 0.02, obj: 0.07, cc: 0.05, gold: 0.08 },
+  BOTTOM: { kp: 0.15, dmg: 0.28, kda: 0.15, cs: 0.18, vis: 0.02, obj: 0.07, cc: 0.03, gold: 0.12 },
+  UTILITY: { kp: 0.25, dmg: 0.07, kda: 0.15, cs: 0, vis: 0.23, obj: 0.06, cc: 0.19, gold: 0.05 },
 }
 
 /**
@@ -171,6 +184,10 @@ export function computeCarryScore(p: {
   teamDamage: number
   visionScore?: number
   role?: string | null
+  objectives?: number
+  ccTime?: number
+  gold?: number
+  teamGold?: number
 }): number {
   const w = ROLE_WEIGHTS[(p.role ?? "").toUpperCase()] ?? DEFAULT_WEIGHTS
   const kp = p.teamKills > 0 ? (p.kills + p.assists) / p.teamKills : 0
@@ -178,13 +195,20 @@ export function computeCarryScore(p: {
   const kda = p.deaths === 0 ? p.kills + p.assists : (p.kills + p.assists) / p.deaths
   const csPerMin = p.durationS > 0 ? p.cs / (p.durationS / 60) : 0
   const visPerMin = p.durationS > 0 ? (p.visionScore ?? 0) / (p.durationS / 60) : 0
-  const score =
-    100 *
-    (w.kp * Math.min(kp / BENCH.kp, 1) +
-      w.dmg * Math.min(dmgShare / BENCH.dmg, 1) +
-      w.kda * Math.min(kda / BENCH.kda, 1) +
-      w.cs * Math.min(csPerMin / BENCH.cspm, 1) +
-      w.vis * Math.min(visPerMin / BENCH.vpm, 1))
+  const goldShare = p.teamGold && p.teamGold > 0 ? (p.gold ?? 0) / p.teamGold : 0
+
+  const components: [number, number][] = [
+    [w.kp, Math.min(kp / BENCH.kp, 1)],
+    [w.dmg, Math.min(dmgShare / BENCH.dmg, 1)],
+    [w.kda, Math.min(kda / BENCH.kda, 1)],
+    [w.cs, Math.min(csPerMin / BENCH.cspm, 1)],
+    [w.vis, Math.min(visPerMin / BENCH.vpm, 1)],
+    [w.obj, Math.min((p.objectives ?? 0) / BENCH.obj, 1)],
+    [w.cc, Math.min((p.ccTime ?? 0) / BENCH.cc, 1)],
+    [w.gold, Math.min(goldShare / BENCH.gold, 1)],
+  ]
+  const totalW = components.reduce((s, [weight]) => s + weight, 0) || 1
+  const score = (100 * components.reduce((s, [weight, v]) => s + weight * v, 0)) / totalW
   return Math.max(0, Math.min(100, score))
 }
 
@@ -214,18 +238,19 @@ export async function getMatchHistory(
           if (!p) return null
           const dur = m.info.gameDuration
 
-          // Team aggregates (kills + damage) for every team.
-          const teamAgg = new Map<number, { kills: number; damage: number }>()
+          // Team aggregates (kills + damage + gold) for every team.
+          const teamAgg = new Map<number, { kills: number; damage: number; gold: number }>()
           for (const x of m.info.participants) {
-            const t = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0 }
+            const t = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0, gold: 0 }
             t.kills += x.kills
             t.damage += x.totalDamageDealtToChampions ?? 0
+            t.gold += x.goldEarned ?? 0
             teamAgg.set(x.teamId, t)
           }
 
           // Raw role-normalized score for all 10, to rank + scale relative.
           const scored = m.info.participants.map((x) => {
-            const ta = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0 }
+            const ta = teamAgg.get(x.teamId) ?? { kills: 0, damage: 0, gold: 0 }
             const xcs = (x.totalMinionsKilled ?? 0) + (x.neutralMinionsKilled ?? 0)
             return {
               puuid: x.puuid,
@@ -243,6 +268,10 @@ export async function getMatchHistory(
                 teamDamage: ta.damage,
                 visionScore: x.visionScore ?? 0,
                 role: x.teamPosition ?? x.individualPosition ?? null,
+                objectives: (x.dragonKills ?? 0) + (x.baronKills ?? 0) + (x.turretTakedowns ?? 0),
+                ccTime: x.timeCCingOthers ?? 0,
+                gold: x.goldEarned ?? 0,
+                teamGold: ta.gold,
               }),
             }
           })

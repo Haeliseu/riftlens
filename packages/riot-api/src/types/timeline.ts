@@ -9,6 +9,14 @@ export const TimelineEventSchema = z.object({
   levelUpType: z.string().optional(),
 })
 
+export const ParticipantFrameSchema = z.object({
+  minionsKilled: z.number().optional(),
+  jungleMinionsKilled: z.number().optional(),
+  totalGold: z.number().optional(),
+  xp: z.number().optional(),
+  level: z.number().optional(),
+})
+
 export const MatchTimelineSchema = z.object({
   metadata: z.object({
     matchId: z.string(),
@@ -19,6 +27,7 @@ export const MatchTimelineSchema = z.object({
       z.object({
         timestamp: z.number().optional(),
         events: z.array(TimelineEventSchema),
+        participantFrames: z.record(z.string(), ParticipantFrameSchema).optional(),
       })
     ),
   }),

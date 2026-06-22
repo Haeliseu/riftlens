@@ -15,8 +15,15 @@ export interface MatchDetailParticipant {
   cs: number
   csPerMin: number
   goldEarned: number
+  goldPerMin: number
   damage: number
+  damageTaken: number
   visionScore: number
+  visionPerMin: number
+  wardsPlaced: number
+  wardsKilled: number
+  controlWards: number
+  spellCasts: number[]
   position: string
   items: (string | null)[]
   trinket: string | null

@@ -21,16 +21,22 @@ const SKILL_COLOR: Record<number, { bg: string; text: string }> = {
   4: { bg: "bg-red-500", text: "text-red-400" },
 }
 
+function diffColor(v: number): string {
+  return v > 0 ? "text-green-500" : v < 0 ? "text-red-500" : "text-muted-foreground"
+}
+
 function BuildSkillOrder({
   matchId,
   region,
   puuid,
+  oppPuuid,
 }: {
   matchId: string
   region: string
   puuid: string
+  oppPuuid?: string | null
 }) {
-  const { data, isLoading } = useMatchTimeline(matchId, region, puuid, true)
+  const { data, isLoading } = useMatchTimeline(matchId, region, puuid, true, oppPuuid)
   if (isLoading) {
     return <p className="text-[11px] text-muted-foreground">Chargement de la timeline…</p>
   }
@@ -39,9 +45,54 @@ function BuildSkillOrder({
   // Skill order grid: for each of Q/W/E/R, mark the level numbers where it was leveled.
   const slotLevels: Record<number, number[]> = { 1: [], 2: [], 3: [], 4: [] }
   data.skills.forEach((s, i) => slotLevels[s.slot]?.push(i + 1))
+  const a = data.at15
 
   return (
     <div className="space-y-4">
+      {a && (
+        <div>
+          <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
+            Laning @15{" "}
+            {a.csDiff !== null && (
+              <span className="font-normal normal-case text-muted-foreground/70">
+                (vs adversaire de lane)
+              </span>
+            )}
+          </p>
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div>
+              <span className="text-muted-foreground text-xs">CS </span>
+              <span className="font-medium">{a.cs}</span>
+              {a.csDiff !== null && (
+                <span className={`ml-1 text-xs ${diffColor(a.csDiff)}`}>
+                  {a.csDiff > 0 ? "+" : ""}
+                  {a.csDiff}
+                </span>
+              )}
+            </div>
+            <div>
+              <span className="text-muted-foreground text-xs">Or </span>
+              <span className="font-medium">{(a.gold / 1000).toFixed(1)}k</span>
+              {a.goldDiff !== null && (
+                <span className={`ml-1 text-xs ${diffColor(a.goldDiff)}`}>
+                  {a.goldDiff > 0 ? "+" : ""}
+                  {a.goldDiff}
+                </span>
+              )}
+            </div>
+            <div>
+              <span className="text-muted-foreground text-xs">XP </span>
+              <span className="font-medium">{a.xp}</span>
+              {a.xpDiff !== null && (
+                <span className={`ml-1 text-xs ${diffColor(a.xpDiff)}`}>
+                  {a.xpDiff > 0 ? "+" : ""}
+                  {a.xpDiff}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div>
         <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">Ordre d'achat</p>
         <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
@@ -257,6 +308,52 @@ function RuneCard({ p, region }: { p: MatchDetailParticipant; region: string }) 
   )
 }
 
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="text-center">
+      <p className="text-sm font-semibold">{value}</p>
+      <p className="text-[10px] text-muted-foreground uppercase">{label}</p>
+    </div>
+  )
+}
+
+function FocusedStats({ p }: { p: MatchDetailParticipant }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">Statistiques</p>
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <Stat label="CS/min" value={p.csPerMin} />
+          <Stat label="Or/min" value={p.goldPerMin} />
+          <Stat label="Dégâts" value={`${Math.round(p.damage / 1000)}k`} />
+          <Stat label="Dégâts subis" value={`${Math.round(p.damageTaken / 1000)}k`} />
+          <Stat label="Vision/min" value={p.visionPerMin} />
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-x-8 gap-y-2">
+        <div>
+          <p className="text-xs font-semibold mb-1.5 uppercase text-muted-foreground">Wards</p>
+          <div className="flex gap-4">
+            <Stat label="Posés" value={p.wardsPlaced} />
+            <Stat label="Détruits" value={p.wardsKilled} />
+            <Stat label="Contrôle" value={p.controlWards} />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold mb-1.5 uppercase text-muted-foreground">
+            Sorts lancés
+          </p>
+          <div className="flex gap-3">
+            {(["Q", "W", "E", "R"] as const).map((label, i) => (
+              <Stat key={label} label={label} value={p.spellCasts[i] ?? 0} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPanelProps) {
   const [tab, setTab] = useState<Tab>("general")
   const { data, isLoading, isError } = useMatchDetail(matchId, region)
@@ -278,6 +375,13 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
   }
   const pingRows = [...pingTotals.entries()].sort((a, b) => b[1].count - a[1].count)
   const totalPings = pingRows.reduce((s, [, v]) => s + v.count, 0)
+
+  // Focused player + their direct lane opponent (for @15 diff and stats block).
+  const owner = ownerPuuid ? data.participants.find((p) => p.puuid === ownerPuuid) : undefined
+  const laneOpp =
+    owner && owner.position
+      ? data.participants.find((p) => p.teamId !== owner.teamId && p.position === owner.position)
+      : undefined
 
   return (
     <div className="px-3 py-3">
@@ -310,9 +414,19 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
             region={region}
             render={(p) => <DetailsRow p={p} region={region} />}
           />
+          {owner && (
+            <div className="mt-3 border-t pt-2">
+              <FocusedStats p={owner} />
+            </div>
+          )}
           {ownerPuuid && isSummonersRift(data.queueId) && (
             <div className="mt-3 border-t pt-2">
-              <BuildSkillOrder matchId={matchId} region={region} puuid={ownerPuuid} />
+              <BuildSkillOrder
+                matchId={matchId}
+                region={region}
+                puuid={ownerPuuid}
+                oppPuuid={laneOpp?.puuid ?? null}
+              />
             </div>
           )}
           <div className="mt-3 border-t pt-2">

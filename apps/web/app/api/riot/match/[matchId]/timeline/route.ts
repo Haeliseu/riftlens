@@ -8,6 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
   const { searchParams } = req.nextUrl
   const region = (searchParams.get("region") ?? "EUW1") as Region
   const puuid = searchParams.get("puuid")
+  const oppPuuid = searchParams.get("opp")
   const routing = regionToRouting(region)
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
@@ -23,9 +24,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
 
     const idx = tl.metadata.participants.indexOf(puuid)
     if (idx < 0) {
-      return NextResponse.json({ build: [], skills: [] })
+      return NextResponse.json({ build: [], skills: [], at15: null })
     }
     const pid = idx + 1
+    const oppPid = oppPuuid ? tl.metadata.participants.indexOf(oppPuuid) + 1 : 0
 
     const build: { itemId: number; icon: string | null; minute: number }[] = []
     const skills: { slot: number; minute: number }[] = []
@@ -45,8 +47,26 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
       }
     }
 
+    // Laning phase @15 (frame index 15, or the last available frame).
+    const frame15 = tl.info.frames[Math.min(15, tl.info.frames.length - 1)]
+    const pf = frame15?.participantFrames
+    const meF = pf?.[String(pid)]
+    const oppF = oppPid > 0 ? pf?.[String(oppPid)] : undefined
+    const meCs = (meF?.minionsKilled ?? 0) + (meF?.jungleMinionsKilled ?? 0)
+    const oppCs = (oppF?.minionsKilled ?? 0) + (oppF?.jungleMinionsKilled ?? 0)
+    const at15 = meF
+      ? {
+          cs: meCs,
+          gold: meF.totalGold ?? 0,
+          xp: meF.xp ?? 0,
+          csDiff: oppF ? meCs - oppCs : null,
+          goldDiff: oppF ? (meF.totalGold ?? 0) - (oppF.totalGold ?? 0) : null,
+          xpDiff: oppF ? (meF.xp ?? 0) - (oppF.xp ?? 0) : null,
+        }
+      : null
+
     return NextResponse.json(
-      { build, skills },
+      { build, skills, at15 },
       { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800" } }
     )
   } catch (err) {
