@@ -34,6 +34,9 @@ export function Navbar() {
   const [regionOpen, setRegionOpen] = useState(false)
   const [recent, setRecent] = useState<RecentSearch[]>([])
   const [searchOpen, setSearchOpen] = useState(false)
+  // null until mounted, so the shortcut hint renders only client-side (no SSR
+  // hydration mismatch) with the key matching the user's OS.
+  const [isMac, setIsMac] = useState<boolean | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const regionRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
@@ -47,6 +50,11 @@ export function Navbar() {
   }
   // biome-ignore lint/correctness/useExhaustiveDependencies: load once on mount
   useEffect(() => loadRecent(), [])
+
+  // Detect the platform once mounted to show the right modifier key.
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent))
+  }, [])
 
   // Ctrl/Cmd+K focuses the search input.
   useEffect(() => {
@@ -152,9 +160,11 @@ export function Navbar() {
               autoComplete="off"
               spellCheck={false}
             />
-            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border px-1 text-[10px] text-muted-foreground pointer-events-none">
-              ⌘K
-            </kbd>
+            {isMac !== null && (
+              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center rounded border px-1 text-[10px] text-muted-foreground pointer-events-none">
+                {isMac ? "⌘K" : "Ctrl K"}
+              </kbd>
+            )}
           </div>
         </form>
 
