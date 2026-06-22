@@ -18,11 +18,19 @@ export interface MatchDetailParticipant {
   goldPerMin: number
   damage: number
   damageTaken: number
+  damageShare: number
   visionScore: number
   visionPerMin: number
   wardsPlaced: number
   wardsKilled: number
   controlWards: number
+  kp: number
+  carryScore: number
+  placement: number
+  badge: "MVP" | "ACE" | null
+  tier: string | null
+  division: string | null
+  lp: number | null
   spellCasts: number[]
   position: string
   items: (string | null)[]
@@ -38,12 +46,25 @@ export interface MatchDetailParticipant {
   totalPings: number
 }
 
+export interface MatchTeam {
+  teamId: number
+  win: boolean
+  kills: number
+  towers: number
+  dragons: number
+  barons: number
+  heralds: number
+  grubs: number
+  inhibitors: number
+}
+
 export interface MatchDetail {
   matchId: string
   region: string
   queueId: number | null
   gameDurationS: number
   participants: MatchDetailParticipant[]
+  teams: MatchTeam[]
 }
 
 export function useMatchDetail(matchId: string | null, region = "EUW1") {

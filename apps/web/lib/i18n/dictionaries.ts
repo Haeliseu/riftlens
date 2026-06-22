@@ -226,6 +226,12 @@ export const dictionaries = {
     "detail.unitVision": "vis",
     "detail.unitPings": "pings",
     "detail.unitCsM": "CS/m",
+    "obj.kills": "Kills",
+    "obj.towers": "Tours",
+    "obj.dragons": "Dragons",
+    "obj.barons": "Barons",
+    "obj.heralds": "Hérauts",
+    "obj.grubs": "Nuées",
 
     // leaderboard / champions pages
     // tiers
@@ -558,6 +564,12 @@ export const dictionaries = {
     "detail.unitVision": "vis",
     "detail.unitPings": "pings",
     "detail.unitCsM": "CS/m",
+    "obj.kills": "Kills",
+    "obj.towers": "Towers",
+    "obj.dragons": "Dragons",
+    "obj.barons": "Barons",
+    "obj.heralds": "Heralds",
+    "obj.grubs": "Grubs",
 
     "tier.iron": "Iron",
     "tier.bronze": "Bronze",

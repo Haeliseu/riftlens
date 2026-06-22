@@ -80,6 +80,24 @@ export const ParticipantSchema = z.object({
   visionClearedPings: z.number().optional(),
 })
 
+const ObjectiveSchema = z.object({ first: z.boolean().optional(), kills: z.number().optional() })
+
+export const TeamSchema = z.object({
+  teamId: z.number(),
+  win: z.boolean().optional(),
+  objectives: z
+    .object({
+      baron: ObjectiveSchema.optional(),
+      champion: ObjectiveSchema.optional(),
+      dragon: ObjectiveSchema.optional(),
+      horde: ObjectiveSchema.optional(),
+      inhibitor: ObjectiveSchema.optional(),
+      riftHerald: ObjectiveSchema.optional(),
+      tower: ObjectiveSchema.optional(),
+    })
+    .optional(),
+})
+
 export const MatchInfoSchema = z.object({
   gameId: z.number(),
   gameCreation: z.number(),
@@ -89,6 +107,7 @@ export const MatchInfoSchema = z.object({
   gameVersion: z.string().optional(),
   mapId: z.number().optional(),
   participants: z.array(ParticipantSchema),
+  teams: z.array(TeamSchema).optional(),
   platformId: z.string().optional(),
   queueId: z.number().optional(),
 })

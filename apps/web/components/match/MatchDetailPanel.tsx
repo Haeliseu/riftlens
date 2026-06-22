@@ -1,14 +1,26 @@
 "use client"
 
 import { getChampionIconUrl, isSummonersRift } from "@riftlens/riot-api"
-import { ChevronRight } from "lucide-react"
+import { Bug, Castle, ChevronRight, Eye, Flame, Skull, Swords } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { type MatchDetailParticipant, useMatchDetail } from "@/hooks/useMatchDetail"
+import { type MatchDetailParticipant, type MatchTeam, useMatchDetail } from "@/hooks/useMatchDetail"
 import { useMatchTimeline } from "@/hooks/useMatchTimeline"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { PING_BY_KEY } from "@/lib/pings"
+import { tierColor, tierLabel } from "@/lib/tiers"
+
+function carryColor(score: number): string {
+  if (score >= 65) return "text-violet-400"
+  if (score >= 45) return "text-blue-400"
+  if (score >= 30) return "text-muted-foreground"
+  return "text-red-400"
+}
+
+function placementLabel(p: number): string {
+  return p === 1 ? "1st" : p === 2 ? "2nd" : p === 3 ? "3rd" : `${p}th`
+}
 
 interface MatchDetailPanelProps {
   matchId: string
@@ -190,8 +202,26 @@ function playerHref(region: string, p: MatchDetailParticipant) {
 }
 
 function GeneralRow({ p, region }: { p: MatchDetailParticipant; region: string }) {
+  const { t } = useI18n()
   return (
     <div className="flex items-center gap-2 py-1">
+      {/* placement / MVP / ACE */}
+      <div className="w-9 flex-shrink-0 text-center">
+        {p.badge ? (
+          <span
+            className={`rounded px-1 py-0.5 text-[9px] font-bold ${
+              p.badge === "MVP"
+                ? "bg-amber-400/20 text-amber-400"
+                : "bg-violet-400/20 text-violet-400"
+            }`}
+          >
+            {p.badge}
+          </span>
+        ) : (
+          <span className="text-[10px] text-muted-foreground">{placementLabel(p.placement)}</span>
+        )}
+      </div>
+
       <div className="relative flex-shrink-0">
         <Icon src={getChampionIconUrl(p.championId)} size={28} alt={p.championName} />
         <span className="absolute -bottom-1 -right-1 rounded bg-background px-0.5 text-[9px] leading-none">
@@ -209,18 +239,81 @@ function GeneralRow({ p, region }: { p: MatchDetailParticipant; region: string }
           <Icon src={p.runes.secondary[0] ?? null} size={13} />
         </div>
       )}
-      <Link href={playerHref(region, p)} className="text-xs truncate hover:underline w-24 min-w-0">
-        {p.gameName || p.championName}
-      </Link>
-      <span className="text-[11px] font-mono text-muted-foreground w-14 text-right">
-        {p.kills}/{p.deaths}/{p.assists}
-      </span>
-      <div className="ml-auto flex gap-0.5">
+
+      {/* name + rank */}
+      <div className="w-24 min-w-0">
+        <Link href={playerHref(region, p)} className="block text-xs truncate hover:underline">
+          {p.gameName || p.championName}
+        </Link>
+        {p.tier && (
+          <span className="text-[10px]" style={{ color: tierColor(p.tier) }}>
+            {tierLabel(t, p.tier)} {p.division}
+          </span>
+        )}
+      </div>
+
+      <div className="flex gap-0.5 flex-shrink-0">
         {p.items.map((it, i) => (
           <Icon key={`it-${p.puuid}-${i}`} src={it} size={20} />
         ))}
         <Icon src={p.trinket} size={20} />
       </div>
+
+      {/* KDA */}
+      <span className="ml-auto w-14 text-right text-[11px] font-mono">
+        {p.kills}
+        <span className="text-muted-foreground">/</span>
+        {p.deaths}
+        <span className="text-muted-foreground">/</span>
+        {p.assists}
+      </span>
+
+      {/* KP + CS/min */}
+      <div className="w-12 text-right">
+        <p className="text-[11px] font-medium">{p.kp}%</p>
+        <p className="text-[10px] text-muted-foreground">
+          {p.csPerMin} {t("detail.unitCsM")}
+        </p>
+      </div>
+
+      {/* damage bar + value */}
+      <div className="w-20 flex-shrink-0">
+        <p className="text-[11px] text-right">{Math.round(p.damage).toLocaleString()}</p>
+        <div className="h-1 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-red-500/70"
+            style={{ width: `${p.damageShare}%` }}
+          />
+        </div>
+      </div>
+
+      {/* carry score */}
+      <span className={`w-8 text-right text-sm font-bold ${carryColor(p.carryScore)}`}>
+        {p.carryScore}
+      </span>
+    </div>
+  )
+}
+
+function TeamObjectives({ team }: { team: MatchTeam | undefined }) {
+  const { t } = useI18n()
+  if (!team) return null
+  const items: { icon: React.ReactNode; value: number; label: string }[] = [
+    { icon: <Swords className="h-3.5 w-3.5" />, value: team.kills, label: t("obj.kills") },
+    { icon: <Castle className="h-3.5 w-3.5" />, value: team.towers, label: t("obj.towers") },
+    { icon: <Flame className="h-3.5 w-3.5" />, value: team.dragons, label: t("obj.dragons") },
+    { icon: <Skull className="h-3.5 w-3.5" />, value: team.barons, label: t("obj.barons") },
+    { icon: <Eye className="h-3.5 w-3.5" />, value: team.heralds, label: t("obj.heralds") },
+    { icon: <Bug className="h-3.5 w-3.5" />, value: team.grubs, label: t("obj.grubs") },
+  ]
+  return (
+    <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground">
+      {items.map((it) => (
+        <span key={it.label} className="flex items-center gap-0.5" title={it.label}>
+          {it.icon}
+          <span className="font-medium text-foreground">{it.value}</span>
+        </span>
+      ))}
     </div>
   )
 }
@@ -229,29 +322,39 @@ function Teams({
   data,
   region,
   render,
+  teams,
 }: {
   data: MatchDetailParticipant[]
   region: string
   render: (p: MatchDetailParticipant) => React.ReactNode
+  teams?: MatchTeam[]
 }) {
   const { t } = useI18n()
   const blue = data.filter((p) => p.teamId === 100)
   const red = data.filter((p) => p.teamId === 200)
   const blueWin = blue[0]?.win ?? false
+  const blueTeam = teams?.find((x) => x.teamId === 100)
+  const redTeam = teams?.find((x) => x.teamId === 200)
   return (
     <div className="space-y-3">
       <div>
-        <p className={`text-xs font-semibold mb-1 ${blueWin ? "text-green-500" : "text-red-500"}`}>
-          {t("live.blueTeam")} · {blueWin ? t("common.win") : t("common.loss")}
-        </p>
+        <div className="mb-1 flex items-center justify-between">
+          <p className={`text-xs font-semibold ${blueWin ? "text-green-500" : "text-red-500"}`}>
+            {t("live.blueTeam")} · {blueWin ? t("common.win") : t("common.loss")}
+          </p>
+          <TeamObjectives team={blueTeam} />
+        </div>
         {blue.map((p) => (
           <div key={p.puuid}>{render(p)}</div>
         ))}
       </div>
       <div>
-        <p className={`text-xs font-semibold mb-1 ${blueWin ? "text-red-500" : "text-green-500"}`}>
-          {t("live.redTeam")} · {blueWin ? t("common.loss") : t("common.win")}
-        </p>
+        <div className="mb-1 flex items-center justify-between">
+          <p className={`text-xs font-semibold ${blueWin ? "text-red-500" : "text-green-500"}`}>
+            {t("live.redTeam")} · {blueWin ? t("common.loss") : t("common.win")}
+          </p>
+          <TeamObjectives team={redTeam} />
+        </div>
         {red.map((p) => (
           <div key={p.puuid}>{render(p)}</div>
         ))}
@@ -436,6 +539,7 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
         <Teams
           data={data.participants}
           region={region}
+          teams={data.teams}
           render={(p) => <GeneralRow p={p} region={region} />}
         />
       )}
