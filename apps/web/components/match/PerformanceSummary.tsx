@@ -60,7 +60,7 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <p className="text-sm font-medium mb-3">{t("perf.title", { n })}</p>
-      <div className="flex flex-wrap items-center gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-6">
         {/* WR essence gauge — blue (wins) / red (losses) */}
         <div className="relative flex-shrink-0" style={{ width: 84, height: 84 }}>
           <svg width={84} height={84} viewBox="0 0 84 84">
@@ -136,7 +136,7 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
         </div>
 
         {/* MVP and ACE — far right (swapped with the champions block) */}
-        <div className="ml-auto flex gap-4">
+        <div className="flex gap-4">
           <div className="text-center">
             <p className="text-[11px] font-semibold text-amber-400">MVP</p>
             <p className="text-lg font-bold">{mvp}x</p>
