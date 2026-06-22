@@ -289,6 +289,7 @@ export const dictionaries = {
     "perf.gamesShort": "p",
     "perf.gamesOne": "{n} partie",
     "perf.gamesMany": "{n} parties",
+    "perf.avgRank": "Rang moyen",
 
     // ranked card (extra)
     "ranked.title": "Classé Solo / Duo",
@@ -627,6 +628,7 @@ export const dictionaries = {
     "perf.gamesShort": "g",
     "perf.gamesOne": "{n} game",
     "perf.gamesMany": "{n} games",
+    "perf.avgRank": "Avg. rank",
 
     "ranked.title": "Ranked Solo / Duo",
     "ranked.wlLine": "{wins}W · {losses}L · {wr}% WR · {games} games",

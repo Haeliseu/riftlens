@@ -28,6 +28,7 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
     ) / n
   ).toFixed(2)
   const avgCarry = Math.round(matches.reduce((s, m) => s + m.carryScore, 0) / n)
+  const avgPlacement = (matches.reduce((s, m) => s + m.placement, 0) / n).toFixed(1)
   const mvp = matches.filter((m) => m.badge === "MVP").length
   const ace = matches.filter((m) => m.badge === "ACE").length
 
@@ -93,16 +94,6 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-          <span className="text-muted-foreground text-xs">{t("perf.kda")}</span>
-          <span className="font-medium">{avgKda}</span>
-          <span className="text-muted-foreground text-xs">{t("perf.kdaPerGame")}</span>
-          <span className="font-medium">{perGameKda}</span>
-          <span className="text-muted-foreground text-xs">{t("perf.carryAvg")}</span>
-          <span className="font-medium text-violet-400">{avgCarry}</span>
-        </div>
-
         {/* Top champions — avatar · WR% + W-L · KDA (DPM-style) */}
         <div className="flex flex-col gap-1.5">
           {champs.map((c) => {
@@ -135,15 +126,34 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           })}
         </div>
 
-        {/* MVP and ACE — far right (swapped with the champions block) */}
-        <div className="flex gap-4">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+          <span className="text-muted-foreground text-xs">{t("perf.kda")}</span>
+          <span className="font-medium">{avgKda}</span>
+          <span className="text-muted-foreground text-xs">{t("perf.kdaPerGame")}</span>
+          <span className="font-medium">{perGameKda}</span>
+          <span className="text-muted-foreground text-xs">{t("perf.carryAvg")}</span>
+          <span className="font-medium text-violet-400">{avgCarry}</span>
+        </div>
+
+        {/* Average rank above MVP / ACE */}
+        <div className="flex flex-col items-center gap-2">
           <div className="text-center">
-            <p className="text-[11px] font-semibold text-amber-400">MVP</p>
-            <p className="text-lg font-bold">{mvp}x</p>
+            <p className="text-[11px] text-muted-foreground">{t("perf.avgRank")}</p>
+            <p className="text-sm font-bold">
+              {avgPlacement}
+              <span className="text-muted-foreground font-normal">/10</span>
+            </p>
           </div>
-          <div className="text-center">
-            <p className="text-[11px] font-semibold text-violet-400">ACE</p>
-            <p className="text-lg font-bold">{ace}x</p>
+          <div className="flex gap-4">
+            <div className="text-center">
+              <p className="text-[11px] font-semibold text-amber-400">MVP</p>
+              <p className="text-lg font-bold">{mvp}x</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[11px] font-semibold text-violet-400">ACE</p>
+              <p className="text-lg font-bold">{ace}x</p>
+            </div>
           </div>
         </div>
       </div>
