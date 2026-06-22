@@ -30,13 +30,15 @@ function BuildSkillOrder({
   region,
   puuid,
   oppPuuid,
+  championId,
 }: {
   matchId: string
   region: string
   puuid: string
   oppPuuid?: string | null
+  championId?: number
 }) {
-  const { data, isLoading } = useMatchTimeline(matchId, region, puuid, true, oppPuuid)
+  const { data, isLoading } = useMatchTimeline(matchId, region, puuid, true, oppPuuid, championId)
   if (isLoading) {
     return <p className="text-[11px] text-muted-foreground">Chargement de la timeline…</p>
   }
@@ -118,9 +120,17 @@ function BuildSkillOrder({
         <div className="space-y-1">
           {[1, 2, 3, 4].map((slot) => (
             <div key={slot} className="flex items-center gap-1.5">
-              <span className={`w-5 text-center text-xs font-bold ${SKILL_COLOR[slot]?.text}`}>
-                {SKILL_LABEL[slot]}
-              </span>
+              <div className="relative flex-shrink-0">
+                {data.spellIcons?.[slot - 1] ? (
+                  <Icon src={data.spellIcons[slot - 1] ?? null} size={20} />
+                ) : (
+                  <span
+                    className={`block w-5 text-center text-xs font-bold ${SKILL_COLOR[slot]?.text}`}
+                  >
+                    {SKILL_LABEL[slot]}
+                  </span>
+                )}
+              </div>
               <div className="flex gap-0.5">
                 {Array.from({ length: 18 }, (_, lvl) => {
                   const leveled = slotLevels[slot]?.includes(lvl + 1)
@@ -426,6 +436,7 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
                 region={region}
                 puuid={ownerPuuid}
                 oppPuuid={laneOpp?.puuid ?? null}
+                {...(owner?.championId ? { championId: owner.championId } : {})}
               />
             </div>
           )}

@@ -13,6 +13,7 @@ export interface MatchTimelineData {
   build: { itemId: number; icon: string | null; minute: number }[]
   skills: { slot: number; minute: number }[]
   at15: LaningAt15 | null
+  spellIcons: (string | null)[]
 }
 
 export function useMatchTimeline(
@@ -20,14 +21,16 @@ export function useMatchTimeline(
   region: string,
   puuid: string | null | undefined,
   enabled: boolean,
-  oppPuuid?: string | null
+  oppPuuid?: string | null,
+  championId?: number
 ) {
   return useQuery({
-    queryKey: ["match-timeline", region, matchId, puuid, oppPuuid],
+    queryKey: ["match-timeline", region, matchId, puuid, oppPuuid, championId],
     queryFn: async () => {
       const opp = oppPuuid ? `&opp=${oppPuuid}` : ""
+      const champ = championId ? `&champ=${championId}` : ""
       const res = await fetch(
-        `/api/riot/match/${matchId}/timeline?region=${region}&puuid=${puuid}${opp}`
+        `/api/riot/match/${matchId}/timeline?region=${region}&puuid=${puuid}${opp}${champ}`
       )
       if (!res.ok) throw new Error("Timeline unavailable")
       return (await res.json()) as MatchTimelineData

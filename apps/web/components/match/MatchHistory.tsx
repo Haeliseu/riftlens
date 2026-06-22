@@ -7,6 +7,7 @@ import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
 import { ROLES, roleIconUrl } from "@/lib/roles"
+import { ChampionFilterModal } from "./ChampionFilterModal"
 import { MatchDetailPanel } from "./MatchDetailPanel"
 import { PerformanceSummary } from "./PerformanceSummary"
 
@@ -108,8 +109,9 @@ export function MatchHistory({
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
   const [period, setPeriod] = useState<"all" | "day" | "session">("all")
-  const [champId, setChampId] = useState<number | null>(null)
-  const [champMode, setChampMode] = useState<"with" | "against">("against")
+  const [withChamp, setWithChamp] = useState<number | null>(null)
+  const [againstChamp, setAgainstChamp] = useState<number | null>(null)
+  const [filterOpen, setFilterOpen] = useState(false)
   const { data: champions } = useChampions()
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
@@ -117,10 +119,10 @@ export function MatchHistory({
   if (matches && queueGroup !== "ALL")
     matches = matches.filter((m) => inQueueGroup(m.queueId, queueGroup))
   if (matches && role !== "ALL") matches = matches.filter((m) => m.position === role)
-  if (matches && champId != null)
-    matches = matches.filter((m) =>
-      (champMode === "with" ? m.allyChampionIds : m.enemyChampionIds).includes(champId)
-    )
+  if (matches && withChamp != null)
+    matches = matches.filter((m) => m.allyChampionIds.includes(withChamp))
+  if (matches && againstChamp != null)
+    matches = matches.filter((m) => m.enemyChampionIds.includes(againstChamp))
   const canLoadMore =
     (rawMatches?.length ?? 0) >= count && count < 50 && period === "all" && queueGroup === "ALL"
 
@@ -186,46 +188,41 @@ export function MatchHistory({
           ))}
         </div>
 
-        {/* Champion filter (with / against) */}
-        <div className="flex items-center gap-1">
-          <div className="flex gap-0.5 rounded-md border p-0.5">
-            <button
-              type="button"
-              onClick={() => setChampMode("with")}
-              className={`rounded px-2 py-1 text-xs ${champMode === "with" ? "ring-1 ring-primary bg-accent font-medium" : "text-muted-foreground"}`}
-            >
-              Avec
-            </button>
-            <button
-              type="button"
-              onClick={() => setChampMode("against")}
-              className={`rounded px-2 py-1 text-xs ${champMode === "against" ? "ring-1 ring-primary bg-accent font-medium" : "text-muted-foreground"}`}
-            >
-              Contre
-            </button>
-          </div>
-          <input
-            list="champ-filter-list"
-            placeholder="Champion…"
-            defaultValue=""
-            onChange={(e) => {
-              const c = (champions ?? []).find((x) => x.name === e.target.value)
-              setChampId(c?.id ?? null)
-            }}
-            className="h-7 w-28 rounded-md border bg-card px-2 text-xs focus:outline-none"
-          />
-          <datalist id="champ-filter-list">
-            {(champions ?? []).map((c) => (
-              <option key={c.id} value={c.name} />
-            ))}
-          </datalist>
-          {champId != null && (
-            <span className="text-[10px] text-muted-foreground">
-              {matches?.length ?? 0} parties
-            </span>
+        {/* Champion filter — opens a modal to pick a 'with' and an 'against' champ */}
+        <button
+          type="button"
+          onClick={() => setFilterOpen(true)}
+          className={`flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs ${
+            withChamp != null || againstChamp != null
+              ? "ring-1 ring-primary bg-accent font-medium"
+              : "text-muted-foreground"
+          }`}
+        >
+          {withChamp != null && (
+            // biome-ignore lint/performance/noImgElement: external CDN icon
+            <img src={getChampionIconUrl(withChamp)} alt="" className="h-4 w-4 rounded" />
           )}
-        </div>
+          {againstChamp != null && (
+            <>
+              <span>vs</span>
+              {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+              <img src={getChampionIconUrl(againstChamp)} alt="" className="h-4 w-4 rounded" />
+            </>
+          )}
+          {withChamp == null && againstChamp == null && "Filtrer par champion"}
+        </button>
       </div>
+
+      {filterOpen && (
+        <ChampionFilterModal
+          champions={champions ?? []}
+          withChamp={withChamp}
+          againstChamp={againstChamp}
+          onWith={setWithChamp}
+          onAgainst={setAgainstChamp}
+          onClose={() => setFilterOpen(false)}
+        />
+      )}
 
       {opponentPuuid && (
         <div className="flex items-center gap-2 rounded-md border bg-accent/50 px-3 py-2 text-sm">
@@ -276,37 +273,40 @@ export function MatchHistory({
                   onClick={() => setExpandedId(expanded ? null : m.matchId)}
                   className="flex w-full items-center gap-3 px-3 py-2 text-left"
                 >
-                  {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
-                  <img
-                    src={getChampionIconUrl(m.championId)}
-                    alt={m.championName}
-                    className="h-9 w-9 rounded-md flex-shrink-0"
-                  />
-
-                  {/* Matchup: lane opponent (big) + enemy carry nested (small, inset) */}
-                  {m.laneOpponentChampionId != null && (
-                    <div className="relative w-9 flex-shrink-0 flex flex-col items-center">
-                      {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                      <img
-                        src={getChampionIconUrl(m.laneOpponentChampionId)}
-                        alt="adversaire"
-                        className="h-9 w-9 rounded-md"
-                      />
-                      {m.enemyCarryChampionId != null &&
-                        m.enemyCarryChampionId !== m.laneOpponentChampionId && (
-                          // biome-ignore lint/performance/noImgElement: external CDN icon
+                  {/* Matchup: played champion VS lane opponent (enemy carry as a
+                      small top-right badge that doesn't cover the 'vs'). */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
+                    <img
+                      src={getChampionIconUrl(m.championId)}
+                      alt={m.championName}
+                      className="h-9 w-9 rounded-md"
+                    />
+                    {m.laneOpponentChampionId != null && (
+                      <>
+                        <span className="text-[9px] font-bold text-muted-foreground">VS</span>
+                        <div className="relative">
+                          {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
                           <img
-                            src={getChampionIconUrl(m.enemyCarryChampionId)}
-                            alt="carry ennemi"
-                            title="Carry adverse"
-                            className="absolute -bottom-1 -right-1 h-5 w-5 rounded-sm border border-background shadow-md ring-1 ring-amber-400/60"
+                            src={getChampionIconUrl(m.laneOpponentChampionId)}
+                            alt="adversaire de lane"
+                            title="Adversaire de lane"
+                            className="h-8 w-8 rounded-md opacity-90"
                           />
-                        )}
-                      <span className="text-[8px] leading-none text-muted-foreground mt-0.5">
-                        vs
-                      </span>
-                    </div>
-                  )}
+                          {m.enemyCarryChampionId != null &&
+                            m.enemyCarryChampionId !== m.laneOpponentChampionId && (
+                              // biome-ignore lint/performance/noImgElement: external CDN icon
+                              <img
+                                src={getChampionIconUrl(m.enemyCarryChampionId)}
+                                alt="carry adverse"
+                                title="Carry adverse"
+                                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-sm border border-background shadow ring-1 ring-amber-400/70"
+                              />
+                            )}
+                        </div>
+                      </>
+                    )}
+                  </div>
 
                   <div className="w-[88px] flex-shrink-0">
                     <p

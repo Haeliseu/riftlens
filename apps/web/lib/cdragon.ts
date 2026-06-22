@@ -64,3 +64,23 @@ export async function resolveAssets(): Promise<ResolvedAssets> {
     perk: (id) => (id ? (m?.perks.get(id) ?? STAT_SHARDS[id] ?? null) : null),
   }
 }
+
+// Champion ability icons (Q/W/E/R), keyed by championId, cached per instance.
+const champSpellCache = new Map<number, (string | null)[]>()
+
+export async function championSpellIcons(championId: number): Promise<(string | null)[]> {
+  const cached = champSpellCache.get(championId)
+  if (cached) return cached
+  try {
+    const data = (await fetch(`${CD}/v1/champions/${championId}.json`).then((r) => r.json())) as {
+      spells?: { abilityIconPath?: string }[]
+    }
+    const icons = (data.spells ?? [])
+      .slice(0, 4)
+      .map((s) => (s.abilityIconPath ? toUrl(s.abilityIconPath) : null))
+    champSpellCache.set(championId, icons)
+    return icons
+  } catch {
+    return [null, null, null, null]
+  }
+}

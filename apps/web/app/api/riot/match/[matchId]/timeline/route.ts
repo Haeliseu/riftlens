@@ -1,7 +1,7 @@
 import type { Region } from "@riftlens/riot-api"
 import { getMatchTimeline, RiotApiClient, regionToRouting } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
-import { resolveAssets } from "@/lib/cdragon"
+import { championSpellIcons, resolveAssets } from "@/lib/cdragon"
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params
@@ -9,6 +9,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
   const region = (searchParams.get("region") ?? "EUW1") as Region
   const puuid = searchParams.get("puuid")
   const oppPuuid = searchParams.get("opp")
+  const champId = parseInt(searchParams.get("champ") ?? "0", 10)
   const routing = regionToRouting(region)
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
@@ -17,14 +18,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
   }
 
   try {
-    const [tl, assets] = await Promise.all([
+    const [tl, assets, spellIcons] = await Promise.all([
       getMatchTimeline(client, routing, matchId),
       resolveAssets(),
+      champId > 0 ? championSpellIcons(champId) : Promise.resolve([null, null, null, null]),
     ])
 
     const idx = tl.metadata.participants.indexOf(puuid)
     if (idx < 0) {
-      return NextResponse.json({ build: [], skills: [], at15: null })
+      return NextResponse.json({ build: [], skills: [], at15: null, spellIcons })
     }
     const pid = idx + 1
     const oppPid = oppPuuid ? tl.metadata.participants.indexOf(oppPuuid) + 1 : 0
@@ -66,7 +68,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
       : null
 
     return NextResponse.json(
-      { build, skills, at15 },
+      { build, skills, at15, spellIcons },
       { headers: { "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800" } }
     )
   } catch (err) {
