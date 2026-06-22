@@ -1,11 +1,24 @@
 "use client"
 
-import { getChampionIconUrl, getRankIconUrl, type TierName } from "@riftlens/riot-api"
+import {
+  getChampionIconUrl,
+  getRankIconUrl,
+  type PlayerTag,
+  type TierName,
+} from "@riftlens/riot-api"
 import { Flame, Radio } from "lucide-react"
 import Link from "next/link"
 import { type LiveParticipant, useLiveGame } from "@/hooks/useLiveGame"
 import { useI18n } from "@/lib/i18n"
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { capitalizeTier, rankLabel } from "@/lib/tiers"
+
+const TAG_META: Record<PlayerTag, { emoji: string; label: TranslationKey }> = {
+  "on-fire": { emoji: "🔥", label: "live.tag.onFire" },
+  "one-trick": { emoji: "🎯", label: "live.tag.oneTrick" },
+  "carry-potential": { emoji: "💪", label: "live.tag.carry" },
+  "fed-last-game": { emoji: "🏆", label: "live.tag.fed" },
+}
 
 interface LiveGameProps {
   puuid?: string | null
@@ -44,6 +57,21 @@ function PlayerRow({ p, region, t }: { p: LiveParticipant; region: string; t: T 
           {p.onFire && <Flame className="h-3 w-3 text-orange-400 flex-shrink-0" />}
         </div>
         <p className="text-[10px] text-muted-foreground">{rank}</p>
+        {p.tags.length > 0 && (
+          <div className="mt-0.5 flex flex-wrap gap-1">
+            {p.tags.map((tag) => {
+              const meta = TAG_META[tag]
+              return (
+                <span
+                  key={tag}
+                  className="rounded bg-accent px-1 py-px text-[9px] font-medium text-foreground/80"
+                >
+                  {meta.emoji} {t(meta.label)}
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
         {p.tier && (

@@ -1,3 +1,4 @@
+import type { PlayerTag } from "@riftlens/riot-api"
 import { useQuery } from "@tanstack/react-query"
 
 export interface LiveParticipant {
@@ -12,6 +13,7 @@ export interface LiveParticipant {
   recentLosses: number
   streak: number
   onFire: boolean
+  tags: PlayerTag[]
 }
 
 export interface LiveGameData {

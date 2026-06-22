@@ -216,6 +216,10 @@ export const dictionaries = {
     "live.blueTeam": "Équipe bleue",
     "live.redTeam": "Équipe rouge",
     "live.streak": "série {n}",
+    "live.tag.onFire": "En feu",
+    "live.tag.oneTrick": "Mono-champion",
+    "live.tag.carry": "Peut carry",
+    "live.tag.fed": "Dernière partie en feu",
 
     // sidebar / search
     "nav.home": "Accueil",
@@ -621,6 +625,10 @@ export const dictionaries = {
     "live.blueTeam": "Blue team",
     "live.redTeam": "Red team",
     "live.streak": "streak {n}",
+    "live.tag.onFire": "On fire",
+    "live.tag.oneTrick": "One-trick",
+    "live.tag.carry": "Carry potential",
+    "live.tag.fed": "Fed last game",
 
     "nav.home": "Home",
     "search.recent": "Recent",

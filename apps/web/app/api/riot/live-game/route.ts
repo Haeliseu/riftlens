@@ -1,5 +1,6 @@
-import type { Region } from "@riftlens/riot-api"
+import type { PlayerTag, Region } from "@riftlens/riot-api"
 import {
+  computePlayerTags,
   getLeagueEntriesByPuuid,
   getLiveGame,
   getMatchIds,
@@ -24,6 +25,7 @@ interface LiveParticipant {
   recentLosses: number
   streak: number // >0 win streak, <0 loss streak
   onFire: boolean
+  tags: PlayerTag[]
 }
 
 export async function GET(req: NextRequest) {
@@ -60,6 +62,7 @@ export async function GET(req: NextRequest) {
         recentLosses: 0,
         streak: 0,
         onFire: false,
+        tags: [],
       }
       if (!p.puuid) return base
 
@@ -84,29 +87,55 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      // Recent ranked form (last few games) → W/L + current streak.
+      // Recent ranked form (last few games, newest first) → W/L, streak, tags.
       try {
         const ids = await getMatchIds(client, routing, p.puuid, { type: "ranked", count: RECENT })
-        const results: boolean[] = []
+        const recent: { win: boolean; championId: number; k: number; d: number; a: number }[] = []
         for (const id of ids) {
           // Cached so a live lookup over 10 players doesn't re-fetch the same
           // immutable matches and exhaust the dev rate limit.
           const m = await cachedMatch(client, routing, id).catch(() => null)
           const me = m?.info.participants.find((x) => x.puuid === p.puuid)
-          if (me) results.push(me.win)
+          if (me)
+            recent.push({
+              win: me.win,
+              championId: me.championId,
+              k: me.kills,
+              d: me.deaths,
+              a: me.assists,
+            })
         }
-        base.recentWins = results.filter(Boolean).length
-        base.recentLosses = results.length - base.recentWins
-        // streak from most-recent (results[0] is newest)
+        base.recentWins = recent.filter((r) => r.win).length
+        base.recentLosses = recent.length - base.recentWins
+        // streak from most-recent (recent[0] is newest)
         let streak = 0
-        for (const w of results) {
-          if (streak === 0) streak = w ? 1 : -1
-          else if (w && streak > 0) streak++
-          else if (!w && streak < 0) streak--
+        for (const r of recent) {
+          if (streak === 0) streak = r.win ? 1 : -1
+          else if (r.win && streak > 0) streak++
+          else if (!r.win && streak < 0) streak--
           else break
         }
         base.streak = streak
         base.onFire = streak >= 3
+
+        // Honoring/informational tags (no shaming — Riot dev policy).
+        const onChamp = recent.filter((r) => r.championId === p.championId)
+        const last = recent[0]
+        base.tags = computePlayerTags({
+          session: {
+            wins: base.recentWins,
+            losses: base.recentLosses,
+            winRate: recent.length ? Math.round((base.recentWins / recent.length) * 100) : 0,
+            gamesPlayed: recent.length,
+            streak,
+          },
+          champWinRate: onChamp.length
+            ? Math.round((onChamp.filter((r) => r.win).length / onChamp.length) * 100)
+            : 0,
+          champGames: onChamp.length,
+          recentChampGames: onChamp.length,
+          lastGameKDA: last ? [last.k, last.d, last.a] : [0, 0, 0],
+        })
       } catch {
         // best effort
       }
