@@ -97,17 +97,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <ProfileHeader
-          region={region}
-          gameName={summary?.gameName ?? name}
-          tagLine={summary?.tagLine ?? tag}
-          profileIconId={summary?.profileIconId ?? null}
-          summonerLevel={summary?.summonerLevel ?? null}
-          soloRank={summary?.soloRank ?? null}
-        />
-        {summary && <RefreshButton puuid={summary.puuid} region={region} />}
-      </div>
+      <ProfileHeader
+        region={region}
+        gameName={summary?.gameName ?? name}
+        tagLine={summary?.tagLine ?? tag}
+        profileIconId={summary?.profileIconId ?? null}
+        summonerLevel={summary?.summonerLevel ?? null}
+        action={summary ? <RefreshButton puuid={summary.puuid} region={region} /> : undefined}
+      />
 
       {!summary && (
         <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">

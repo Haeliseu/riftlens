@@ -1,15 +1,6 @@
-"use client"
-
-import { getProfileIconUrl, getRankIconUrl, type TierName } from "@riftlens/riot-api"
-import { useI18n } from "@/lib/i18n"
+import { getProfileIconUrl } from "@riftlens/riot-api"
+import type { ReactNode } from "react"
 import { regionBadge } from "@/lib/regions"
-import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
-
-interface SoloRank {
-  tier: string
-  rank: string
-  leaguePoints: number
-}
 
 interface ProfileHeaderProps {
   region: string
@@ -17,7 +8,8 @@ interface ProfileHeaderProps {
   tagLine: string
   profileIconId?: number | null
   summonerLevel?: number | null
-  soloRank?: SoloRank | null
+  /** rendered on the line under the name (e.g. the refresh button) */
+  action?: ReactNode
 }
 
 export function ProfileHeader({
@@ -26,9 +18,8 @@ export function ProfileHeader({
   tagLine,
   profileIconId,
   summonerLevel,
-  soloRank,
+  action,
 }: ProfileHeaderProps) {
-  const { t } = useI18n()
   const rb = regionBadge(region)
 
   return (
@@ -64,24 +55,7 @@ export function ProfileHeader({
             {rb.label}
           </span>
         </div>
-        {soloRank ? (
-          <div className="flex items-center gap-2">
-            {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
-            <img
-              src={getRankIconUrl(capitalizeTier(soloRank.tier) as TierName)}
-              alt=""
-              className="w-8 h-8 object-contain"
-            />
-            <span className="text-sm font-medium" style={{ color: tierColor(soloRank.tier) }}>
-              {rankLabel(t, soloRank.tier, soloRank.rank)}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {t("history.lp", { value: soloRank.leaguePoints })}
-            </span>
-          </div>
-        ) : (
-          <span className="text-sm text-muted-foreground">{t("profile.unranked")}</span>
-        )}
+        {action}
       </div>
     </div>
   )
