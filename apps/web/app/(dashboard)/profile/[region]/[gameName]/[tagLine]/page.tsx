@@ -18,6 +18,7 @@ import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { FlexCard } from "@/components/profile/FlexCard"
 import { LiveGame } from "@/components/profile/LiveGame"
 import { MasteryCard } from "@/components/profile/MasteryCard"
+import { ObjectiveInsight } from "@/components/profile/ObjectiveInsight"
 import { PingStats } from "@/components/profile/PingStats"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { ProfileTabs } from "@/components/profile/ProfileTabs"
@@ -152,8 +153,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           }
           champions={<ChampionStats region={region} puuid={summary.puuid} />}
           coaching={
-            <div className="max-w-md">
+            <div className="max-w-md space-y-4">
               <CoachingCard puuid={summary.puuid} />
+              <ObjectiveInsight puuid={summary.puuid} region={region} />
             </div>
           }
           mastery={

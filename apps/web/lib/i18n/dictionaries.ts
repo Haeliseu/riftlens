@@ -173,6 +173,16 @@ export const dictionaries = {
       "Optimise ton économie : recall sur des paliers d'achat propres, ne meurs pas avec de l'or en poche, garde la vague qui pousse.",
     "coach.good": "Bon",
     "coach.allGood": "Solide sur ce rôle — rien d'alarmant dans tes moyennes.",
+    "coach.obj.title": "Morts autour des objectifs",
+    "coach.obj.empty": "Pas assez de données timeline pour analyser.",
+    "coach.obj.stat":
+      "{near}/{deaths} de tes morts ({pct}%) surviennent autour d'un objectif pris par l'adversaire.",
+    "coach.obj.games": "Sur tes {n} dernières parties classées.",
+    "coach.obj.good": "Tu contestes rarement un objectif perdu — bien joué.",
+    "coach.obj.warn":
+      "Tu meurs parfois autour d'objectifs adverses : recule si tu n'as ni la vision ni l'avantage.",
+    "coach.obj.bad":
+      "Tu meurs souvent en contestant des objectifs que l'adversaire prend. Ne contest pas un dragon/baron perdu : recule, ward la zone, et concède l'objectif plutôt qu'un kill.",
     "mastery.title": "Maestria",
     "mastery.level": "Niv. {n}",
     "mastery.empty": "Aucune donnée de maestria.",
@@ -566,6 +576,16 @@ export const dictionaries = {
       "Tighten your economy: back on clean item breakpoints, don't die with gold on you, keep the wave pushing.",
     "coach.good": "Good",
     "coach.allGood": "Solid for this role — nothing alarming in your averages.",
+    "coach.obj.title": "Deaths around objectives",
+    "coach.obj.empty": "Not enough timeline data to analyze.",
+    "coach.obj.stat":
+      "{near}/{deaths} of your deaths ({pct}%) happen around an objective the enemy takes.",
+    "coach.obj.games": "Over your last {n} ranked games.",
+    "coach.obj.good": "You rarely contest a lost objective — well played.",
+    "coach.obj.warn":
+      "You sometimes die around enemy objectives: back off when you lack vision or a lead.",
+    "coach.obj.bad":
+      "You often die contesting objectives the enemy takes. Don't fight a lost dragon/baron: back off, ward the area, and give the objective rather than a kill.",
     "mastery.title": "Mastery",
     "mastery.level": "Lv. {n}",
     "mastery.empty": "No mastery data.",

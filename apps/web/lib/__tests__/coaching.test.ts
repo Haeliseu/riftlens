@@ -33,7 +33,9 @@ describe("analyzeCoaching", () => {
 
   it("scales the benchmark to the player's rank (same stats: pass at Iron, fail at Challenger)", () => {
     const weak = { ...mid, csPerMin: 5 }
-    expect(analyzeCoaching(weak, "IRON").find((t) => t.metric === "csPerMin")?.severity).toBe("good")
+    expect(analyzeCoaching(weak, "IRON").find((t) => t.metric === "csPerMin")?.severity).toBe(
+      "good"
+    )
     expect(analyzeCoaching(weak, "CHALLENGER").find((t) => t.metric === "csPerMin")?.severity).toBe(
       "bad"
     )

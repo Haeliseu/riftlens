@@ -7,6 +7,13 @@ export const TimelineEventSchema = z.object({
   itemId: z.number().optional(),
   skillSlot: z.number().optional(), // 1=Q 2=W 3=E 4=R
   levelUpType: z.string().optional(),
+  // CHAMPION_KILL
+  victimId: z.number().optional(),
+  killerId: z.number().optional(),
+  // ELITE_MONSTER_KILL
+  killerTeamId: z.number().optional(),
+  monsterType: z.string().optional(), // DRAGON | BARON_NASHOR | RIFTHERALD | HORDE
+  monsterSubType: z.string().optional(),
 })
 
 export const ParticipantFrameSchema = z.object({
