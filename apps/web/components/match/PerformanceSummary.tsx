@@ -31,11 +31,24 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
   const mvp = matches.filter((m) => m.badge === "MVP").length
   const ace = matches.filter((m) => m.badge === "ACE").length
 
-  const byChamp = new Map<number, { id: number; games: number; wins: number }>()
+  const byChamp = new Map<
+    number,
+    { id: number; games: number; wins: number; kills: number; deaths: number; assists: number }
+  >()
   for (const m of matches) {
-    const c = byChamp.get(m.championId) ?? { id: m.championId, games: 0, wins: 0 }
+    const c = byChamp.get(m.championId) ?? {
+      id: m.championId,
+      games: 0,
+      wins: 0,
+      kills: 0,
+      deaths: 0,
+      assists: 0,
+    }
     c.games += 1
     c.wins += m.win ? 1 : 0
+    c.kills += m.kills
+    c.deaths += m.deaths
+    c.assists += m.assists
     byChamp.set(m.championId, c)
   }
   const champs = [...byChamp.values()].sort((a, b) => b.games - a.games).slice(0, 3)
@@ -80,6 +93,38 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           </div>
         </div>
 
+        {/* Top champions — avatar · WR% + W-L · KDA (DPM-style) */}
+        <div className="flex flex-col gap-1.5">
+          {champs.map((c) => {
+            const cwr = Math.round((c.wins / c.games) * 100)
+            return (
+              <div key={c.id} className="flex items-center gap-2">
+                {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                <img src={getChampionIconUrl(c.id)} alt="" className="h-8 w-8 rounded-md" />
+                <div className="leading-tight">
+                  <p className="text-xs">
+                    <span
+                      className={
+                        cwr >= 50 ? "text-blue-500 font-semibold" : "text-red-500 font-semibold"
+                      }
+                    >
+                      {cwr}%
+                    </span>{" "}
+                    <span className="text-muted-foreground">
+                      {c.wins}
+                      {t("perf.winShort")}-{c.games - c.wins}
+                      {t("perf.lossShort")}
+                    </span>
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {kdaStr(c.kills, c.deaths, c.assists)} {t("perf.kda")}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
           <span className="text-muted-foreground text-xs">{t("perf.kda")}</span>
@@ -90,8 +135,8 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           <span className="font-medium text-violet-400">{avgCarry}</span>
         </div>
 
-        {/* MVP and ACE — separate, label over count */}
-        <div className="flex gap-4">
+        {/* MVP and ACE — moved to where the champions used to be */}
+        <div className="ml-auto flex gap-4">
           <div className="text-center">
             <p className="text-[11px] font-semibold text-amber-400">MVP</p>
             <p className="text-lg font-bold">{mvp}x</p>
@@ -100,28 +145,6 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
             <p className="text-[11px] font-semibold text-violet-400">ACE</p>
             <p className="text-lg font-bold">{ace}x</p>
           </div>
-        </div>
-
-        {/* Top champions */}
-        <div className="ml-auto flex items-center gap-3">
-          {champs.map((c) => {
-            const cwr = Math.round((c.wins / c.games) * 100)
-            return (
-              <div key={c.id} className="flex flex-col items-center gap-0.5">
-                {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                <img src={getChampionIconUrl(c.id)} alt="" className="h-9 w-9 rounded-md" />
-                <span
-                  className={`text-[11px] font-medium ${cwr >= 50 ? "text-blue-500" : "text-red-500"}`}
-                >
-                  {cwr}%
-                </span>
-                <span className="text-[9px] text-muted-foreground">
-                  {c.games}
-                  {t("perf.gamesShort")}
-                </span>
-              </div>
-            )
-          })}
         </div>
       </div>
     </div>
