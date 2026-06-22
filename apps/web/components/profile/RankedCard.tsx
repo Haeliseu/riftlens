@@ -9,8 +9,9 @@ import {
 import { useAverageRank } from "@/hooks/useAverageRank"
 import { useLadderRank } from "@/hooks/useLadderRank"
 import { useLpHistory } from "@/hooks/useLpHistory"
+import { useI18n } from "@/lib/i18n"
 import type { LpPoint } from "@/lib/profile-db"
-import { capitalizeTier, rankLabelFr, tierColor } from "@/lib/tiers"
+import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
 import { LpChart } from "./LpChart"
 
 export interface SoloRank {
@@ -56,6 +57,7 @@ function DeltaPill({ label, value }: { label: string; value: number | null }) {
 }
 
 export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
+  const { t } = useI18n()
   const { data: avg, isLoading: avgLoading } = useAverageRank(puuid, region)
   const { data: lpHistory } = useLpHistory(puuid, region)
   const isApex = soloRank ? APEX.has(soloRank.tier) : false
@@ -64,7 +66,7 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
   const d7 = lpDelta(points, 7)
   const d30 = lpDelta(points, 30)
 
-  const label = soloRank ? rankLabelFr(soloRank.tier, soloRank.rank) : "Non classé"
+  const label = soloRank ? rankLabel(t, soloRank.tier, soloRank.rank) : t("profile.unranked")
   const games = soloRank ? soloRank.wins + soloRank.losses : 0
   const winRate = games > 0 ? Math.round(((soloRank?.wins ?? 0) / games) * 100) : null
   const color = soloRank ? tierColor(soloRank.tier) : undefined
@@ -72,7 +74,7 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-muted-foreground">Classé Solo / Duo</span>
+        <span className="text-xs text-muted-foreground">{t("ranked.title")}</span>
         <span className="text-[10px] text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
       </div>
 
@@ -96,7 +98,7 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
             {label}
           </p>
           <p className="text-sm text-muted-foreground font-mono">
-            {soloRank ? soloRank.leaguePoints : 0} LP
+            {t("history.lp", { value: soloRank ? soloRank.leaguePoints : 0 })}
           </p>
         </div>
       </div>
@@ -104,8 +106,12 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
       {winRate != null && soloRank && (
         <>
           <p className="text-xs text-muted-foreground mb-1.5">
-            {soloRank.wins}V · {soloRank.losses}D ·{" "}
-            <span className="text-foreground font-medium">{winRate}% WR</span> · {games} games
+            {t("ranked.wlLine", {
+              wins: soloRank.wins,
+              losses: soloRank.losses,
+              wr: winRate ?? 0,
+              games,
+            })}
           </p>
           {/* LP progress within the division: 10 LP = 10% */}
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
@@ -120,7 +126,7 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
       {/* Rang moyen des parties = médiane des rangs des participants (≈ MMR) */}
       {soloRank && (
         <div className="mt-3 rounded-lg border bg-muted/40 px-3 py-2">
-          <p className="text-[10px] text-muted-foreground mb-1">Rang moyen des parties</p>
+          <p className="text-[10px] text-muted-foreground mb-1">{t("ranked.avgGameRank")}</p>
           {avgLoading ? (
             <div className="h-4 w-24 rounded bg-muted animate-pulse" />
           ) : avg ? (
@@ -128,10 +134,10 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
               {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
               <img src={getRankIconUrl(avg.tier)} alt="" className="w-7 h-7 object-contain" />
               <span className="text-sm font-medium" style={{ color: tierColor(avg.tier) }}>
-                {rankLabelFr(avg.tier, avg.division)}
+                {rankLabel(t, avg.tier, avg.division)}
               </span>
               <span className="text-[10px] text-muted-foreground ml-auto">
-                {avg.sampleGames} dernières
+                {t("ranked.lastN", { n: avg.sampleGames })}
               </span>
             </div>
           ) : (
@@ -144,14 +150,14 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
         <div className="mt-3 space-y-1">
           {ladder?.rank != null && (
             <p className="text-xs">
-              <span className="text-muted-foreground">Rang ladder </span>
-              <span className="font-semibold">#{ladder.rank.toLocaleString("fr-FR")}</span>
+              <span className="text-muted-foreground">{t("ranked.ladderRank")} </span>
+              <span className="font-semibold">#{ladder.rank.toLocaleString()}</span>
             </p>
           )}
           {(d7 !== null || d30 !== null) && (
             <div className="flex items-center gap-3">
-              <DeltaPill label="30j" value={d30} />
-              <DeltaPill label="7j" value={d7} />
+              <DeltaPill label={t("ranked.delta30")} value={d30} />
+              <DeltaPill label={t("ranked.delta7")} value={d7} />
             </div>
           )}
         </div>

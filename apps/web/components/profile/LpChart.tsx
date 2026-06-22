@@ -4,6 +4,7 @@ import type { TierName } from "@riftlens/riot-api"
 import { CURRENT_SEASON_LABEL } from "@riftlens/riot-api"
 import { useState } from "react"
 import { useLpHistory } from "@/hooks/useLpHistory"
+import { useI18n } from "@/lib/i18n"
 
 interface LpDataPoint {
   dateMs: number
@@ -31,11 +32,12 @@ const CHART_WIDTH = 320
 const CHART_HEIGHT = 160
 const PADDING = { top: 16, right: 16, bottom: 24, left: 40 }
 
-function formatDate(ms: number) {
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(ms))
+function formatDate(ms: number, locale: string) {
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(new Date(ms))
 }
 
 export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: LpChartProps) {
+  const { t, locale } = useI18n()
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
   const { data: history } = useLpHistory(dataProp ? null : puuid, region)
   const cardClass = embedded ? "mt-3 border-t pt-3" : "rounded-xl border bg-card p-4"
@@ -55,7 +57,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
       <div className={cardClass}>
         {!embedded && (
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium">LP Chart</span>
+            <span className="text-sm font-medium">{t("lpchart.title")}</span>
             <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
           </div>
         )}
@@ -63,9 +65,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
           className="flex items-center justify-center text-center text-muted-foreground text-xs px-4"
           style={{ height: CHART_HEIGHT }}
         >
-          {data.length === 0
-            ? "L'historique LP se construit à chaque changement de LP (Riot ne fournit pas le passé)."
-            : "Premier point enregistré — la courbe apparaît dès le prochain changement de LP."}
+          {data.length === 0 ? t("lpchart.emptyNoData") : t("lpchart.emptyFirst")}
         </div>
       </div>
     )
@@ -159,7 +159,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
           fontSize={9}
           fill="#f59e0b"
         >
-          Peak
+          {t("lpchart.peak")}
         </text>
 
         {/* Current position marker */}
@@ -186,14 +186,17 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
       {/* Tooltip */}
       {hoverIndex !== null && hoveredPoint && (
         <div className="mt-2 rounded-md border bg-popover p-2 text-xs space-y-0.5">
-          <p className="font-medium">{formatDate(hoveredPoint.dateMs)}</p>
+          <p className="font-medium">{formatDate(hoveredPoint.dateMs, locale)}</p>
           <p>
             {hoveredPoint.tier} {hoveredPoint.division} ·{" "}
-            {hoveredPoint.leaguePoints ?? hoveredPoint.lp} LP
+            {t("history.lp", { value: hoveredPoint.leaguePoints ?? hoveredPoint.lp })}
           </p>
           {hoveredPoint.avgGameRank && (
             <p className="text-muted-foreground">
-              Rang moyen : {hoveredPoint.avgGameRank.tier} {hoveredPoint.avgGameRank.division}
+              {t("lpchart.avgRank", {
+                tier: hoveredPoint.avgGameRank.tier,
+                division: hoveredPoint.avgGameRank.division,
+              })}
             </p>
           )}
         </div>

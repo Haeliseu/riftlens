@@ -3,11 +3,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render as rtlRender, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { describe, expect, it } from "vitest"
+import { I18nProvider } from "@/lib/i18n"
 import { LpChart } from "../LpChart"
 
 function render(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return rtlRender(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
+  return rtlRender(
+    <I18nProvider initialLocale="fr">
+      <QueryClientProvider client={client}>{ui}</QueryClientProvider>
+    </I18nProvider>
+  )
 }
 
 const mockData = [
@@ -35,7 +40,7 @@ describe("LpChart", () => {
 
   it("shows LP Chart label in both states", () => {
     render(<LpChart region="EUW1" gameName="Test" tagLine="EUW" />)
-    expect(screen.getByText("LP Chart")).toBeInTheDocument()
+    expect(screen.getByText("Courbe LP")).toBeInTheDocument()
   })
 
   it("renders without throwing with data", () => {

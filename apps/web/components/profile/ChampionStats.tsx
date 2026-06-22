@@ -4,14 +4,16 @@ import { getChampionIconUrl } from "@riftlens/riot-api"
 import { useState } from "react"
 import { useChampionStats } from "@/hooks/useChampionStats"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
+import { useI18n } from "@/lib/i18n"
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import type { ChampDetailBucket, ChampionDetail } from "@/lib/profile-db"
 
 type Mode = "total" | "solo" | "flex"
 
-const TABS: { id: Mode; label: string }[] = [
-  { id: "total", label: "Total" },
-  { id: "solo", label: "Solo/Duo" },
-  { id: "flex", label: "Flex" },
+const TABS: { id: Mode; label: TranslationKey }[] = [
+  { id: "total", label: "champStats.tab.total" },
+  { id: "solo", label: "champStats.tab.solo" },
+  { id: "flex", label: "champStats.tab.flex" },
 ]
 
 interface ChampionStatsProps {
@@ -29,6 +31,7 @@ function kda(b: ChampDetailBucket): string {
 }
 
 export function ChampionStats({ region, puuid }: ChampionStatsProps) {
+  const { t } = useI18n()
   const [mode, setMode] = useState<Mode>("total")
   const { data, isLoading } = useChampionStats(puuid, region)
   const { data: lpPerGame } = useLpPerGame(puuid)
@@ -40,43 +43,45 @@ export function ChampionStats({ region, puuid }: ChampionStatsProps) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium">Statistiques par champion</h3>
+        <h3 className="text-sm font-medium">{t("champStats.title")}</h3>
         <div className="flex rounded-md bg-muted p-0.5">
-          {TABS.map((t) => (
+          {TABS.map((tab) => (
             <button
-              key={t.id}
+              key={tab.id}
               type="button"
-              onClick={() => setMode(t.id)}
+              onClick={() => setMode(tab.id)}
               className={`px-2.5 py-0.5 text-xs rounded ${
-                mode === t.id ? "bg-background font-medium" : "text-muted-foreground"
+                mode === tab.id ? "bg-background font-medium" : "text-muted-foreground"
               }`}
             >
-              {t.label}
+              {t(tab.label)}
             </button>
           ))}
         </div>
       </div>
 
       {!puuid || (!isLoading && champs.length === 0) ? (
-        <p className="text-xs text-muted-foreground py-2">Aucune partie classée pour ce filtre.</p>
+        <p className="text-xs text-muted-foreground py-2">{t("champStats.empty")}</p>
       ) : isLoading ? (
-        <p className="text-xs text-muted-foreground py-2">Chargement…</p>
+        <p className="text-xs text-muted-foreground py-2">{t("common.loading")}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="text-[10px] uppercase text-muted-foreground border-b">
-                <th className="text-left font-medium py-1.5 pr-2">Champion</th>
-                <th className="text-right font-medium px-2">Parties</th>
-                <th className="text-right font-medium px-2">WR</th>
-                <th className="text-right font-medium px-2">LP</th>
-                <th className="text-right font-medium px-2">KDA</th>
-                <th className="text-right font-medium px-2">K/D/A</th>
-                <th className="text-right font-medium px-2">CS/min</th>
-                <th className="text-right font-medium px-2">KP</th>
-                <th className="text-right font-medium px-2">Or</th>
-                <th className="text-right font-medium px-2">Dégâts</th>
-                <th className="text-right font-medium pl-2">Vision</th>
+                <th className="text-left font-medium py-1.5 pr-2">
+                  {t("champStats.col.champion")}
+                </th>
+                <th className="text-right font-medium px-2">{t("champStats.col.games")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.wr")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.lp")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.kda")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.kdaDetail")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.csPerMin")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.kp")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.gold")}</th>
+                <th className="text-right font-medium px-2">{t("champStats.col.damage")}</th>
+                <th className="text-right font-medium pl-2">{t("champStats.col.vision")}</th>
               </tr>
             </thead>
             <tbody>

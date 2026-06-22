@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
 import { Geist } from "next/font/google"
+import { cookies } from "next/headers"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
+import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES, type Locale } from "@/lib/i18n/dictionaries"
 import { Providers } from "./providers"
 import "./globals.css"
 
@@ -12,12 +14,16 @@ export const metadata: Metadata = {
   description: "Track your League of Legends performance with RiftLens.",
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies()
+  const stored = cookieStore.get(LOCALE_COOKIE)?.value as Locale | undefined
+  const locale: Locale = stored && LOCALES.includes(stored) ? stored : DEFAULT_LOCALE
+
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={geist.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <Providers>{children}</Providers>
+          <Providers locale={locale}>{children}</Providers>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>

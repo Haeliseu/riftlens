@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useCrossedPlayers } from "@/hooks/useProfilePanels"
+import { useI18n } from "@/lib/i18n"
 
 interface Props {
   puuid?: string | null
@@ -9,21 +10,20 @@ interface Props {
 }
 
 export function CrossedPlayers({ puuid, region }: Props) {
+  const { t } = useI18n()
   const { data, isLoading } = useCrossedPlayers(puuid)
   const rows = data ?? []
 
   return (
     <div className="rounded-xl border bg-card p-4">
-      <h3 className="text-sm font-medium mb-3">Croisés plusieurs fois</h3>
+      <h3 className="text-sm font-medium mb-3">{t("crossed.title")}</h3>
       {!puuid || (!isLoading && rows.length === 0) ? (
-        <p className="text-xs text-muted-foreground py-1">
-          Personne pour l'instant — plus tu synchronises, plus on détecte les récurrents.
-        </p>
+        <p className="text-xs text-muted-foreground py-1">{t("crossed.empty")}</p>
       ) : (
         <div className="space-y-2">
           {rows.map((c) => {
             const wr = c.encounters > 0 ? Math.round((c.wins / c.encounters) * 100) : 0
-            const name = c.gameName || "Joueur"
+            const name = c.gameName || t("common.player")
             const href =
               c.gameName && c.tagLine
                 ? `/profile/${region}/${encodeURIComponent(c.gameName)}/${encodeURIComponent(c.tagLine)}`
@@ -39,7 +39,11 @@ export function CrossedPlayers({ puuid, region }: Props) {
                     <span className="font-medium truncate">{name}</span>
                   )}
                   <p className="text-[10px] text-muted-foreground">
-                    {c.encounters}× · {c.asAlly} allié / {c.asEnemy} ennemi
+                    {t("crossed.detail", {
+                      n: c.encounters,
+                      ally: c.asAlly,
+                      enemy: c.asEnemy,
+                    })}
                   </p>
                 </div>
                 <span className={`font-semibold ${wr >= 50 ? "text-blue-500" : "text-red-500"}`}>

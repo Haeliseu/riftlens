@@ -3,6 +3,8 @@
 import { Clock, Search, User, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import { useI18n } from "@/lib/i18n"
+import { tierLabel } from "@/lib/tiers"
 
 export const REGIONS = [
   { id: "EUW1", label: "EUW" },
@@ -41,23 +43,13 @@ interface Suggestion {
   soloRank?: SoloRank | null
 }
 
-const RANK_FR: Record<string, string> = {
-  IRON: "Fer",
-  BRONZE: "Bronze",
-  SILVER: "Argent",
-  GOLD: "Or",
-  PLATINUM: "Platine",
-  EMERALD: "Émeraude",
-  DIAMOND: "Diamant",
-  MASTER: "Maître",
-  GRANDMASTER: "Grand Maître",
-  CHALLENGER: "Challenger",
-}
+type Translate = ReturnType<typeof useI18n>["t"]
 
-function formatRank(r: SoloRank): string {
-  const tier = RANK_FR[r.tier] ?? r.tier
+function formatRank(t: Translate, r: SoloRank): string {
+  const tier = tierLabel(t, r.tier)
   const apex = r.tier === "MASTER" || r.tier === "GRANDMASTER" || r.tier === "CHALLENGER"
-  return apex ? `${tier} ${r.leaguePoints} LP` : `${tier} ${r.rank} · ${r.leaguePoints} LP`
+  const lp = t("history.lp", { value: r.leaguePoints })
+  return apex ? `${tier} ${lp}` : `${tier} ${r.rank} · ${lp}`
 }
 
 function profileIconUrl(id: number): string {
@@ -81,6 +73,7 @@ function regionLabel(id: string) {
 
 export function SearchHero() {
   const router = useRouter()
+  const { t } = useI18n()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
   const [recent, setRecent] = useState<RecentSearch[]>([])
@@ -150,10 +143,10 @@ export function SearchHero() {
             ])
           } else if (res.status === 404) {
             setSuggestions([])
-            setError("Joueur introuvable")
+            setError(t("search.notFound"))
           } else {
             setSuggestions([])
-            setError("Recherche indisponible (vérifie la clé API Riot)")
+            setError(t("search.unavailable"))
           }
           return
         }
@@ -163,16 +156,16 @@ export function SearchHero() {
         const data = (await res.json()) as Suggestion[]
         setSuggestions(data)
         if (data.length === 0) {
-          setError("Aucun résultat — tape le pseudo complet avec #TAG")
+          setError(t("search.noResult"))
         }
       } catch {
         setSuggestions([])
-        setError("Erreur réseau")
+        setError(t("search.networkError"))
       } finally {
         setLoading(false)
       }
     }, 300)
-  }, [query, region])
+  }, [query, region, t])
 
   function navigate(gameName: string, tagLine: string, reg: string) {
     const next: RecentSearch = { gameName, tagLine, region: reg }
@@ -239,7 +232,7 @@ export function SearchHero() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
-            placeholder="Joueur#EUW"
+            placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setOpen(true)}
@@ -253,7 +246,7 @@ export function SearchHero() {
           type="submit"
           className="px-5 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors whitespace-nowrap"
         >
-          Rechercher
+          {t("home.search.button")}
         </button>
       </form>
 
@@ -264,7 +257,9 @@ export function SearchHero() {
           {showSuggestions && (
             <>
               {loading ? (
-                <div className="px-4 py-3 text-xs text-muted-foreground">Recherche…</div>
+                <div className="px-4 py-3 text-xs text-muted-foreground">
+                  {t("search.searching")}
+                </div>
               ) : suggestions.length === 0 && error ? (
                 <div className="px-4 py-3 text-xs text-muted-foreground">{error}</div>
               ) : (
@@ -293,8 +288,8 @@ export function SearchHero() {
                         <span className="text-muted-foreground">#{s.tagLine}</span>
                       </span>
                       <span className="text-xs text-muted-foreground truncate">
-                        {s.soloRank ? formatRank(s.soloRank) : "Non classé"}
-                        {s.summonerLevel ? ` · niv. ${s.summonerLevel}` : ""}
+                        {s.soloRank ? formatRank(t, s.soloRank) : t("profile.unranked")}
+                        {s.summonerLevel ? ` · ${t("search.level", { n: s.summonerLevel })}` : ""}
                       </span>
                     </div>
                     <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex-shrink-0">
@@ -310,7 +305,7 @@ export function SearchHero() {
           {showRecent && (
             <>
               <p className="px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Récents
+                {t("search.recent")}
               </p>
               {recent.map((r, i) => (
                 <div

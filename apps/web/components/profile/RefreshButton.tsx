@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
+import { useI18n } from "@/lib/i18n"
 
 interface RefreshButtonProps {
   puuid?: string | null
@@ -10,6 +11,7 @@ interface RefreshButtonProps {
 }
 
 export function RefreshButton({ puuid, region }: RefreshButtonProps) {
+  const { t } = useI18n()
   const qc = useQueryClient()
   const [busy, setBusy] = useState(false)
   const [added, setAdded] = useState<number | null>(null)
@@ -48,7 +50,11 @@ export function RefreshButton({ puuid, region }: RefreshButtonProps) {
       className="flex items-center gap-2 rounded-md border bg-card px-3 py-1.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
     >
       <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} />
-      {busy ? `Synchro… ${added ?? 0} parties` : added != null ? `+${added} parties` : "Actualiser"}
+      {busy
+        ? t("refresh.syncing", { n: added ?? 0 })
+        : added != null
+          ? t("refresh.added", { n: added })
+          : t("profile.refresh")}
     </button>
   )
 }

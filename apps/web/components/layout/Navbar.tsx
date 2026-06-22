@@ -4,6 +4,8 @@ import { Search } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useI18n } from "@/lib/i18n"
+import { LanguageToggle } from "./LanguageToggle"
 import { ThemeToggle } from "./ThemeToggle"
 
 const REGIONS = [
@@ -19,6 +21,7 @@ const REGIONS = [
 
 export function Navbar() {
   const router = useRouter()
+  const { t } = useI18n()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
 
@@ -57,7 +60,7 @@ export function Navbar() {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <input
             type="text"
-            placeholder="Joueur#TAG"
+            placeholder={t("nav.search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-9 w-full bg-transparent pl-8 pr-3 text-sm focus:outline-none placeholder:text-muted-foreground"
@@ -68,12 +71,13 @@ export function Navbar() {
       </form>
 
       <div className="ml-auto flex items-center gap-2">
+        <LanguageToggle />
         <ThemeToggle />
         <Link
           href="/login"
           className="text-xs px-3 py-1.5 rounded-md border border-border hover:bg-accent transition-colors font-medium"
         >
-          Se connecter
+          {t("nav.login")}
         </Link>
       </div>
     </header>

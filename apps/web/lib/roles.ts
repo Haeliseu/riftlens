@@ -14,10 +14,25 @@ export function roleIconUrl(role: string): string {
   return `${SVG}/position-${ROLE_ICON[role] ?? "middle"}-light.svg`
 }
 
-export const ROLES = [
-  { id: "TOP", label: "Top" },
-  { id: "JUNGLE", label: "Jungle" },
-  { id: "MIDDLE", label: "Mid" },
-  { id: "BOTTOM", label: "ADC" },
-  { id: "UTILITY", label: "Support" },
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
+
+export const ROLES: { id: string; label: TranslationKey }[] = [
+  { id: "TOP", label: "role.top" },
+  { id: "JUNGLE", label: "role.jungle" },
+  { id: "MIDDLE", label: "role.mid" },
+  { id: "BOTTOM", label: "role.adc" },
+  { id: "UTILITY", label: "role.support" },
 ]
+
+const ROLE_KEY: Record<string, TranslationKey> = {
+  TOP: "role.top",
+  JUNGLE: "role.jungle",
+  MIDDLE: "role.mid",
+  BOTTOM: "role.adc",
+  UTILITY: "role.support",
+  UNKNOWN: "role.other",
+}
+
+export function roleKey(role: string): TranslationKey {
+  return ROLE_KEY[role] ?? "role.other"
+}

@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
+import { useI18n } from "@/lib/i18n"
 
 export default function LoginPage() {
+  const { t } = useI18n()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -14,7 +16,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     const { error: authError } = await authClient.signIn.email({ email, password })
-    if (authError) setError(authError.message ?? "Erreur de connexion")
+    if (authError) setError(authError.message ?? t("login.error"))
     setLoading(false)
   }
 
@@ -27,13 +29,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">RiftLens</h1>
-          <p className="text-muted-foreground text-sm mt-1">Connectez-vous à votre compte</p>
+          <p className="text-muted-foreground text-sm mt-1">{t("login.subtitle")}</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t("login.email")}
             </label>
             <input
               id="email"
@@ -46,7 +48,7 @@ export default function LoginPage() {
           </div>
           <div className="space-y-1">
             <label htmlFor="password" className="text-sm font-medium">
-              Mot de passe
+              {t("login.password")}
             </label>
             <input
               id="password"
@@ -63,7 +65,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
-            {loading ? "Connexion…" : "Se connecter"}
+            {loading ? t("login.submitting") : t("login.submit")}
           </button>
         </form>
 
@@ -72,7 +74,7 @@ export default function LoginPage() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">ou</span>
+            <span className="bg-background px-2 text-muted-foreground">{t("login.or")}</span>
           </div>
         </div>
 
@@ -81,7 +83,7 @@ export default function LoginPage() {
           onClick={handleDiscord}
           className="w-full rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
         >
-          Continuer avec Discord
+          {t("login.discord")}
         </button>
       </div>
     </div>

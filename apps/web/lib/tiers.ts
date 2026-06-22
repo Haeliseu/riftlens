@@ -1,3 +1,5 @@
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
+
 /** Tier color from an UPPERCASE Riot tier (e.g. "DIAMOND") or capitalized TierName. */
 export const TIER_COLOR: Record<string, string> = {
   IRON: "#888",
@@ -14,6 +16,34 @@ export const TIER_COLOR: Record<string, string> = {
 
 export function tierColor(tier: string): string {
   return TIER_COLOR[tier.toUpperCase()] ?? "#888"
+}
+
+const TIER_KEY: Record<string, TranslationKey> = {
+  IRON: "tier.iron",
+  BRONZE: "tier.bronze",
+  SILVER: "tier.silver",
+  GOLD: "tier.gold",
+  PLATINUM: "tier.platinum",
+  EMERALD: "tier.emerald",
+  DIAMOND: "tier.diamond",
+  MASTER: "tier.master",
+  GRANDMASTER: "tier.grandmaster",
+  CHALLENGER: "tier.challenger",
+}
+
+type Translate = (key: TranslationKey, vars?: Record<string, string | number>) => string
+
+/** Localized "Diamond III" / "Master" (apex tiers have no division). */
+export function rankLabel(t: Translate, tier: string, division: string): string {
+  const key = TIER_KEY[tier.toUpperCase()]
+  const name = key ? t(key) : tier
+  return APEX_TIERS.has(tier.toUpperCase()) ? name : `${name} ${division}`
+}
+
+/** Localized bare tier name. */
+export function tierLabel(t: Translate, tier: string): string {
+  const key = TIER_KEY[tier.toUpperCase()]
+  return key ? t(key) : tier
 }
 
 export const RANK_FR: Record<string, string> = {

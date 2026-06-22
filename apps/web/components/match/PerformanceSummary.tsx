@@ -1,6 +1,7 @@
 "use client"
 
 import { getChampionIconUrl, type MatchSummary } from "@riftlens/riot-api"
+import { useI18n } from "@/lib/i18n"
 
 function kdaStr(k: number, d: number, a: number): string {
   const r = d === 0 ? k + a : (k + a) / d
@@ -8,6 +9,7 @@ function kdaStr(k: number, d: number, a: number): string {
 }
 
 export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
+  const { t } = useI18n()
   const n = matches.length
   if (n === 0) return null
 
@@ -44,7 +46,7 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
 
   return (
     <div className="rounded-xl border bg-card p-4">
-      <p className="text-sm font-medium mb-3">Performances sur les {n} dernières parties</p>
+      <p className="text-sm font-medium mb-3">{t("perf.title", { n })}</p>
       <div className="flex flex-wrap items-center gap-6">
         {/* WR essence gauge — blue (wins) / red (losses) */}
         <div className="relative flex-shrink-0" style={{ width: 84, height: 84 }}>
@@ -66,19 +68,25 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-lg font-bold">{wr}%</span>
             <span className="text-[10px] text-muted-foreground">
-              <span className="text-blue-500">{wins}V</span>{" "}
-              <span className="text-red-500">{losses}D</span>
+              <span className="text-blue-500">
+                {wins}
+                {t("perf.winShort")}
+              </span>{" "}
+              <span className="text-red-500">
+                {losses}
+                {t("perf.lossShort")}
+              </span>
             </span>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-          <span className="text-muted-foreground text-xs">KDA</span>
+          <span className="text-muted-foreground text-xs">{t("perf.kda")}</span>
           <span className="font-medium">{avgKda}</span>
-          <span className="text-muted-foreground text-xs">KDA moy. / partie</span>
+          <span className="text-muted-foreground text-xs">{t("perf.kdaPerGame")}</span>
           <span className="font-medium">{perGameKda}</span>
-          <span className="text-muted-foreground text-xs">Note de carry moy.</span>
+          <span className="text-muted-foreground text-xs">{t("perf.carryAvg")}</span>
           <span className="font-medium text-violet-400">{avgCarry}</span>
         </div>
 
@@ -107,7 +115,10 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
                 >
                   {cwr}%
                 </span>
-                <span className="text-[9px] text-muted-foreground">{c.games}g</span>
+                <span className="text-[9px] text-muted-foreground">
+                  {c.games}
+                  {t("perf.gamesShort")}
+                </span>
               </div>
             )
           })}

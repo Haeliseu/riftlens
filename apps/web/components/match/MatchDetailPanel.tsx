@@ -6,6 +6,8 @@ import Link from "next/link"
 import { useState } from "react"
 import { type MatchDetailParticipant, useMatchDetail } from "@/hooks/useMatchDetail"
 import { useMatchTimeline } from "@/hooks/useMatchTimeline"
+import { useI18n } from "@/lib/i18n"
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
 
 interface MatchDetailPanelProps {
   matchId: string
@@ -38,9 +40,10 @@ function BuildSkillOrder({
   oppPuuid?: string | null
   championId?: number
 }) {
+  const { t } = useI18n()
   const { data, isLoading } = useMatchTimeline(matchId, region, puuid, true, oppPuuid, championId)
   if (isLoading) {
-    return <p className="text-[11px] text-muted-foreground">Chargement de la timeline…</p>
+    return <p className="text-[11px] text-muted-foreground">{t("detail.loadingTimeline")}</p>
   }
   if (!data || (data.build.length === 0 && data.skills.length === 0)) return null
 
@@ -54,16 +57,16 @@ function BuildSkillOrder({
       {a && (
         <div>
           <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
-            Laning @15{" "}
+            {t("detail.laning15")}{" "}
             {a.csDiff !== null && (
               <span className="font-normal normal-case text-muted-foreground/70">
-                (vs adversaire de lane)
+                {t("detail.vsLaneOpp")}
               </span>
             )}
           </p>
           <div className="flex flex-wrap gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground text-xs">CS </span>
+              <span className="text-muted-foreground text-xs">{t("detail.cs")} </span>
               <span className="font-medium">{a.cs}</span>
               {a.csDiff !== null && (
                 <span className={`ml-1 text-xs ${diffColor(a.csDiff)}`}>
@@ -73,7 +76,7 @@ function BuildSkillOrder({
               )}
             </div>
             <div>
-              <span className="text-muted-foreground text-xs">Or </span>
+              <span className="text-muted-foreground text-xs">{t("detail.gold")} </span>
               <span className="font-medium">{(a.gold / 1000).toFixed(1)}k</span>
               {a.goldDiff !== null && (
                 <span className={`ml-1 text-xs ${diffColor(a.goldDiff)}`}>
@@ -83,7 +86,7 @@ function BuildSkillOrder({
               )}
             </div>
             <div>
-              <span className="text-muted-foreground text-xs">XP </span>
+              <span className="text-muted-foreground text-xs">{t("detail.xp")} </span>
               <span className="font-medium">{a.xp}</span>
               {a.xpDiff !== null && (
                 <span className={`ml-1 text-xs ${diffColor(a.xpDiff)}`}>
@@ -96,7 +99,9 @@ function BuildSkillOrder({
         </div>
       )}
       <div>
-        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">Ordre d'achat</p>
+        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
+          {t("detail.build")}
+        </p>
         <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
           {data.build.map((b, i) => (
             <div key={`b-${b.itemId}-${i}`} className="flex items-center">
@@ -115,7 +120,7 @@ function BuildSkillOrder({
       </div>
       <div>
         <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
-          Ordre des sorts
+          {t("detail.skillOrder")}
         </p>
         <div className="space-y-1">
           {[1, 2, 3, 4].map((slot) => (
@@ -158,10 +163,10 @@ function BuildSkillOrder({
 
 type Tab = "general" | "details" | "runes"
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "general", label: "Général" },
-  { id: "details", label: "Détails" },
-  { id: "runes", label: "Runes" },
+const TABS: { id: Tab; label: TranslationKey }[] = [
+  { id: "general", label: "detail.tab.general" },
+  { id: "details", label: "detail.tab.details" },
+  { id: "runes", label: "detail.tab.runes" },
 ]
 
 // biome-ignore lint/performance/noImgElement: external CDN icons throughout
@@ -228,6 +233,7 @@ function Teams({
   region: string
   render: (p: MatchDetailParticipant) => React.ReactNode
 }) {
+  const { t } = useI18n()
   const blue = data.filter((p) => p.teamId === 100)
   const red = data.filter((p) => p.teamId === 200)
   const blueWin = blue[0]?.win ?? false
@@ -235,7 +241,7 @@ function Teams({
     <div className="space-y-3">
       <div>
         <p className={`text-xs font-semibold mb-1 ${blueWin ? "text-green-500" : "text-red-500"}`}>
-          Équipe bleue · {blueWin ? "Victoire" : "Défaite"}
+          {t("live.blueTeam")} · {blueWin ? t("common.win") : t("common.loss")}
         </p>
         {blue.map((p) => (
           <div key={p.puuid}>{render(p)}</div>
@@ -243,7 +249,7 @@ function Teams({
       </div>
       <div>
         <p className={`text-xs font-semibold mb-1 ${blueWin ? "text-red-500" : "text-green-500"}`}>
-          Équipe rouge · {blueWin ? "Défaite" : "Victoire"}
+          {t("live.redTeam")} · {blueWin ? t("common.loss") : t("common.win")}
         </p>
         {red.map((p) => (
           <div key={p.puuid}>{render(p)}</div>
@@ -254,21 +260,28 @@ function Teams({
 }
 
 function DetailsRow({ p, region }: { p: MatchDetailParticipant; region: string }) {
+  const { t } = useI18n()
   return (
     <div className="flex items-center gap-2 py-1 text-[11px]">
       <Icon src={getChampionIconUrl(p.championId)} size={22} alt={p.championName} />
       <Link href={playerHref(region, p)} className="truncate hover:underline w-20 min-w-0">
         {p.gameName || p.championName}
       </Link>
-      <span className="w-16 text-right text-muted-foreground">{p.csPerMin} CS/m</span>
+      <span className="w-16 text-right text-muted-foreground">
+        {p.csPerMin} {t("detail.unitCsM")}
+      </span>
       <span className="w-20 text-right text-muted-foreground">
-        {Math.round(p.damage).toLocaleString()} dmg
+        {Math.round(p.damage).toLocaleString()} {t("detail.unitDmg")}
       </span>
       <span className="w-16 text-right text-muted-foreground">
-        {(p.goldEarned / 1000).toFixed(1)}k or
+        {(p.goldEarned / 1000).toFixed(1)}k {t("detail.unitGold")}
       </span>
-      <span className="w-12 text-right text-muted-foreground">{p.visionScore} vis</span>
-      <span className="ml-auto w-14 text-right">{p.totalPings} pings</span>
+      <span className="w-12 text-right text-muted-foreground">
+        {p.visionScore} {t("detail.unitVision")}
+      </span>
+      <span className="ml-auto w-14 text-right">
+        {p.totalPings} {t("detail.unitPings")}
+      </span>
     </div>
   )
 }
@@ -328,30 +341,35 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 }
 
 function FocusedStats({ p }: { p: MatchDetailParticipant }) {
+  const { t } = useI18n()
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">Statistiques</p>
+        <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
+          {t("detail.stats")}
+        </p>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
-          <Stat label="CS/min" value={p.csPerMin} />
-          <Stat label="Or/min" value={p.goldPerMin} />
-          <Stat label="Dégâts" value={`${Math.round(p.damage / 1000)}k`} />
-          <Stat label="Dégâts subis" value={`${Math.round(p.damageTaken / 1000)}k`} />
-          <Stat label="Vision/min" value={p.visionPerMin} />
+          <Stat label={t("detail.csPerMin")} value={p.csPerMin} />
+          <Stat label={t("detail.goldPerMin")} value={p.goldPerMin} />
+          <Stat label={t("detail.damage")} value={`${Math.round(p.damage / 1000)}k`} />
+          <Stat label={t("detail.damageTaken")} value={`${Math.round(p.damageTaken / 1000)}k`} />
+          <Stat label={t("detail.visionPerMin")} value={p.visionPerMin} />
         </div>
       </div>
       <div className="flex flex-wrap gap-x-8 gap-y-2">
         <div>
-          <p className="text-xs font-semibold mb-1.5 uppercase text-muted-foreground">Wards</p>
+          <p className="text-xs font-semibold mb-1.5 uppercase text-muted-foreground">
+            {t("detail.wardsTitle")}
+          </p>
           <div className="flex gap-4">
-            <Stat label="Posés" value={p.wardsPlaced} />
-            <Stat label="Détruits" value={p.wardsKilled} />
-            <Stat label="Contrôle" value={p.controlWards} />
+            <Stat label={t("detail.wardsPlaced")} value={p.wardsPlaced} />
+            <Stat label={t("detail.wardsKilled")} value={p.wardsKilled} />
+            <Stat label={t("detail.controlWards")} value={p.controlWards} />
           </div>
         </div>
         <div>
           <p className="text-xs font-semibold mb-1.5 uppercase text-muted-foreground">
-            Sorts lancés
+            {t("detail.spellCasts")}
           </p>
           <div className="flex gap-3">
             {(["Q", "W", "E", "R"] as const).map((label, i) => (
@@ -365,14 +383,17 @@ function FocusedStats({ p }: { p: MatchDetailParticipant }) {
 }
 
 export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPanelProps) {
+  const { t } = useI18n()
   const [tab, setTab] = useState<Tab>("general")
   const { data, isLoading, isError } = useMatchDetail(matchId, region)
 
   if (isLoading) {
-    return <div className="px-3 py-3 text-xs text-muted-foreground">Chargement du détail…</div>
+    return (
+      <div className="px-3 py-3 text-xs text-muted-foreground">{t("detail.loadingDetail")}</div>
+    )
   }
   if (isError || !data) {
-    return <div className="px-3 py-3 text-xs text-muted-foreground">Détail indisponible.</div>
+    return <div className="px-3 py-3 text-xs text-muted-foreground">{t("detail.unavailable")}</div>
   }
 
   // Aggregate ping breakdown across all players for the footer.
@@ -396,16 +417,16 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
   return (
     <div className="px-3 py-3">
       <div className="mb-3 flex gap-1 rounded-md bg-muted p-0.5 w-fit">
-        {TABS.map((t) => (
+        {TABS.map((item) => (
           <button
-            key={t.id}
+            key={item.id}
             type="button"
-            onClick={() => setTab(t.id)}
+            onClick={() => setTab(item.id)}
             className={`rounded px-3 py-1 text-xs ${
-              tab === t.id ? "bg-background font-medium" : "text-muted-foreground"
+              tab === item.id ? "bg-background font-medium" : "text-muted-foreground"
             }`}
           >
-            {t.label}
+            {t(item.label)}
           </button>
         ))}
       </div>
@@ -441,7 +462,9 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
             </div>
           )}
           <div className="mt-3 border-t pt-2">
-            <p className="text-xs font-medium mb-1">Pings de la partie · {totalPings}</p>
+            <p className="text-xs font-medium mb-1">
+              {t("pings.title")} · {totalPings}
+            </p>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-muted-foreground">
               {pingRows.map(([label, v]) => (
                 <span key={label} className="flex items-center gap-1" title={label}>
@@ -461,7 +484,7 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
             ))}
           </div>
         ) : (
-          <p className="py-3 text-xs text-muted-foreground">Pas de runes dans ce mode de jeu.</p>
+          <p className="py-3 text-xs text-muted-foreground">{t("detail.noRunes")}</p>
         ))}
     </div>
   )

@@ -1,17 +1,14 @@
 "use client"
 
-import {
-  getChampionIconUrl,
-  getItemIconUrl,
-  type MatchSummary,
-  queueName,
-} from "@riftlens/riot-api"
+import { getChampionIconUrl, getItemIconUrl, type MatchSummary } from "@riftlens/riot-api"
 import { ChevronDown } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
+import { useI18n } from "@/lib/i18n"
+import type { TranslationKey } from "@/lib/i18n/dictionaries"
+import { queueKey } from "@/lib/queues"
 import { ROLES, roleIconUrl } from "@/lib/roles"
 import { ChampionFilterModal } from "./ChampionFilterModal"
 import { MatchDetailPanel } from "./MatchDetailPanel"
@@ -19,17 +16,17 @@ import { PerformanceSummary } from "./PerformanceSummary"
 
 const SESSION_GAP_MS = 3 * 3_600_000 // a session breaks after a >3h gap
 
-const PERIODS = [
-  { id: "all", label: "None" },
-  { id: "day", label: "Jour" },
-  { id: "session", label: "Session" },
-] as const
+const PERIODS: { id: "all" | "day" | "session"; label: TranslationKey }[] = [
+  { id: "all", label: "filter.period.all" },
+  { id: "day", label: "filter.period.day" },
+  { id: "session", label: "filter.period.session" },
+]
 
-const QUEUE_GROUPS = [
-  { id: "ALL", label: "Toutes" },
-  { id: "SOLO", label: "Solo/Duo" },
-  { id: "FLEX", label: "Flex" },
-  { id: "OTHER", label: "Autre" },
+const QUEUE_GROUPS: { id: string; label: TranslationKey }[] = [
+  { id: "ALL", label: "filter.queue.all" },
+  { id: "SOLO", label: "filter.queue.solo" },
+  { id: "FLEX", label: "filter.queue.flex" },
+  { id: "OTHER", label: "filter.queue.other" },
 ]
 
 function inQueueGroup(queueId: number | null, group: string): boolean {
@@ -37,10 +34,6 @@ function inQueueGroup(queueId: number | null, group: string): boolean {
   if (group === "SOLO") return queueId === 420
   if (group === "FLEX") return queueId === 440
   return queueId !== 420 && queueId !== 440 // OTHER (ARAM, Arena, normals…)
-}
-
-function placementLabel(p: number): string {
-  return p === 1 ? "1er" : `${p}e`
 }
 
 function carryColor(score: number): string {
@@ -76,40 +69,34 @@ function filterByPeriod(
 
 interface MatchHistoryProps {
   region: string
-  gameName: string
-  tagLine: string
   puuid?: string | null
-  opponentPuuid?: string
-  opponentRelation?: "ally" | "enemy" | "both"
-  period?: "all" | "day" | "session"
-}
-
-function kda(k: number, d: number, a: number): string {
-  const ratio = d === 0 ? k + a : (k + a) / d
-  return `${ratio.toFixed(2)} KDA`
 }
 
 function duration(s: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
 }
 
-function relativeTime(ms: number): string {
-  const diff = Date.now() - ms
-  const h = Math.floor(diff / 3_600_000)
-  if (h < 1) return "à l'instant"
-  if (h < 24) return `il y a ${h} h`
-  const d = Math.floor(h / 24)
-  return `il y a ${d} j`
+type T = ReturnType<typeof useI18n>["t"]
+
+function kdaLabel(t: T, k: number, d: number, a: number): string {
+  const ratio = d === 0 ? k + a : (k + a) / d
+  return t("history.kda", { ratio: ratio.toFixed(2) })
 }
 
-export function MatchHistory({
-  region,
-  gameName,
-  tagLine,
-  puuid,
-  opponentPuuid,
-}: MatchHistoryProps) {
-  const router = useRouter()
+function relativeTime(t: T, ms: number): string {
+  const diff = Date.now() - ms
+  const h = Math.floor(diff / 3_600_000)
+  if (h < 1) return t("time.now")
+  if (h < 24) return t("time.hoursAgo", { h })
+  return t("time.daysAgo", { d: Math.floor(h / 24) })
+}
+
+function placementLabel(t: T, p: number): string {
+  return p === 1 ? t("history.placement.first") : t("history.placement.nth", { n: p })
+}
+
+export function MatchHistory({ region, puuid }: MatchHistoryProps) {
+  const { t } = useI18n()
   const [count, setCount] = useState(30)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
@@ -146,14 +133,14 @@ export function MatchHistory({
               <button
                 key={r.id}
                 type="button"
-                title={r.label}
+                title={t(r.label)}
                 onClick={() => setRole(active ? "ALL" : r.id)}
                 className={`flex h-7 w-7 items-center justify-center rounded-md ${
                   active ? "ring-2 ring-primary bg-accent" : "opacity-50 hover:opacity-100"
                 }`}
               >
                 {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                <img src={roleIconUrl(r.id)} alt={r.label} className="h-4 w-4" />
+                <img src={roleIconUrl(r.id)} alt={t(r.label)} className="h-4 w-4" />
               </button>
             )
           })}
@@ -172,7 +159,7 @@ export function MatchHistory({
                   : "text-muted-foreground"
               }`}
             >
-              {p.label}
+              {t(p.label)}
             </button>
           ))}
         </div>
@@ -190,7 +177,7 @@ export function MatchHistory({
                   : "text-muted-foreground"
               }`}
             >
-              {g.label}
+              {t(g.label)}
             </button>
           ))}
         </div>
@@ -211,12 +198,12 @@ export function MatchHistory({
           )}
           {againstChamp != null && (
             <>
-              <span>vs</span>
+              <span>{t("history.vs").toLowerCase()}</span>
               {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
               <img src={getChampionIconUrl(againstChamp)} alt="" className="h-4 w-4 rounded" />
             </>
           )}
-          {withChamp == null && againstChamp == null && "Filtrer"}
+          {withChamp == null && againstChamp == null && t("filter.champion")}
         </button>
       </div>
 
@@ -231,37 +218,14 @@ export function MatchHistory({
         />
       )}
 
-      {opponentPuuid && (
-        <div className="flex items-center gap-2 rounded-md border bg-accent/50 px-3 py-2 text-sm">
-          <span>Filtre : parties avec/contre ce joueur</span>
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                `/profile/${region}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`
-              )
-            }
-            className="ml-auto text-xs underline"
-          >
-            Effacer
-          </button>
-        </div>
-      )}
-
       {!puuid ? (
-        <p className="text-muted-foreground text-sm text-center py-8">
-          Joueur introuvable sur cette région.
-        </p>
+        <p className="text-muted-foreground text-sm text-center py-8">{t("history.notFound")}</p>
       ) : isLoading ? (
-        <p className="text-muted-foreground text-sm text-center py-8">
-          Chargement de l'historique…
-        </p>
+        <p className="text-muted-foreground text-sm text-center py-8">{t("history.loading")}</p>
       ) : isError ? (
-        <p className="text-muted-foreground text-sm text-center py-8">
-          Historique indisponible (clé API Riot ?).
-        </p>
+        <p className="text-muted-foreground text-sm text-center py-8">{t("history.error")}</p>
       ) : !matches || matches.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center py-8">Aucune partie récente.</p>
+        <p className="text-muted-foreground text-sm text-center py-8">{t("history.empty")}</p>
       ) : (
         <div className="space-y-1">
           {matches.map((m) => {
@@ -291,7 +255,9 @@ export function MatchHistory({
                     />
                     {m.laneOpponentChampionId != null && (
                       <div className="flex items-center gap-1">
-                        <span className="text-[8px] font-bold text-muted-foreground">VS</span>
+                        <span className="text-[8px] font-bold text-muted-foreground">
+                          {t("history.vs")}
+                        </span>
                         <div className="relative">
                           {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
                           <img
@@ -319,19 +285,19 @@ export function MatchHistory({
                     <p
                       className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
                     >
-                      {m.win ? "Victoire" : "Défaite"}
+                      {m.win ? t("common.win") : t("common.loss")}
                     </p>
                     {m.queueId === 420 ? (
                       <p className="text-[11px] text-muted-foreground truncate">
-                        {queueName(m.queueId)}
+                        {t(queueKey(m.queueId))}
                       </p>
                     ) : (
                       <span className="inline-block rounded bg-accent px-1.5 py-px text-[10px] font-medium text-foreground/80">
-                        {queueName(m.queueId)}
+                        {t(queueKey(m.queueId))}
                       </span>
                     )}
                     <p className="text-[11px] text-muted-foreground">
-                      {duration(m.gameDurationS)} · {relativeTime(m.gameCreationMs)}
+                      {duration(m.gameDurationS)} · {relativeTime(t, m.gameCreationMs)}
                     </p>
                     {lpPerGame?.matchLp[m.matchId] !== undefined && (
                       <p
@@ -341,8 +307,9 @@ export function MatchHistory({
                             : "text-red-500"
                         }`}
                       >
-                        {(lpPerGame.matchLp[m.matchId] ?? 0) > 0 ? "+" : ""}
-                        {lpPerGame.matchLp[m.matchId]} LP
+                        {t("history.lp", {
+                          value: `${(lpPerGame.matchLp[m.matchId] ?? 0) > 0 ? "+" : ""}${lpPerGame.matchLp[m.matchId]}`,
+                        })}
                       </p>
                     )}
                   </div>
@@ -353,16 +320,18 @@ export function MatchHistory({
                       {m.assists}
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      {kda(m.kills, m.deaths, m.assists)}
+                      {kdaLabel(t, m.kills, m.deaths, m.assists)}
                     </p>
                   </div>
                   <div className="w-[64px] flex-shrink-0">
-                    <p className="text-xs">{m.cs} CS</p>
-                    <p className="text-[11px] text-muted-foreground">{csPerMin} CS/min</p>
+                    <p className="text-xs">{t("history.cs", { cs: m.cs })}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {t("history.csPerMin", { value: csPerMin })}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-medium">{kp}%</p>
-                    <p className="text-[11px] text-muted-foreground">KP</p>
+                    <p className="text-[11px] text-muted-foreground">{t("history.kp")}</p>
                   </div>
                   {/* Items equipped at the end of the game, filling the empty space */}
                   <div className="ml-auto flex gap-0.5 flex-shrink-0">
@@ -386,7 +355,7 @@ export function MatchHistory({
                     <p className={`text-base font-bold leading-none ${carryColor(m.carryScore)}`}>
                       {m.carryScore}
                     </p>
-                    <p className="text-[10px] text-muted-foreground">carry</p>
+                    <p className="text-[10px] text-muted-foreground">{t("history.carry")}</p>
                   </div>
                   <div className="w-12 flex-shrink-0 flex justify-center">
                     {m.badge ? (
@@ -401,7 +370,7 @@ export function MatchHistory({
                       </span>
                     ) : (
                       <span className="text-xs text-muted-foreground">
-                        {placementLabel(m.placement)}
+                        {placementLabel(t, m.placement)}
                       </span>
                     )}
                   </div>
@@ -427,7 +396,7 @@ export function MatchHistory({
               disabled={isFetching}
               className="w-full rounded-md border bg-card py-2 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
             >
-              {isFetching ? "Chargement…" : "Voir plus de parties"}
+              {isFetching ? t("common.loading") : t("history.loadMore")}
             </button>
           )}
         </div>

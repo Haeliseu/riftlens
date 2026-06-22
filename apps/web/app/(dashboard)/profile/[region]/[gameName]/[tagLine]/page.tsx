@@ -18,6 +18,7 @@ import { ProfileTabs } from "@/components/profile/ProfileTabs"
 import { RankedCard } from "@/components/profile/RankedCard"
 import { RefreshButton } from "@/components/profile/RefreshButton"
 import { RolePerformance } from "@/components/profile/RolePerformance"
+import { getT } from "@/lib/i18n/server"
 import { ingestProfile } from "@/lib/ingest"
 
 interface ProfilePageProps {
@@ -25,11 +26,6 @@ interface ProfilePageProps {
     region: string
     gameName: string
     tagLine: string
-  }>
-  searchParams: Promise<{
-    opponent?: string
-    relation?: "ally" | "enemy" | "both"
-    period?: "all" | "day" | "session"
   }>
 }
 
@@ -71,9 +67,9 @@ function safeDecode(value: string): string {
   }
 }
 
-export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
+export default async function ProfilePage({ params }: ProfilePageProps) {
   const { region, gameName, tagLine } = await params
-  const { opponent, relation } = await searchParams
+  const t = await getT()
 
   const name = safeDecode(gameName)
   const tag = safeDecode(tagLine)
@@ -109,8 +105,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
 
       {!summary && (
         <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-          Aucune donnée Riot pour <strong>{name}</strong> sur <strong>{region}</strong>. Vérifie la
-          région (le compte joue peut-être sur une autre) ou la validité de la clé API Riot.
+          {t("profile.noData", { name, region })}
         </div>
       )}
 
@@ -125,14 +120,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                 <PingStats puuid={summary.puuid} />
               </div>
               <div className="lg:col-span-2 space-y-4">
-                <MatchHistory
-                  region={region}
-                  gameName={name}
-                  tagLine={tag}
-                  puuid={summary.puuid}
-                  {...(opponent ? { opponentPuuid: opponent } : {})}
-                  {...(relation ? { opponentRelation: relation } : {})}
-                />
+                <MatchHistory region={region} puuid={summary.puuid} />
               </div>
             </div>
           }

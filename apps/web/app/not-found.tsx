@@ -1,11 +1,13 @@
 import Link from "next/link"
+import { getT } from "@/lib/i18n/server"
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getT()
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <h2 className="text-2xl font-bold">404 — Page introuvable</h2>
+      <h2 className="text-2xl font-bold">{t("notFound.title")}</h2>
       <Link href="/" className="text-primary underline underline-offset-4 text-sm">
-        Retour à l'accueil
+        {t("notFound.back")}
       </Link>
     </div>
   )
