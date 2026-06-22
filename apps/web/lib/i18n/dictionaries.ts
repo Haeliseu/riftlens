@@ -56,6 +56,7 @@ export const dictionaries = {
     // profile header
     "profile.level": "Niveau {level}",
     "profile.unranked": "Non classé",
+    "profile.activeRegion": "Ce joueur est actif sur {region} →",
     "profile.refresh": "Actualiser",
     "profile.refreshing": "Actualisation…",
     "profile.noData":
@@ -147,6 +148,13 @@ export const dictionaries = {
 
     // role performance
     "champPerf.title": "Performances par champion",
+    "mastery.title": "Maestria",
+    "mastery.level": "Niv. {n}",
+    "mastery.empty": "Aucune donnée de maestria.",
+    "challenges.title": "Challenges",
+    "challenges.points": "Points",
+    "challenges.percentile": "Top {n}%",
+    "challenges.empty": "Aucune donnée de challenges.",
     "roles.title": "Performances par rôle",
     "roles.empty": "Pas encore de données par rôle.",
     "roles.games": "{n} parties",
@@ -334,6 +342,8 @@ export const dictionaries = {
     "champions.loading": "Chargement des champions…",
     "champions.listUnavailable": "Liste indisponible.",
     "champions.none": "Aucun champion.",
+    "champions.freeRotation": "Rotation gratuite",
+    "champions.freeBadge": "FREE",
 
     // login
     "login.title": "Connexion",
@@ -419,6 +429,7 @@ export const dictionaries = {
 
     "profile.level": "Level {level}",
     "profile.unranked": "Unranked",
+    "profile.activeRegion": "This player is active on {region} →",
     "profile.refresh": "Refresh",
     "profile.refreshing": "Refreshing…",
     "profile.noData":
@@ -501,6 +512,13 @@ export const dictionaries = {
     "ranked.lpChart.empty": "Not enough data yet to draw the chart.",
 
     "champPerf.title": "Performance by champion",
+    "mastery.title": "Mastery",
+    "mastery.level": "Lv. {n}",
+    "mastery.empty": "No mastery data.",
+    "challenges.title": "Challenges",
+    "challenges.points": "Points",
+    "challenges.percentile": "Top {n}%",
+    "challenges.empty": "No challenges data.",
     "roles.title": "Performance by role",
     "roles.empty": "No role data yet.",
     "roles.games": "{n} games",
@@ -672,6 +690,8 @@ export const dictionaries = {
     "champions.loading": "Loading champions…",
     "champions.listUnavailable": "List unavailable.",
     "champions.none": "No champion.",
+    "champions.freeRotation": "Free rotation",
+    "champions.freeBadge": "FREE",
 
     "login.title": "Sign in",
     "login.discord": "Continue with Discord",

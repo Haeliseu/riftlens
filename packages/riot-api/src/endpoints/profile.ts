@@ -2,7 +2,7 @@ import type { Region, RiotApiClient } from "../client"
 import { regionToRouting } from "../client"
 import type { Division, RankedEntry, TierName } from "../utils/rank"
 import { computeAverageGameRank } from "../utils/rank"
-import { getAccountByRiotId } from "./account"
+import { getAccountByRiotId, getActiveRegion } from "./account"
 import { getLeagueEntriesByPuuid } from "./league"
 import { getMatch, getMatchIds } from "./match"
 import { getSummonerByPuuid } from "./summoner"
@@ -27,6 +27,8 @@ export interface ProfileSummary {
   summonerLevel: number
   soloRank: SoloRank | null
   flexRank: SoloRank | null
+  /** platform region where the player is actually active (e.g. "EUW1"), if known */
+  activeRegion: string | null
 }
 
 /**
@@ -42,9 +44,10 @@ export async function getProfileSummary(
   const routing = regionToRouting(region)
   const account = await getAccountByRiotId(client, routing, gameName, tagLine)
 
-  const [summoner, entries] = await Promise.all([
+  const [summoner, entries, activeRegion] = await Promise.all([
     getSummonerByPuuid(client, region, account.puuid),
     getLeagueEntriesByPuuid(client, region, account.puuid).catch(() => []),
+    getActiveRegion(client, routing, account.puuid).catch(() => null),
   ])
 
   const solo = entries.find((e) => e.queueType === "RANKED_SOLO_5x5")
@@ -68,6 +71,7 @@ export async function getProfileSummary(
     summonerLevel: summoner.summonerLevel,
     soloRank: toRank(solo),
     flexRank: toRank(flex),
+    activeRegion,
   }
 }
 

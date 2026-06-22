@@ -9,11 +9,13 @@ import {
 import { sql } from "drizzle-orm"
 import { after } from "next/server"
 import { MatchHistory } from "@/components/match/MatchHistory"
+import { ChallengesCard } from "@/components/profile/ChallengesCard"
 import { ChampionPerformance } from "@/components/profile/ChampionPerformance"
 import { ChampionStats } from "@/components/profile/ChampionStats"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { FlexCard } from "@/components/profile/FlexCard"
 import { LiveGame } from "@/components/profile/LiveGame"
+import { MasteryCard } from "@/components/profile/MasteryCard"
 import { PingStats } from "@/components/profile/PingStats"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { ProfileTabs } from "@/components/profile/ProfileTabs"
@@ -22,6 +24,7 @@ import { RefreshButton } from "@/components/profile/RefreshButton"
 import { RolePerformance } from "@/components/profile/RolePerformance"
 import { getT } from "@/lib/i18n/server"
 import { ingestProfile } from "@/lib/ingest"
+import { regionBadge } from "@/lib/regions"
 
 interface ProfilePageProps {
   params: Promise<{
@@ -111,6 +114,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </div>
       )}
 
+      {summary?.activeRegion && summary.activeRegion.toUpperCase() !== region.toUpperCase() && (
+        <a
+          href={`/profile/${summary.activeRegion}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`}
+          className="block rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm text-blue-300 hover:bg-blue-500/15"
+        >
+          {t("profile.activeRegion", {
+            region: regionBadge(summary.activeRegion).label,
+          })}
+        </a>
+      )}
+
       {summary && (
         <ProfileTabs
           overview={
@@ -119,6 +133,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 <RankedCard region={region} puuid={summary.puuid} soloRank={summary.soloRank} />
                 <FlexCard region={region} puuid={summary.puuid} flexRank={summary.flexRank} />
                 <ChampionPerformance puuid={summary.puuid} region={region} />
+                <MasteryCard puuid={summary.puuid} region={region} />
+                <ChallengesCard puuid={summary.puuid} region={region} />
                 <RolePerformance puuid={summary.puuid} />
                 <CrossedPlayers puuid={summary.puuid} region={region} />
                 <PingStats puuid={summary.puuid} />
