@@ -91,6 +91,7 @@ async function storeMatch(region: string, m: MatchDto, targetPuuid: string): Pro
         puuid: p.puuid,
         gameName: p.riotIdGameName ?? null,
         tagLine: p.riotIdTagline ?? null,
+        profileIconId: p.profileIcon ?? null,
         teamId: p.teamId,
         championName: p.championName,
         win: p.win,

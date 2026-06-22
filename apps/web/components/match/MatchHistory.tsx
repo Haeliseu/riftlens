@@ -285,14 +285,40 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     <LpDelta value={lpPerGame?.matchLp[m.matchId]} t={t} />
                   </div>
 
-                  {/* 2. Player identity: champion + summoner spells + runes */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                    <img
-                      src={getChampionIconUrl(m.championId)}
-                      alt={m.championName}
-                      className="h-10 w-10 rounded-md"
-                    />
+                  {/* 2. Played champion */}
+                  {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                  <img
+                    src={getChampionIconUrl(m.championId)}
+                    alt={m.championName}
+                    className="h-10 w-10 rounded-md flex-shrink-0"
+                  />
+
+                  {/* 3. KDA · CS · KP */}
+                  <div className="w-[62px] flex-shrink-0">
+                    <p className="text-sm font-medium font-mono whitespace-nowrap">
+                      {m.kills}
+                      <span className="text-muted-foreground font-normal">/</span>
+                      {m.deaths}
+                      <span className="text-muted-foreground font-normal">/</span>
+                      {m.assists}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {kdaLabel(t, m.kills, m.deaths, m.assists)}
+                    </p>
+                  </div>
+                  <div className="w-[58px] flex-shrink-0">
+                    <p className="text-xs">{t("history.cs", { cs: m.cs })}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {t("history.csPerMin", { value: csPerMin })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium">{kp}%</p>
+                    <p className="text-[11px] text-muted-foreground">{t("history.kp")}</p>
+                  </div>
+
+                  {/* 4a. Summoner spells + runes (primary/secondary), before items */}
+                  <div className="ml-auto flex items-center gap-1 flex-shrink-0">
                     <div className="flex flex-col gap-0.5">
                       {m.spellIcons.map((url, i) =>
                         url ? (
@@ -324,32 +350,8 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     </div>
                   </div>
 
-                  {/* 3. KDA · CS · KP */}
-                  <div className="w-[78px] flex-shrink-0">
-                    <p className="text-sm font-medium font-mono whitespace-nowrap">
-                      {m.kills}
-                      <span className="text-muted-foreground font-normal">{" / "}</span>
-                      {m.deaths}
-                      <span className="text-muted-foreground font-normal">{" / "}</span>
-                      {m.assists}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {kdaLabel(t, m.kills, m.deaths, m.assists)}
-                    </p>
-                  </div>
-                  <div className="w-[58px] flex-shrink-0">
-                    <p className="text-xs">{t("history.cs", { cs: m.cs })}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {t("history.csPerMin", { value: csPerMin })}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium">{kp}%</p>
-                    <p className="text-[11px] text-muted-foreground">{t("history.kp")}</p>
-                  </div>
-
-                  {/* 4. End-game items: 2 rows of 4 (items + trinket) */}
-                  <div className="ml-auto grid grid-cols-4 grid-rows-2 gap-0.5 flex-shrink-0">
+                  {/* 4b. End-game items: 2 rows of 4 (items + trinket) */}
+                  <div className="grid grid-cols-4 grid-rows-2 gap-0.5 flex-shrink-0">
                     {Array.from({ length: 8 }, (_, i) => {
                       const url = getItemIconUrl(m.items[i] ?? 0)
                       return (

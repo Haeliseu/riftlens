@@ -1,5 +1,6 @@
 "use client"
 
+import { getProfileIconUrl } from "@riftlens/riot-api"
 import Link from "next/link"
 import { useCrossedPlayers } from "@/hooks/useProfilePanels"
 import { useI18n } from "@/lib/i18n"
@@ -29,7 +30,17 @@ export function CrossedPlayers({ puuid, region }: Props) {
                 ? `/profile/${region}/${encodeURIComponent(c.gameName)}/${encodeURIComponent(c.tagLine)}`
                 : null
             return (
-              <div key={c.puuid} className="flex items-center gap-2 text-sm">
+              <div key={c.puuid} className="flex items-center gap-2.5 text-sm">
+                <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-muted">
+                  {c.profileIconId != null && (
+                    // biome-ignore lint/performance/noImgElement: external CDN icon
+                    <img
+                      src={getProfileIconUrl(c.profileIconId)}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   {href ? (
                     <Link href={href} className="font-medium truncate hover:underline">
@@ -39,11 +50,7 @@ export function CrossedPlayers({ puuid, region }: Props) {
                     <span className="font-medium truncate">{name}</span>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    {t("crossed.detail", {
-                      n: c.encounters,
-                      ally: c.asAlly,
-                      enemy: c.asEnemy,
-                    })}
+                    {t("roles.games", { n: c.encounters })}
                   </p>
                 </div>
                 <span className={`font-semibold ${wr >= 50 ? "text-blue-500" : "text-red-500"}`}>

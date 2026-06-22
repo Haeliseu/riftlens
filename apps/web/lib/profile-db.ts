@@ -304,6 +304,7 @@ export interface CrossedPlayer {
   puuid: string
   gameName: string | null
   tagLine: string | null
+  profileIconId: number | null
   encounters: number
   wins: number
   asAlly: number
@@ -331,6 +332,7 @@ export async function crossedPlayersFromDb(puuid: string, limit = 5): Promise<Cr
       puuid: matchParticipants.puuid,
       gameName: matchParticipants.gameName,
       tagLine: matchParticipants.tagLine,
+      profileIconId: matchParticipants.profileIconId,
       teamId: matchParticipants.teamId,
     })
     .from(matchParticipants)
@@ -345,6 +347,7 @@ export async function crossedPlayersFromDb(puuid: string, limit = 5): Promise<Cr
       puuid: p.puuid,
       gameName: p.gameName,
       tagLine: p.tagLine,
+      profileIconId: p.profileIconId,
       encounters: 0,
       wins: 0,
       asAlly: 0,
@@ -356,6 +359,7 @@ export async function crossedPlayersFromDb(puuid: string, limit = 5): Promise<Cr
     else c.asEnemy += 1
     if (!c.gameName && p.gameName) c.gameName = p.gameName
     if (!c.tagLine && p.tagLine) c.tagLine = p.tagLine
+    if (c.profileIconId == null && p.profileIconId != null) c.profileIconId = p.profileIconId
     map.set(p.puuid, c)
   }
 

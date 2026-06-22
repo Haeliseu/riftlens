@@ -136,7 +136,7 @@ export const dictionaries = {
     "roles.games": "{n} parties",
 
     // crossed players
-    "crossed.title": "Croisés plusieurs fois",
+    "crossed.title": "Joué avec",
     "crossed.empty":
       "Personne pour l'instant — plus tu synchronises, plus on détecte les récurrents.",
     "crossed.detail": "{n}× · {ally} allié / {enemy} ennemi",
@@ -460,7 +460,7 @@ export const dictionaries = {
     "roles.empty": "No role data yet.",
     "roles.games": "{n} games",
 
-    "crossed.title": "Crossed multiple times",
+    "crossed.title": "Played with",
     "crossed.empty": "Nobody yet — the more you sync, the more recurring players we detect.",
     "crossed.detail": "{n}× · {ally} ally / {enemy} enemy",
 

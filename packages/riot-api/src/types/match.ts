@@ -5,6 +5,7 @@ export const ParticipantSchema = z.object({
   summonerName: z.string().optional(),
   riotIdGameName: z.string().optional(),
   riotIdTagline: z.string().optional(),
+  profileIcon: z.number().optional(),
   teamId: z.number(),
   championId: z.number(),
   championName: z.string(),

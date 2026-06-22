@@ -11,6 +11,7 @@ export const matchParticipants = pgTable(
     puuid: text().notNull(),
     gameName: text("game_name"),
     tagLine: text("tag_line"),
+    profileIconId: integer("profile_icon_id"),
     teamId: integer("team_id"), // 100=blue, 200=red
     championName: text("champion_name"),
     win: boolean(),
