@@ -165,8 +165,8 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   if (matches && queueGroup !== "ALL")
     matches = matches.filter((m) => inQueueGroup(m.queueId, queueGroup))
   if (matches && role !== "ALL") matches = matches.filter((m) => m.position === role)
-  if (matches && withChamp != null)
-    matches = matches.filter((m) => m.allyChampionIds.includes(withChamp))
+  // "with" now means the champion the player themselves played.
+  if (matches && withChamp != null) matches = matches.filter((m) => m.championId === withChamp)
   if (matches && againstChamp != null)
     matches = matches.filter((m) => m.enemyChampionIds.includes(againstChamp))
   const canLoadMore =

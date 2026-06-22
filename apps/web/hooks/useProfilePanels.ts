@@ -22,7 +22,8 @@ export function useCrossedPlayers(puuid: string | null | undefined, region = "EU
       if (!res.ok) throw new Error("Crossed players unavailable")
       return (await res.json()) as CrossedPlayer[]
     },
-    staleTime: 120_000,
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
     enabled: !!puuid,
   })
 }

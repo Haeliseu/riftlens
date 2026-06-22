@@ -19,7 +19,9 @@ export async function GET(req: NextRequest) {
         return s ? { ...p, profileIconId: s.profileIconId } : p
       })
     )
-    return NextResponse.json(enriched, { headers: { "Cache-Control": "no-store" } })
+    return NextResponse.json(enriched, {
+      headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
+    })
   } catch {
     return NextResponse.json([], { headers: { "Cache-Control": "no-store" } })
   }

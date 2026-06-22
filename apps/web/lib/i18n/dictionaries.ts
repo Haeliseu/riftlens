@@ -100,11 +100,11 @@ export const dictionaries = {
 
     // champion filter modal
     "champFilter.title": "Filtrer par champion",
-    "champFilter.with": "Avec (allié)",
+    "champFilter.with": "Joué (ce champion)",
     "champFilter.against": "Contre (ennemi)",
     "champFilter.searchPlaceholder": "Rechercher un champion…",
     "champFilter.hint":
-      "Choisis un champion joué avec et/ou contre. Aucun sélectionné = pas de filtre.",
+      "Choisis le champion que tu as joué et/ou un champion adverse. Aucun sélectionné = pas de filtre.",
 
     // champion stats table
     "champStats.title": "Statistiques par champion",
@@ -472,10 +472,11 @@ export const dictionaries = {
     "time.daysAgo": "{d}d ago",
 
     "champFilter.title": "Filter by champion",
-    "champFilter.with": "With (ally)",
+    "champFilter.with": "Played (this champion)",
     "champFilter.against": "Against (enemy)",
     "champFilter.searchPlaceholder": "Search a champion…",
-    "champFilter.hint": "Pick a champion played with and/or against. None selected = no filter.",
+    "champFilter.hint":
+      "Pick the champion you played and/or an enemy champion. None selected = no filter.",
 
     "champStats.title": "Champion statistics",
     "champStats.empty": "No ranked games for this filter.",

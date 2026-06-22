@@ -30,15 +30,15 @@ export function PingStats({ puuid }: Props) {
   const { t } = useI18n()
   const { data, isLoading } = usePingStats(puuid)
   const rows = (data?.byKey ?? []).filter((r) => PING_BY_KEY[r.key])
+  // Sum only the displayed (known) ping types so the total matches the breakdown.
+  const total = rows.reduce((s, r) => s + r.count, 0)
 
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-semibold">{t("pings.titleUsed")}</h3>
-        {data && data.total > 0 && (
-          <span className="text-sm text-muted-foreground">
-            {t("pings.total", { n: data.total })}
-          </span>
+        {total > 0 && (
+          <span className="text-sm text-muted-foreground">{t("pings.total", { n: total })}</span>
         )}
       </div>
       {!puuid || (!isLoading && rows.length === 0) ? (
