@@ -1,5 +1,23 @@
+import { z } from "zod"
 import type { RiotApiClient, RoutingRegion } from "../client"
 import { type AccountDto, AccountDtoSchema } from "../types/account"
+
+const ActiveRegionSchema = z.object({
+  puuid: z.string(),
+  game: z.string(),
+  region: z.string(), // platform id, e.g. "EUW1"
+})
+
+/** account-v1: the platform region where the player is active for LoL. */
+export async function getActiveRegion(
+  client: RiotApiClient,
+  routing: RoutingRegion,
+  puuid: string
+): Promise<string> {
+  const url = `https://${routing}.api.riotgames.com/riot/account/v1/region/by-game/lol/by-puuid/${puuid}`
+  const res = await client.fetch(url, ActiveRegionSchema)
+  return res.region.toUpperCase()
+}
 
 export async function getAccountByRiotId(
   client: RiotApiClient,

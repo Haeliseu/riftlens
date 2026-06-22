@@ -1,6 +1,8 @@
 export type { Region, RoutingRegion } from "./client"
 export { RiotApiClient, regionToRouting } from "./client"
 export * from "./endpoints/account"
+export * from "./endpoints/challenges"
+export * from "./endpoints/champion"
 export * from "./endpoints/champion-mastery"
 export * from "./endpoints/league"
 export * from "./endpoints/match"
