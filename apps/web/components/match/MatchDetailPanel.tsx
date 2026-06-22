@@ -1,7 +1,12 @@
 "use client"
 
-import { getChampionIconUrl, isSummonersRift } from "@riftlens/riot-api"
-import { Bug, Castle, ChevronRight, Eye, Flame, Skull, Swords } from "lucide-react"
+import {
+  getChampionIconUrl,
+  getRankIconUrl,
+  isSummonersRift,
+  type TierName,
+} from "@riftlens/riot-api"
+import { Bug, Castle, ChevronRight, Eye, Flame, Link2, Skull, Swords } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { type MatchDetailParticipant, type MatchTeam, useMatchDetail } from "@/hooks/useMatchDetail"
@@ -9,7 +14,7 @@ import { useMatchTimeline } from "@/hooks/useMatchTimeline"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { PING_BY_KEY } from "@/lib/pings"
-import { tierColor, tierLabel } from "@/lib/tiers"
+import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
 
 function carryColor(score: number): string {
   if (score >= 65) return "text-violet-400"
@@ -264,14 +269,23 @@ function GeneralRow({ p, region }: { p: MatchDetailParticipant; region: string }
         </div>
       )}
 
-      {/* name + rank */}
+      {/* name + rank (icon before the label; apex tiers have no division) */}
       <div className="w-24 min-w-0">
         <Link href={playerHref(region, p)} className="block text-xs truncate hover:underline">
           {p.gameName || p.championName}
         </Link>
         {p.tier && (
-          <span className="text-[10px]" style={{ color: tierColor(p.tier) }}>
-            {tierLabel(t, p.tier)} {p.division}
+          <span
+            className="flex items-center gap-1 text-[10px]"
+            style={{ color: tierColor(p.tier) }}
+          >
+            {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+            <img
+              src={getRankIconUrl(capitalizeTier(p.tier) as TierName)}
+              alt=""
+              className="h-3.5 w-3.5"
+            />
+            {rankLabel(t, p.tier, p.division ?? "")}
           </span>
         )}
       </div>
@@ -364,7 +378,7 @@ function Teams({
       <div>
         <div className="mb-1 flex items-center justify-between">
           <p className={`text-xs font-semibold ${blueWin ? "text-green-500" : "text-red-500"}`}>
-            {t("live.blueTeam")} · {blueWin ? t("common.win") : t("common.loss")}
+            {blueWin ? t("common.win") : t("common.loss")} · {t("live.blueTeam")}
           </p>
           <TeamObjectives team={blueTeam} />
         </div>
@@ -375,7 +389,7 @@ function Teams({
       <div>
         <div className="mb-1 flex items-center justify-between">
           <p className={`text-xs font-semibold ${blueWin ? "text-red-500" : "text-green-500"}`}>
-            {t("live.redTeam")} · {blueWin ? t("common.loss") : t("common.win")}
+            {blueWin ? t("common.loss") : t("common.win")} · {t("live.redTeam")}
           </p>
           <TeamObjectives team={redTeam} />
         </div>
@@ -513,7 +527,19 @@ function FocusedStats({ p }: { p: MatchDetailParticipant }) {
 export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPanelProps) {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>("general")
+  const [copied, setCopied] = useState(false)
   const { data, isLoading, isError } = useMatchDetail(matchId, region)
+
+  function copyLink() {
+    const link =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/match/${region}/${matchId}`
+        : matchId
+    navigator.clipboard?.writeText(link).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
 
   if (isLoading) {
     return (
@@ -544,19 +570,29 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
 
   return (
     <div className="px-3 py-3">
-      <div className="mb-3 flex gap-1 rounded-md bg-muted p-0.5 w-fit">
-        {TABS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setTab(item.id)}
-            className={`rounded px-3 py-1 text-xs ${
-              tab === item.id ? "bg-background font-medium" : "text-muted-foreground"
-            }`}
-          >
-            {t(item.label)}
-          </button>
-        ))}
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex gap-1 rounded-md bg-muted p-0.5 w-fit">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTab(item.id)}
+              className={`rounded px-3 py-1 text-xs ${
+                tab === item.id ? "bg-background font-medium" : "text-muted-foreground"
+              }`}
+            >
+              {t(item.label)}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={copyLink}
+          className="flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs text-muted-foreground hover:bg-accent"
+        >
+          <Link2 className="h-3.5 w-3.5" />
+          {copied ? t("detail.copied") : t("detail.copyLink")}
+        </button>
       </div>
 
       {tab === "general" && (

@@ -165,7 +165,7 @@ export function LeaderboardTable() {
               disabled={isFetchingNextPage}
               className="w-full py-2.5 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
             >
-              {isFetchingNextPage ? t("common.loading") : t("history.loadMore")}
+              {isFetchingNextPage ? t("common.loading") : t("leaderboard.loadMore")}
             </button>
           )}
         </div>

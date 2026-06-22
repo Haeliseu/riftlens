@@ -50,26 +50,28 @@ export function FlexCard({ region, puuid, flexRank }: FlexCardProps) {
         <div className="px-4 pb-4">
           <div className="flex items-center gap-4 mb-2">
             {flexRank ? (
-              <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
+              <div className="relative w-28 h-28 flex-shrink-0 overflow-hidden">
                 {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
                 <img
                   src={getRankEmblemUrl(capitalizeTier(flexRank.tier) as TierName)}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-contain scale-[3.2] drop-shadow"
+                  className="absolute inset-0 h-full w-full object-contain scale-[3.4] drop-shadow"
                 />
               </div>
             ) : (
-              <div className="h-20 w-20 flex items-center justify-center text-4xl text-muted-foreground">
+              <div className="h-28 w-28 flex items-center justify-center text-5xl text-muted-foreground">
                 —
               </div>
             )}
             <div>
-              <p className="text-lg font-bold" style={{ color }}>
+              <p className="text-xl font-bold" style={{ color }}>
                 {label}
               </p>
-              <p className="text-sm text-muted-foreground font-mono">
-                {t("history.lp", { value: flexRank ? flexRank.leaguePoints : 0 })}
-              </p>
+              {flexRank && (
+                <p className="text-sm text-muted-foreground font-mono">
+                  {t("history.lp", { value: flexRank.leaguePoints })}
+                </p>
+              )}
             </div>
           </div>
 

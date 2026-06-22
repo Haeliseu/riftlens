@@ -11,7 +11,7 @@ interface Props {
 export function RolePerformance({ puuid }: Props) {
   const { t } = useI18n()
   const { data, isLoading } = useRolePerformance(puuid)
-  const rows = (data ?? []).filter((r) => r.games > 0)
+  const rows = (data ?? []).filter((r) => r.games > 0 && r.role !== "UNKNOWN")
 
   return (
     <div className="rounded-xl border bg-card p-4">

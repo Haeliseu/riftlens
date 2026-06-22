@@ -202,6 +202,8 @@ export const dictionaries = {
     "lpchart.avgRank": "Rang moyen : {tier} {division}",
 
     // match detail panel
+    "detail.copyLink": "Copier le lien",
+    "detail.copied": "Copié !",
     "detail.tab.general": "Général",
     "detail.tab.details": "Détails",
     "detail.tab.runes": "Runes",
@@ -337,6 +339,7 @@ export const dictionaries = {
     "leaderboard.col.wins": "Victoires",
     "leaderboard.col.wr": "VIC",
     "leaderboard.hidden": "Joueur masqué",
+    "leaderboard.loadMore": "Voir plus de joueurs",
     "champions.title": "Champions",
     "champions.soon": "La page champions arrive bientôt.",
     "champions.loading": "Chargement des champions…",
@@ -558,6 +561,8 @@ export const dictionaries = {
     "lpchart.peak": "Peak",
     "lpchart.avgRank": "Avg. rank: {tier} {division}",
 
+    "detail.copyLink": "Copy link",
+    "detail.copied": "Copied!",
     "detail.tab.general": "General",
     "detail.tab.details": "Details",
     "detail.tab.runes": "Runes",
@@ -685,6 +690,7 @@ export const dictionaries = {
     "leaderboard.col.wins": "Wins",
     "leaderboard.col.wr": "WR",
     "leaderboard.hidden": "Hidden player",
+    "leaderboard.loadMore": "Show more players",
     "champions.title": "Champions",
     "champions.soon": "The champions page is coming soon.",
     "champions.loading": "Loading champions…",

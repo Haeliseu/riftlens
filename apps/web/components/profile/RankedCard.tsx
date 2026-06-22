@@ -97,9 +97,11 @@ export function RankedCard({ region, puuid, soloRank }: RankedCardProps) {
           <p className="text-xl font-bold" style={{ color }}>
             {label}
           </p>
-          <p className="text-sm text-muted-foreground font-mono">
-            {t("history.lp", { value: soloRank ? soloRank.leaguePoints : 0 })}
-          </p>
+          {soloRank && (
+            <p className="text-sm text-muted-foreground font-mono">
+              {t("history.lp", { value: soloRank.leaguePoints })}
+            </p>
+          )}
         </div>
       </div>
 

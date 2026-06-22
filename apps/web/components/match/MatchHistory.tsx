@@ -408,39 +408,33 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     })}
                   </div>
 
-                  {/* 5. Matchup: lane opponent + VS + enemy carry (with role icon) */}
-                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-11">
+                  {/* 5. Matchup: lane opponent in front, enemy team's top-score
+                      player stacked behind it; "vs" below. */}
+                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-12">
                     {m.laneOpponentChampionId != null ? (
                       <>
-                        {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                        <img
-                          src={getChampionIconUrl(m.laneOpponentChampionId)}
-                          alt={t("history.laneOpponent")}
-                          title={t("history.laneOpponent")}
-                          className="h-8 w-8 rounded-md"
-                        />
-                        <div className="flex items-center gap-0.5">
-                          <span className="text-[8px] font-bold text-muted-foreground">
-                            {t("history.vs")}
-                          </span>
-                          {m.enemyCarryChampionId != null && (
-                            // biome-ignore lint/performance/noImgElement: external CDN icon
-                            <img
-                              src={getChampionIconUrl(m.enemyCarryChampionId)}
-                              alt={t("history.enemyCarry")}
-                              title={t("history.enemyCarry")}
-                              className="h-4 w-4 rounded-sm ring-1 ring-amber-400/70"
-                            />
-                          )}
-                          {m.enemyCarryPosition && (
-                            // biome-ignore lint/performance/noImgElement: external CDN icon
-                            <img
-                              src={roleIconUrl(m.enemyCarryPosition)}
-                              alt=""
-                              className="h-3 w-3"
-                            />
-                          )}
+                        <div className="relative h-9 w-9">
+                          {m.enemyCarryChampionId != null &&
+                            m.enemyCarryChampionId !== m.laneOpponentChampionId && (
+                              // biome-ignore lint/performance/noImgElement: external CDN icon
+                              <img
+                                src={getChampionIconUrl(m.enemyCarryChampionId)}
+                                alt={t("history.enemyCarry")}
+                                title={t("history.enemyCarry")}
+                                className="absolute -top-1 -left-1.5 h-7 w-7 rounded-sm opacity-70 ring-1 ring-amber-400/60"
+                              />
+                            )}
+                          {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+                          <img
+                            src={getChampionIconUrl(m.laneOpponentChampionId)}
+                            alt={t("history.laneOpponent")}
+                            title={t("history.laneOpponent")}
+                            className="absolute bottom-0 right-0 h-8 w-8 rounded-md ring-2 ring-background"
+                          />
                         </div>
+                        <span className="text-[8px] font-bold text-muted-foreground">
+                          {t("history.vs")}
+                        </span>
                       </>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
