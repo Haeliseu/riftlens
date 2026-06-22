@@ -6,11 +6,9 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
-import { regionBadge } from "@/lib/regions"
+import { REGION_IDS, REGION_NAME_KEY, regionBadge } from "@/lib/regions"
 import { LanguageToggle } from "./LanguageToggle"
 import { ThemeToggle } from "./ThemeToggle"
-
-const REGIONS = ["EUW1", "EUN1", "NA1", "KR", "BR1", "JP1", "OC1", "TR1", "LA1", "LA2", "RU"]
 
 const NAV_LINKS: { href: string; label: TranslationKey }[] = [
   { href: "/leaderboard", label: "leaderboard.title" },
@@ -119,8 +117,11 @@ export function Navbar() {
             {badge.label}
           </button>
           {regionOpen && (
-            <div className="absolute right-0 top-full mt-1 z-50 flex flex-wrap justify-end gap-1.5 rounded-md border bg-popover p-2 shadow-xl w-40">
-              {REGIONS.map((id) => {
+            <div className="absolute right-0 top-full mt-1 z-50 max-h-80 w-56 overflow-y-auto rounded-md border bg-popover p-1 shadow-xl">
+              <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("nav.region")}
+              </p>
+              {REGION_IDS.map((id) => {
                 const b = regionBadge(id)
                 return (
                   <button
@@ -130,12 +131,17 @@ export function Navbar() {
                       setRegion(id)
                       setRegionOpen(false)
                     }}
-                    className={`rounded px-1.5 py-0.5 text-[10px] font-semibold text-white ${
-                      id === region ? "ring-1 ring-foreground" : ""
+                    className={`flex w-full items-center gap-2.5 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                      id === region ? "bg-accent" : ""
                     }`}
-                    style={{ backgroundColor: b.color }}
                   >
-                    {b.label}
+                    <span
+                      className="inline-flex w-11 flex-shrink-0 justify-center rounded px-1 py-0.5 text-[10px] font-semibold text-white"
+                      style={{ backgroundColor: b.color }}
+                    >
+                      {b.label}
+                    </span>
+                    <span className="truncate">{t(REGION_NAME_KEY[id] ?? "nav.region")}</span>
                   </button>
                 )
               })}
