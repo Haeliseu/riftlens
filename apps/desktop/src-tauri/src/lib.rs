@@ -17,6 +17,8 @@ pub fn run() {
             commands::summoner::get_current_summoner,
             commands::game_flow::get_gameflow_phase,
             commands::champ_select::get_champ_select_buddies,
+            commands::profile::get_ranked_stats,
+            commands::profile::get_recent_matches,
             commands::runes::import_rune_page,
         ])
         .run(tauri::generate_context!())

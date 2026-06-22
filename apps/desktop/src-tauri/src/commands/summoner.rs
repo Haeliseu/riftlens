@@ -7,6 +7,10 @@ use serde::{Deserialize, Serialize};
 pub struct LcuSummoner {
     pub account_id: i64,
     pub display_name: String,
+    #[serde(default)]
+    pub game_name: String,
+    #[serde(default)]
+    pub tag_line: String,
     pub profile_icon_id: i32,
     pub puuid: String,
     pub summoner_id: i64,
