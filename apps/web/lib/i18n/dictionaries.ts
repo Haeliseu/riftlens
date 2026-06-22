@@ -386,8 +386,11 @@ export const dictionaries = {
 
     // login
     "login.title": "Connexion",
-    "login.discord": "Continuer avec Discord",
-    "login.subtitle": "Connectez-vous à votre compte",
+    "login.riot": "Se connecter avec Riot",
+    "login.riotInfo":
+      "RiftLens utilise ton compte Riot pour récupérer et tenir à jour ton profil automatiquement.",
+    "login.riotPending": "Connexion Riot bientôt disponible — en attente de l'accès RSO.",
+    "login.subtitle": "Connecte-toi avec ton compte Riot",
     "login.email": "Email",
     "login.password": "Mot de passe",
     "login.submit": "Se connecter",
@@ -773,8 +776,11 @@ export const dictionaries = {
     "champions.freeBadge": "FREE",
 
     "login.title": "Sign in",
-    "login.discord": "Continue with Discord",
-    "login.subtitle": "Sign in to your account",
+    "login.riot": "Sign in with Riot",
+    "login.riotInfo":
+      "RiftLens uses your Riot account to fetch and keep your profile up to date automatically.",
+    "login.riotPending": "Riot sign-in coming soon — pending RSO access.",
+    "login.subtitle": "Sign in with your Riot account",
     "login.email": "Email",
     "login.password": "Password",
     "login.submit": "Sign in",

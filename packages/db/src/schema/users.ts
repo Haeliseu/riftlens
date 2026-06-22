@@ -10,6 +10,13 @@ export const profiles = pgTable("profiles", {
   username: text().unique(),
   avatarUrl: text("avatar_url"),
   defaultRegion: text("default_region").default("EUW1"),
+  // Riot identity, filled from RSO at sign-in. The hourly profile-refresh cron
+  // iterates the rows where riotPuuid is set.
+  riotPuuid: text("riot_puuid").unique(),
+  gameName: text("game_name"),
+  tagLine: text("tag_line"),
+  region: text(),
+  lastRefreshedAt: timestamp("last_refreshed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })

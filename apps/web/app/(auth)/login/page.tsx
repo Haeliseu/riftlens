@@ -4,87 +4,53 @@ import { useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import { useI18n } from "@/lib/i18n"
 
+/** Official Riot Games logo (Simple Icons). */
+function RiotLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
+      <path d="M13.458.86 0 7.093l3.353 12.761 2.552-.313-.701-8.024.838-.373 1.447 8.202 4.361-.535-.775-8.857.83-.37 1.591 9.025 4.412-.542-.849-9.708.84-.374 1.74 9.87L24 17.318V3.5Zm.316 19.356.222 1.256L24 23.14v-4.18l-10.22 1.256Z" />
+    </svg>
+  )
+}
+
 export default function LoginPage() {
   const { t } = useI18n()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleRiot() {
     setLoading(true)
     setError(null)
-    const { error: authError } = await authClient.signIn.email({ email, password })
-    if (authError) setError(authError.message ?? t("login.error"))
-    setLoading(false)
-  }
-
-  async function handleDiscord() {
-    await authClient.signIn.social({ provider: "discord" })
+    const { error: authError } = await authClient.signIn.oauth2({
+      providerId: "riot",
+      callbackURL: "/",
+    })
+    if (authError) {
+      setError(t("login.riotPending"))
+      setLoading(false)
+    }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
+      <div className="w-full max-w-sm space-y-8 text-center">
+        <div>
           <h1 className="text-2xl font-bold">RiftLens</h1>
           <p className="text-muted-foreground text-sm mt-1">{t("login.subtitle")}</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              {t("login.email")}
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
-          <div className="space-y-1">
-            <label htmlFor="password" className="text-sm font-medium">
-              {t("login.password")}
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
-          {error && <p className="text-destructive text-sm">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-          >
-            {loading ? t("login.submitting") : t("login.submit")}
-          </button>
-        </form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">{t("login.or")}</span>
-          </div>
-        </div>
-
         <button
           type="button"
-          onClick={handleDiscord}
-          className="w-full rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+          onClick={handleRiot}
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2.5 rounded-md bg-[#d13639] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#b92d30] disabled:opacity-50"
         >
-          {t("login.discord")}
+          <RiotLogo className="h-4 w-4" />
+          {loading ? t("login.submitting") : t("login.riot")}
         </button>
+
+        {error && <p className="text-destructive text-sm">{error}</p>}
+        <p className="text-xs text-muted-foreground">{t("login.riotInfo")}</p>
       </div>
     </div>
   )
