@@ -132,21 +132,36 @@ function placementLabel(t: T, p: number): string {
   return p === 1 ? t("history.placement.first") : t("history.placement.nth", { n: p })
 }
 
-/** Per-game LP with a promotion/demotion arrow; em dash when unknown. */
-function LpDelta({ value, t }: { value: number | undefined; t: T }) {
+/**
+ * Per-game LP: the signed gain/loss in a bigger font. The promotion/demotion
+ * arrow is shown ONLY when the game crossed a tier/division boundary.
+ */
+function LpDelta({
+  value,
+  rankChange,
+  t,
+}: {
+  value: number | undefined
+  rankChange: "promotion" | "demotion" | undefined
+  t: T
+}) {
   if (value === undefined) {
     return <span className="text-sm text-muted-foreground">—</span>
   }
   const positive = value >= 0
-  const Arrow = positive ? ArrowUp : ArrowDown
+  const color = positive ? "text-green-500" : "text-red-500"
   return (
-    <span
-      className={`flex flex-col items-center text-xs font-semibold leading-tight ${
-        positive ? "text-green-500" : "text-red-500"
-      }`}
-    >
-      <Arrow className="h-3.5 w-3.5" />
-      {t("history.lp", { value: `${value > 0 ? "+" : ""}${value}` })}
+    <span className={`flex flex-col items-center leading-tight ${color}`}>
+      {rankChange &&
+        (rankChange === "promotion" ? (
+          <ArrowUp className="h-4 w-4" />
+        ) : (
+          <ArrowDown className="h-4 w-4" />
+        ))}
+      <span className="text-base font-bold tabular-nums">
+        {value > 0 ? "+" : ""}
+        {value}
+      </span>
     </span>
   )
 }
@@ -308,7 +323,11 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                 >
                   {/* 0. LP gain/loss — its own column, left of the info lines */}
                   <div className="w-12 flex-shrink-0 flex items-center justify-center">
-                    <LpDelta value={lpPerGame?.matchLp[m.matchId]} t={t} />
+                    <LpDelta
+                      value={lpPerGame?.matchLp[m.matchId]}
+                      rankChange={lpPerGame?.matchRankChange[m.matchId]}
+                      t={t}
+                    />
                   </div>
 
                   {/* 1. Result info: queue, date, win/loss, duration */}

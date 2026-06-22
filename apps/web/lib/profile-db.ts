@@ -216,6 +216,8 @@ export async function cachedRanks(
 export interface LpPerGame {
   /** matchId -> LP change, only for unambiguously attributable games */
   matchLp: Record<string, number>
+  /** matchId -> rank change across that game (tier/division crossed) */
+  matchRankChange: Record<string, "promotion" | "demotion">
   /** championId -> net LP across attributable games */
   byChampion: Record<number, number>
 }
@@ -227,7 +229,12 @@ export interface LpPerGame {
  */
 export async function lpPerGameFromDb(puuid: string): Promise<LpPerGame> {
   const snaps = await db
-    .select({ value: lpSnapshots.value, recordedAt: lpSnapshots.recordedAt })
+    .select({
+      value: lpSnapshots.value,
+      tier: lpSnapshots.tier,
+      division: lpSnapshots.division,
+      recordedAt: lpSnapshots.recordedAt,
+    })
     .from(lpSnapshots)
     .where(and(eq(lpSnapshots.puuid, puuid), eq(lpSnapshots.queueId, 420)))
     .orderBy(lpSnapshots.recordedAt)
@@ -242,6 +249,7 @@ export async function lpPerGameFromDb(puuid: string): Promise<LpPerGame> {
     .where(and(eq(summonerMatches.puuid, puuid), eq(summonerMatches.queueId, 420)))
 
   const matchLp: Record<string, number> = {}
+  const matchRankChange: Record<string, "promotion" | "demotion"> = {}
   for (let i = 1; i < snaps.length; i++) {
     const a = snaps[i - 1]
     const b = snaps[i]
@@ -251,8 +259,15 @@ export async function lpPerGameFromDb(puuid: string): Promise<LpPerGame> {
     const between = games.filter(
       (g) => g.gameCreation != null && g.gameCreation > at && g.gameCreation <= bt
     )
-    if (between.length === 1 && between[0]?.matchId) {
-      matchLp[between[0].matchId] = b.value - a.value
+    const matchId = between.length === 1 ? between[0]?.matchId : undefined
+    if (matchId) {
+      matchLp[matchId] = b.value - a.value
+      // A crossed tier/division boundary means a promotion (LP went up) or a
+      // demotion (LP went down) — the ladder value is continuous so its sign is
+      // the reliable direction.
+      if (a.tier !== b.tier || a.division !== b.division) {
+        matchRankChange[matchId] = b.value >= a.value ? "promotion" : "demotion"
+      }
     }
   }
 
@@ -262,7 +277,7 @@ export async function lpPerGameFromDb(puuid: string): Promise<LpPerGame> {
       byChampion[g.championId] = (byChampion[g.championId] ?? 0) + (matchLp[g.matchId] ?? 0)
     }
   }
-  return { matchLp, byChampion }
+  return { matchLp, matchRankChange, byChampion }
 }
 
 export interface PingStat {

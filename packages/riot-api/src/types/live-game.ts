@@ -2,7 +2,9 @@ import { z } from "zod"
 
 export const LiveGameParticipantSchema = z.object({
   puuid: z.string().optional(),
-  summonerId: z.string(),
+  // Riot removed encrypted IDs from spectator-v5 — summonerId is no longer
+  // returned for many participants, so it must stay optional.
+  summonerId: z.string().optional(),
   summonerName: z.string().optional(),
   riotId: z.string().optional(),
   teamId: z.number(),
