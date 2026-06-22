@@ -2,7 +2,7 @@
 
 import { getChampionIconUrl, type MatchSummary } from "@riftlens/riot-api"
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
@@ -152,7 +152,6 @@ function LpDelta({ value, t }: { value: number | undefined; t: T }) {
 
 export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   const { t } = useI18n()
-  const [count, setCount] = useState(20)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
@@ -162,21 +161,13 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   const [filterOpen, setFilterOpen] = useState(false)
   const { data: champions } = useChampions()
   const { data: lpPerGame } = useLpPerGame(puuid)
-  // Solo/Flex are filtered server-side (Riot queue param) so a page is exactly
+  // Solo/Flex are filtered server-side (Riot queue param) so each page is exactly
   // 20 of that queue. Other filters (role, champion, OTHER, period) are applied
-  // client-side — "load more" lets the user fetch deeper to fill 20.
+  // client-side across loaded pages — "load more" fetches the next page.
   const serverQueue = SERVER_QUEUE[queueGroup]
-  // Reset to the first page whenever the active filters change.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on filter change only
-  useEffect(() => {
-    setCount(20)
-  }, [queueGroup, role, period, withChamp, againstChamp])
-  const {
-    data: rawMatches,
-    isLoading,
-    isError,
-    isFetching,
-  } = useMatchHistory(puuid, region, count, serverQueue)
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useMatchHistory(puuid, region, serverQueue)
+  const rawMatches = data?.pages.flat()
 
   let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
   // Client-side queue filter only needed for OTHER (no single Riot queue id).
@@ -187,9 +178,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   if (matches && withChamp != null) matches = matches.filter((m) => m.championId === withChamp)
   if (matches && againstChamp != null)
     matches = matches.filter((m) => m.enemyChampionIds.includes(againstChamp))
-  // Keep the button until the cap, independent of how many matches actually came
-  // back (rate-limited fetches can return fewer than `count`).
-  const canLoadMore = !isLoading && (rawMatches?.length ?? 0) > 0 && count < 100
+  const canLoadMore = hasNextPage
 
   return (
     <div className="space-y-2">
@@ -500,11 +489,11 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
           {canLoadMore && (
             <button
               type="button"
-              onClick={() => setCount((c) => Math.min(100, c + 20))}
-              disabled={isFetching}
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
               className="w-full rounded-md border bg-card py-2 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
             >
-              {isFetching ? t("common.loading") : t("history.loadMore")}
+              {isFetchingNextPage ? t("common.loading") : t("history.loadMore")}
             </button>
           )}
         </div>

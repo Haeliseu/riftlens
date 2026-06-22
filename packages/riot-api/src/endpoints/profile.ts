@@ -247,11 +247,13 @@ export async function getMatchHistory(
   region: Region,
   puuid: string,
   count = 10,
-  queue?: number
+  queue?: number,
+  start = 0
 ): Promise<MatchSummary[]> {
   const routing = regionToRouting(region)
   const ids = await getMatchIds(client, routing, puuid, {
     count,
+    start,
     ...(queue !== undefined ? { queue } : {}),
   })
 

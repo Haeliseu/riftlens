@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   const puuid = searchParams.get("puuid")
   const region = (searchParams.get("region") ?? "EUW1") as Region
   const count = Math.min(100, Math.max(1, parseInt(searchParams.get("count") ?? "10", 10)))
+  const start = Math.max(0, parseInt(searchParams.get("start") ?? "0", 10))
   const queueParam = searchParams.get("queue")
   const queue = queueParam ? parseInt(queueParam, 10) : undefined
 
@@ -19,14 +20,14 @@ export async function GET(req: NextRequest) {
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
-    // Cache the enriched list briefly so repeat navigations don't re-fetch ~20
-    // matches from Riot each time (eases the dev-key rate limit).
+    // Cache the enriched page briefly so repeat navigations don't re-fetch the
+    // same matches from Riot each time (eases the dev-key rate limit).
     const enriched = await withCache(
-      `mh:${region}:${puuid}:${queue ?? "all"}:${count}`,
+      `mh:${region}:${puuid}:${queue ?? "all"}:${start}:${count}`,
       180,
       async () => {
         const [matches, assets] = await Promise.all([
-          getMatchHistory(client, region, puuid, count, queue),
+          getMatchHistory(client, region, puuid, count, queue, start),
           resolveAssets(),
         ])
         // Attach resolved CDN icon URLs for the player's summoner spells + runes so
