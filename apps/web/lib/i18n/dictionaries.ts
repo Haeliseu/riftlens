@@ -13,7 +13,6 @@ export const dictionaries = {
   fr: {
     // generic
     "common.loading": "Chargement…",
-    "common.soon": "Bientôt disponible",
     "common.clear": "Effacer",
     "common.reset": "Réinitialiser",
     "common.apply": "Appliquer",
@@ -371,7 +370,6 @@ export const dictionaries = {
     "queue.other": "Autre",
 
     "leaderboard.title": "Classement",
-    "leaderboard.soon": "Le classement arrive bientôt.",
     "leaderboard.loading": "Chargement du classement…",
     "leaderboard.unavailable": "Classement indisponible (clé API Riot ?).",
     "leaderboard.col.player": "Joueur",
@@ -380,7 +378,6 @@ export const dictionaries = {
     "leaderboard.hidden": "Joueur masqué",
     "leaderboard.loadMore": "Voir plus de joueurs",
     "champions.title": "Champions",
-    "champions.soon": "La page champions arrive bientôt.",
     "champions.loading": "Chargement des champions…",
     "champions.listUnavailable": "Liste indisponible.",
     "champions.none": "Aucun champion.",
@@ -431,7 +428,6 @@ export const dictionaries = {
 
   en: {
     "common.loading": "Loading…",
-    "common.soon": "Coming soon",
     "common.clear": "Clear",
     "common.reset": "Reset",
     "common.apply": "Apply",
@@ -762,7 +758,6 @@ export const dictionaries = {
     "queue.other": "Other",
 
     "leaderboard.title": "Leaderboard",
-    "leaderboard.soon": "The leaderboard is coming soon.",
     "leaderboard.loading": "Loading leaderboard…",
     "leaderboard.unavailable": "Leaderboard unavailable (Riot API key?).",
     "leaderboard.col.player": "Player",
@@ -771,7 +766,6 @@ export const dictionaries = {
     "leaderboard.hidden": "Hidden player",
     "leaderboard.loadMore": "Show more players",
     "champions.title": "Champions",
-    "champions.soon": "The champions page is coming soon.",
     "champions.loading": "Loading champions…",
     "champions.listUnavailable": "List unavailable.",
     "champions.none": "No champion.",
