@@ -156,9 +156,9 @@ export async function ingestRankedMatches(
 ): Promise<void> {
   const routing = regionToRouting(region)
   const c = client()
-  // Pull a deep id list (1 cheap call); we persist up to `maxNew` new ones per
-  // view so the season backfills progressively across visits.
-  const ids = await getMatchIds(c, routing, puuid, { type: "ranked", count: 100 })
+  // Pull a deep id list (1 cheap call); all queues so champion stats can split
+  // by Solo/Flex/ARAM/Arena. We persist up to `maxNew` new ones per view.
+  const ids = await getMatchIds(c, routing, puuid, { count: 100 })
   if (ids.length === 0) return
 
   const existing = await db

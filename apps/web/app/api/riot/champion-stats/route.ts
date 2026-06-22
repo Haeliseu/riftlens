@@ -34,12 +34,26 @@ export async function GET(req: NextRequest) {
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
   try {
     const stats = await getChampionStats(client, region, puuid, count)
+    const empty = (): ChampDetailBucket => ({
+      games: 0,
+      wins: 0,
+      kills: 0,
+      deaths: 0,
+      assists: 0,
+      csPerMin: 0,
+      kp: 0,
+      gold: 0,
+      damage: 0,
+      vision: 0,
+    })
     const detailed: ChampionDetail[] = stats.map((c) => ({
       championId: c.championId,
       championName: c.championName,
       total: toDetailBucket(c.total),
       solo: toDetailBucket(c.solo),
       flex: toDetailBucket(c.flex),
+      aram: empty(),
+      arena: empty(),
     }))
     return NextResponse.json(detailed, {
       headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },

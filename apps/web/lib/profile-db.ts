@@ -22,6 +22,8 @@ export interface ChampionDetail {
   total: ChampDetailBucket
   solo: ChampDetailBucket
   flex: ChampDetailBucket
+  aram: ChampDetailBucket
+  arena: ChampDetailBucket
 }
 
 function emptyDetail(): ChampDetailBucket {
@@ -96,6 +98,8 @@ export async function championStatsFromDb(puuid: string): Promise<ChampionDetail
         total: emptyDetail(),
         solo: emptyDetail(),
         flex: emptyDetail(),
+        aram: emptyDetail(),
+        arena: emptyDetail(),
       } satisfies ChampionDetail)
     const line = {
       win: r.win ?? false,
@@ -111,6 +115,8 @@ export async function championStatsFromDb(puuid: string): Promise<ChampionDetail
     addDetail(agg.total, line)
     if (r.queueId === 420) addDetail(agg.solo, line)
     else if (r.queueId === 440) addDetail(agg.flex, line)
+    else if (r.queueId === 450) addDetail(agg.aram, line)
+    else if (r.queueId === 1700 || r.queueId === 1710) addDetail(agg.arena, line)
     byChamp.set(r.championId, agg)
   }
   return [...byChamp.values()].sort((a, b) => b.total.games - a.total.games)
