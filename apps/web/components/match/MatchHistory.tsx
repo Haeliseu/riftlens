@@ -1,7 +1,12 @@
 "use client"
 
-import { getChampionIconUrl, type MatchSummary } from "@riftlens/riot-api"
-import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react"
+import {
+  getChampionIconUrl,
+  getRankIconUrl,
+  type MatchSummary,
+  type TierName,
+} from "@riftlens/riot-api"
+import { ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
@@ -10,6 +15,7 @@ import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { queueKey } from "@/lib/queues"
 import { ROLES, roleIconUrl } from "@/lib/roles"
+import { capitalizeTier, rankLabel } from "@/lib/tiers"
 import { ChampionFilterModal } from "./ChampionFilterModal"
 import { MatchDetailPanel } from "./MatchDetailPanel"
 import { MatchupVs } from "./MatchupVs"
@@ -133,8 +139,9 @@ function placementLabel(t: T, p: number): string {
 }
 
 /**
- * Per-game LP: the signed gain/loss in a bigger font. The promotion/demotion
- * arrow is shown ONLY when the game crossed a tier/division boundary.
+ * Per-game LP: the signed gain/loss in a bigger font. When the game crossed a
+ * tier/division boundary we also show the icon of the rank reached (promotion
+ * or demotion) instead of a plain arrow.
  */
 function LpDelta({
   value,
@@ -142,7 +149,7 @@ function LpDelta({
   t,
 }: {
   value: number | undefined
-  rankChange: "promotion" | "demotion" | undefined
+  rankChange: { dir: "promotion" | "demotion"; tier: string; division: string } | undefined
   t: T
 }) {
   if (value === undefined) {
@@ -152,12 +159,17 @@ function LpDelta({
   const color = positive ? "text-green-500" : "text-red-500"
   return (
     <span className={`flex flex-col items-center leading-tight ${color}`}>
-      {rankChange &&
-        (rankChange === "promotion" ? (
-          <ArrowUp className="h-4 w-4" />
-        ) : (
-          <ArrowDown className="h-4 w-4" />
-        ))}
+      {rankChange && (
+        // biome-ignore lint/performance/noImgElement: external CDN icon
+        <img
+          src={getRankIconUrl(capitalizeTier(rankChange.tier) as TierName)}
+          alt={rankLabel(t, rankChange.tier, rankChange.division)}
+          title={t(rankChange.dir === "promotion" ? "history.promotion" : "history.demotion", {
+            rank: rankLabel(t, rankChange.tier, rankChange.division),
+          })}
+          className="h-6 w-6"
+        />
+      )}
       <span className="text-base font-bold tabular-nums">
         {value > 0 ? "+" : ""}
         {value}

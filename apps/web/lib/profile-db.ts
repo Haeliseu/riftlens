@@ -217,7 +217,7 @@ export interface LpPerGame {
   /** matchId -> LP change, only for unambiguously attributable games */
   matchLp: Record<string, number>
   /** matchId -> rank change across that game (tier/division crossed) */
-  matchRankChange: Record<string, "promotion" | "demotion">
+  matchRankChange: Record<string, { dir: "promotion" | "demotion"; tier: string; division: string }>
   /** championId -> net LP across attributable games */
   byChampion: Record<number, number>
 }
@@ -249,7 +249,10 @@ export async function lpPerGameFromDb(puuid: string): Promise<LpPerGame> {
     .where(and(eq(summonerMatches.puuid, puuid), eq(summonerMatches.queueId, 420)))
 
   const matchLp: Record<string, number> = {}
-  const matchRankChange: Record<string, "promotion" | "demotion"> = {}
+  const matchRankChange: Record<
+    string,
+    { dir: "promotion" | "demotion"; tier: string; division: string }
+  > = {}
   for (let i = 1; i < snaps.length; i++) {
     const a = snaps[i - 1]
     const b = snaps[i]
@@ -266,7 +269,11 @@ export async function lpPerGameFromDb(puuid: string): Promise<LpPerGame> {
       // demotion (LP went down) — the ladder value is continuous so its sign is
       // the reliable direction.
       if (a.tier !== b.tier || a.division !== b.division) {
-        matchRankChange[matchId] = b.value >= a.value ? "promotion" : "demotion"
+        matchRankChange[matchId] = {
+          dir: b.value >= a.value ? "promotion" : "demotion",
+          tier: b.tier,
+          division: b.division,
+        }
       }
     }
   }
