@@ -70,25 +70,28 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
     const puuids = m.info.participants.map((p) => p.puuid)
     const cache = await cachedRanks(puuids).catch(() => new Map())
     const rankByPuuid = new Map<string, { tier: string; division: string; lp: number }>()
-    await Promise.all(
-      m.info.participants.map(async (p) => {
-        const c = cache.get(p.puuid)
-        if (c) {
-          rankByPuuid.set(p.puuid, { tier: c.tier, division: c.division, lp: c.leaguePoints })
-          return
-        }
-        const entries = await getLeagueEntriesByPuuid(client, region, p.puuid).catch(() => [])
-        const solo = entries.find((e) => e.queueType === "RANKED_SOLO_5x5")
-        if (solo) {
-          rankByPuuid.set(p.puuid, { tier: solo.tier, division: solo.rank, lp: solo.leaguePoints })
-          await cacheParticipantRank(p.puuid, region, {
-            tier: solo.tier,
-            division: solo.rank,
-            leaguePoints: solo.leaguePoints,
-          }).catch(() => {})
-        }
-      })
-    )
+    // Cap live league-v4 lookups so opening a match can't blow the dev-key rate
+    // limit (which would starve average-rank / live-game). Cached ranks are free.
+    let liveBudget = 4
+    for (const p of m.info.participants) {
+      const c = cache.get(p.puuid)
+      if (c) {
+        rankByPuuid.set(p.puuid, { tier: c.tier, division: c.division, lp: c.leaguePoints })
+        continue
+      }
+      if (liveBudget <= 0) continue
+      liveBudget -= 1
+      const entries = await getLeagueEntriesByPuuid(client, region, p.puuid).catch(() => [])
+      const solo = entries.find((e) => e.queueType === "RANKED_SOLO_5x5")
+      if (solo) {
+        rankByPuuid.set(p.puuid, { tier: solo.tier, division: solo.rank, lp: solo.leaguePoints })
+        await cacheParticipantRank(p.puuid, region, {
+          tier: solo.tier,
+          division: solo.rank,
+          leaguePoints: solo.leaguePoints,
+        }).catch(() => {})
+      }
+    }
 
     const participants = m.info.participants.map((p) => {
       const cs = (p.totalMinionsKilled ?? 0) + (p.neutralMinionsKilled ?? 0)

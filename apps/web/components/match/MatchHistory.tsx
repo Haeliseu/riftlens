@@ -131,19 +131,19 @@ function placementLabel(t: T, p: number): string {
 /** Per-game LP with a promotion/demotion arrow; em dash when unknown. */
 function LpDelta({ value, t }: { value: number | undefined; t: T }) {
   if (value === undefined) {
-    return <p className="text-[11px] text-muted-foreground">—</p>
+    return <span className="text-sm text-muted-foreground">—</span>
   }
   const positive = value >= 0
   const Arrow = positive ? ArrowUp : ArrowDown
   return (
-    <p
-      className={`flex items-center gap-0.5 text-[11px] font-semibold ${
+    <span
+      className={`flex flex-col items-center text-xs font-semibold leading-tight ${
         positive ? "text-green-500" : "text-red-500"
       }`}
     >
-      <Arrow className="h-3 w-3" />
+      <Arrow className="h-3.5 w-3.5" />
       {t("history.lp", { value: `${value > 0 ? "+" : ""}${value}` })}
-    </p>
+    </span>
   )
 }
 
@@ -297,27 +297,31 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                   onClick={() => setExpandedId(expanded ? null : m.matchId)}
                   className="flex w-full items-center gap-3 px-3 py-2 text-left"
                 >
-                  {/* 1. Result info: queue, win/loss, duration·date, LP ± with arrow */}
+                  {/* 0. LP gain/loss — its own column, left of the info lines */}
+                  <div className="w-12 flex-shrink-0 flex items-center justify-center">
+                    <LpDelta value={lpPerGame?.matchLp[m.matchId]} t={t} />
+                  </div>
+
+                  {/* 1. Result info: queue, date, win/loss, duration */}
                   <div className="w-[96px] flex-shrink-0 space-y-0.5">
                     {m.queueId === 420 ? (
-                      <p className="text-[11px] text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground truncate">
                         {t(queueKey(m.queueId, m.gameMode))}
                       </p>
                     ) : (
-                      <span className="inline-block rounded bg-accent px-1.5 py-px text-[10px] font-medium text-foreground/80">
+                      <span className="inline-block rounded bg-accent px-1.5 py-px text-[11px] font-medium text-foreground/80">
                         {t(queueKey(m.queueId, m.gameMode))}
                       </span>
                     )}
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {relativeTime(t, m.gameCreationMs)}
                     </p>
                     <p
-                      className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
+                      className={`text-sm font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
                     >
                       {m.win ? t("common.win") : t("common.loss")}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">{duration(m.gameDurationS)}</p>
-                    <LpDelta value={lpPerGame?.matchLp[m.matchId]} t={t} />
+                    <p className="text-xs text-muted-foreground">{duration(m.gameDurationS)}</p>
                   </div>
 
                   {/* 2. Played champion */}
@@ -329,7 +333,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                   />
 
                   {/* 3. KDA · CS · KP */}
-                  <div className="w-[62px] flex-shrink-0">
+                  <div className="w-[66px] flex-shrink-0">
                     <p className="text-sm font-medium font-mono whitespace-nowrap">
                       {m.kills}
                       <span className="text-muted-foreground font-normal">/</span>
@@ -337,19 +341,19 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                       <span className="text-muted-foreground font-normal">/</span>
                       {m.assists}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {kdaLabel(t, m.kills, m.deaths, m.assists)}
                     </p>
                   </div>
-                  <div className="w-[58px] flex-shrink-0">
-                    <p className="text-xs">{t("history.cs", { cs: m.cs })}</p>
-                    <p className="text-[11px] text-muted-foreground">
+                  <div className="w-[62px] flex-shrink-0">
+                    <p className="text-sm">{t("history.cs", { cs: m.cs })}</p>
+                    <p className="text-xs text-muted-foreground">
                       {t("history.csPerMin", { value: csPerMin })}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-medium">{kp}%</p>
-                    <p className="text-[11px] text-muted-foreground">{t("history.kp")}</p>
+                    <p className="text-sm font-medium">{kp}%</p>
+                    <p className="text-xs text-muted-foreground">{t("history.kp")}</p>
                   </div>
 
                   {/* 4a. Summoner spells + runes (primary/secondary), before items */}
