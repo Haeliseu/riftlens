@@ -65,6 +65,17 @@ function BuildSkillOrder({
   data.skills.forEach((s, i) => slotLevels[s.slot]?.push(i + 1))
   const a = data.at15
 
+  // Group items bought in the same shop visit (close timestamps) so they render
+  // glued together, with chevrons only between distinct purchase moments.
+  const BUY_WINDOW_MS = 3000
+  const buildGroups: (typeof data.build)[] = []
+  for (const b of data.build) {
+    const g = buildGroups[buildGroups.length - 1]
+    const prev = g?.[g.length - 1]
+    if (g && prev && b.at - prev.at <= BUY_WINDOW_MS) g.push(b)
+    else buildGroups.push([b])
+  }
+
   return (
     <div className="space-y-4">
       {a && (
@@ -116,19 +127,32 @@ function BuildSkillOrder({
           {t("detail.build")}
         </p>
         <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
-          {data.build.map((b, i) => (
-            <div key={`b-${b.itemId}-${i}`} className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div className="rounded-md ring-1 ring-border">
-                  <Icon src={b.icon} size={28} />
+          {buildGroups.map((group, gi) => {
+            const last = group[group.length - 1]
+            return (
+              // biome-ignore lint/suspicious/noArrayIndexKey: purchase-moment groups
+              <div key={gi} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  {/* items bought together, glued */}
+                  <div className="flex gap-0.5">
+                    {group.map((b, i) => (
+                      <div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: stacked same-moment items
+                        key={`${b.itemId}-${i}`}
+                        className="rounded-md ring-1 ring-border"
+                      >
+                        <Icon src={b.icon} size={28} />
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-[9px] text-muted-foreground mt-0.5">{last?.minute}'</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground mt-0.5">{b.minute}'</span>
+                {gi < buildGroups.length - 1 && (
+                  <ChevronRight className="mx-0.5 h-3 w-3 text-muted-foreground/60 self-start mt-2" />
+                )}
               </div>
-              {i < data.build.length - 1 && (
-                <ChevronRight className="mx-0.5 h-3 w-3 text-muted-foreground/60 self-start mt-2" />
-              )}
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
       <div>

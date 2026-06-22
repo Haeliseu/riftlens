@@ -10,7 +10,7 @@ export interface LaningAt15 {
 }
 
 export interface MatchTimelineData {
-  build: { itemId: number; icon: string | null; minute: number }[]
+  build: { itemId: number; icon: string | null; minute: number; at: number }[]
   skills: { slot: number; minute: number }[]
   at15: LaningAt15 | null
   spellIcons: (string | null)[]

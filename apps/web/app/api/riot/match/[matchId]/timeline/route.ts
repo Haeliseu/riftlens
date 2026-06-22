@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
     const pid = idx + 1
     const oppPid = oppPuuid ? tl.metadata.participants.indexOf(oppPuuid) + 1 : 0
 
-    const build: { itemId: number; icon: string | null; minute: number }[] = []
+    const build: { itemId: number; icon: string | null; minute: number; at: number }[] = []
     const skills: { slot: number; minute: number }[] = []
 
     for (const frame of tl.info.frames) {
@@ -42,6 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
             itemId: e.itemId,
             icon: assets.item(e.itemId),
             minute: Math.floor(e.timestamp / 60000),
+            at: e.timestamp,
           })
         } else if (e.type === "SKILL_LEVEL_UP" && e.skillSlot) {
           skills.push({ slot: e.skillSlot, minute: Math.floor(e.timestamp / 60000) })
