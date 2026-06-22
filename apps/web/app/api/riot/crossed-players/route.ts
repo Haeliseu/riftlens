@@ -1,6 +1,7 @@
 import type { Region } from "@riftlens/riot-api"
 import { getSummonerByPuuid, RiotApiClient } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
+import { withCache } from "@/lib/cache"
 import { crossedPlayersFromDb } from "@/lib/profile-db"
 
 export async function GET(req: NextRequest) {
@@ -15,7 +16,9 @@ export async function GET(req: NextRequest) {
     const enriched = await Promise.all(
       players.map(async (p) => {
         if (p.profileIconId != null) return p
-        const s = await getSummonerByPuuid(client, region, p.puuid).catch(() => null)
+        const s = await withCache(`sum:${region}:${p.puuid}`, 86400, () =>
+          getSummonerByPuuid(client, region, p.puuid)
+        ).catch(() => null)
         return s ? { ...p, profileIconId: s.profileIconId } : p
       })
     )

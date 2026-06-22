@@ -1,6 +1,7 @@
 import type { Region } from "@riftlens/riot-api"
 import { getProfileSummary, RiotApiClient } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
+import { withCache } from "@/lib/cache"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -15,7 +16,11 @@ export async function GET(req: NextRequest) {
   const client = new RiotApiClient(process.env.RIOT_API_KEY!)
 
   try {
-    const summary = await getProfileSummary(client, region, gameName, tagLine)
+    const summary = await withCache(
+      `ps:${region}:${gameName.toLowerCase()}:${tagLine.toLowerCase()}`,
+      300,
+      () => getProfileSummary(client, region, gameName, tagLine)
+    )
     return NextResponse.json(summary, {
       headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
     })
