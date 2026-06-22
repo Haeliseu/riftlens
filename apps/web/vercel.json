@@ -1,6 +1,7 @@
 {
   "buildCommand": "cd ../.. && pnpm turbo build --filter=web",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "ignoreCommand": "npx turbo-ignore web",
   "crons": [
     {
       "path": "/api/cron/refresh-profiles",
