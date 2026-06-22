@@ -43,6 +43,39 @@ function carryColor(score: number): string {
   return "text-red-400"
 }
 
+// Role-quest item ids (CommunityDragon): they sit in a normal slot but we pull
+// them out into the dedicated last cell of the item grid.
+const QUEST_ITEM_IDS = new Set([
+  1090, 1091, 1092, 1093, 1094, 1200, 1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, 1209, 1210,
+  1211, 1220, 1221, 1222,
+])
+
+/**
+ * Lay out the 8 item cells: row 1 = items 1-3 + trinket, row 2 = items 4-6 +
+ * the role-quest item (pulled out of its normal slot into the last cell).
+ */
+function itemCells(items: number[], icons: (string | null)[]): (string | null)[] {
+  const trinket = icons[6] ?? null
+  let quest: string | null = null
+  const regular: (string | null)[] = []
+  for (let i = 0; i < 6; i++) {
+    const id = items[i] ?? 0
+    const icon = icons[i] ?? null
+    if (id && QUEST_ITEM_IDS.has(id)) quest = icon
+    else regular.push(icon)
+  }
+  return [
+    regular[0] ?? null,
+    regular[1] ?? null,
+    regular[2] ?? null,
+    trinket,
+    regular[3] ?? null,
+    regular[4] ?? null,
+    regular[5] ?? null,
+    quest,
+  ]
+}
+
 function filterByPeriod<M extends MatchSummary>(
   matches: M[],
   period: "all" | "day" | "session"
@@ -250,6 +283,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
           {matches.map((m) => {
             const csPerMin = m.gameDurationS > 0 ? (m.cs / (m.gameDurationS / 60)).toFixed(1) : "0"
             const kp = m.teamKills > 0 ? Math.round(((m.kills + m.assists) / m.teamKills) * 100) : 0
+            const cells = itemCells(m.items, m.itemIcons)
             const expanded = expandedId === m.matchId
             return (
               <div
@@ -354,8 +388,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                   {/* 4b. End-game items, 2 rows of 4:
                       row 1 = items 1-3 + trinket, row 2 = items 4-6 + quest slot */}
                   <div className="grid grid-cols-4 grid-rows-2 gap-0.5 flex-shrink-0">
-                    {[0, 1, 2, 6, 3, 4, 5, -1].map((slot, i) => {
-                      const url = slot >= 0 ? (m.itemIcons[slot] ?? null) : null
+                    {cells.map((url, i) => {
                       return (
                         <div
                           // biome-ignore lint/suspicious/noArrayIndexKey: fixed item slots
