@@ -1,6 +1,7 @@
 "use client"
 
 import { Radio } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import { type ReactNode, useState } from "react"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
@@ -15,6 +16,8 @@ const TABS: { id: TabId; label: TranslationKey; icon?: boolean }[] = [
   { id: "challenges", label: "challenges.title" },
   { id: "live", label: "tab.live", icon: true },
 ]
+
+const TAB_IDS = new Set<string>(TABS.map((tab) => tab.id))
 
 interface ProfileTabsProps {
   overview: ReactNode
@@ -34,7 +37,11 @@ export function ProfileTabs({
   live,
 }: ProfileTabsProps) {
   const { t } = useI18n()
-  const [tab, setTab] = useState<TabId>("overview")
+  // Allow deep-linking a tab via ?tab= (e.g. the leaderboard's LIVE badge).
+  const initial = useSearchParams().get("tab")
+  const [tab, setTab] = useState<TabId>(
+    initial && TAB_IDS.has(initial) ? (initial as TabId) : "overview"
+  )
 
   return (
     <div className="space-y-4">

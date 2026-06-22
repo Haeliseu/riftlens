@@ -196,15 +196,25 @@ export function LeaderboardTable() {
                   ) : (
                     <span className="text-sm text-muted-foreground">{t("leaderboard.hidden")}</span>
                   )}
-                  {liveStatus?.[r.puuid] && (
-                    <span
-                      title={t("leaderboard.inGame")}
-                      className="flex flex-shrink-0 items-center gap-1 rounded bg-[var(--color-win)]/15 px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-win)]"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-win)] animate-pulse" />
-                      {t("leaderboard.live")}
-                    </span>
-                  )}
+                  {liveStatus?.[r.puuid] &&
+                    (href ? (
+                      <Link
+                        href={`${href}?tab=live`}
+                        title={t("leaderboard.inGame")}
+                        className="flex flex-shrink-0 items-center gap-1 rounded bg-[var(--color-win)]/15 px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-win)] hover:bg-[var(--color-win)]/25"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-win)] animate-pulse" />
+                        {t("leaderboard.live")}
+                      </Link>
+                    ) : (
+                      <span
+                        title={t("leaderboard.inGame")}
+                        className="flex flex-shrink-0 items-center gap-1 rounded bg-[var(--color-win)]/15 px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-win)]"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-win)] animate-pulse" />
+                        {t("leaderboard.live")}
+                      </span>
+                    ))}
                 </div>
                 <div className="w-[120px] hidden sm:flex justify-end gap-1">
                   {r.topChampions.map((c) => (
