@@ -3,6 +3,7 @@
 import { getChampionIconUrl } from "@riftlens/riot-api"
 import { useState } from "react"
 import { useChampionStats } from "@/hooks/useChampionStats"
+import { useLpPerGame } from "@/hooks/useLpPerGame"
 import type { ChampDetailBucket, ChampionDetail } from "@/lib/profile-db"
 
 type Mode = "total" | "solo" | "flex"
@@ -30,6 +31,7 @@ function kda(b: ChampDetailBucket): string {
 export function ChampionStats({ region, puuid }: ChampionStatsProps) {
   const [mode, setMode] = useState<Mode>("total")
   const { data, isLoading } = useChampionStats(puuid, region)
+  const { data: lpPerGame } = useLpPerGame(puuid)
 
   const champs = (data ?? [])
     .filter((c) => c[mode].games > 0)
@@ -67,6 +69,7 @@ export function ChampionStats({ region, puuid }: ChampionStatsProps) {
                 <th className="text-left font-medium py-1.5 pr-2">Champion</th>
                 <th className="text-right font-medium px-2">Parties</th>
                 <th className="text-right font-medium px-2">WR</th>
+                <th className="text-right font-medium px-2">LP</th>
                 <th className="text-right font-medium px-2">KDA</th>
                 <th className="text-right font-medium px-2">K/D/A</th>
                 <th className="text-right font-medium px-2">CS/min</th>
@@ -98,6 +101,19 @@ export function ChampionStats({ region, puuid }: ChampionStatsProps) {
                       className={`text-right px-2 font-semibold ${wr >= 50 ? "text-blue-500" : "text-red-500"}`}
                     >
                       {wr}%
+                    </td>
+                    <td className="text-right px-2">
+                      {(() => {
+                        const lp = lpPerGame?.byChampion[c.championId]
+                        if (lp == null || lp === 0)
+                          return <span className="text-muted-foreground">—</span>
+                        return (
+                          <span className={lp > 0 ? "text-green-500" : "text-red-500"}>
+                            {lp > 0 ? "+" : ""}
+                            {lp}
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td className="text-right px-2 font-medium">{kda(b)}</td>
                     <td className="text-right px-2 text-muted-foreground">

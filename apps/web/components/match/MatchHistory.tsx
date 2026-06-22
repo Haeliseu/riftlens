@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
+import { useLpPerGame } from "@/hooks/useLpPerGame"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
 import { ROLES, roleIconUrl } from "@/lib/roles"
 import { ChampionFilterModal } from "./ChampionFilterModal"
@@ -113,6 +114,7 @@ export function MatchHistory({
   const [againstChamp, setAgainstChamp] = useState<number | null>(null)
   const [filterOpen, setFilterOpen] = useState(false)
   const { data: champions } = useChampions()
+  const { data: lpPerGame } = useLpPerGame(puuid)
   const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
 
   let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
@@ -209,7 +211,7 @@ export function MatchHistory({
               <img src={getChampionIconUrl(againstChamp)} alt="" className="h-4 w-4 rounded" />
             </>
           )}
-          {withChamp == null && againstChamp == null && "Filtrer par champion"}
+          {withChamp == null && againstChamp == null && "Filtrer"}
         </button>
       </div>
 
@@ -320,6 +322,18 @@ export function MatchHistory({
                     <p className="text-[11px] text-muted-foreground">
                       {duration(m.gameDurationS)} · {relativeTime(m.gameCreationMs)}
                     </p>
+                    {lpPerGame?.matchLp[m.matchId] !== undefined && (
+                      <p
+                        className={`text-[11px] font-semibold ${
+                          (lpPerGame.matchLp[m.matchId] ?? 0) >= 0
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {(lpPerGame.matchLp[m.matchId] ?? 0) > 0 ? "+" : ""}
+                        {lpPerGame.matchLp[m.matchId]} LP
+                      </p>
+                    )}
                   </div>
                   <div className="w-[76px] flex-shrink-0">
                     <p className="text-sm font-medium font-mono">

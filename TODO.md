@@ -126,6 +126,15 @@ Prérequis à réunir pour la soumission sur developer.riotgames.com :
 - [ ] **Icônes de pings** : actuellement le breakdown affiche les **libellés + compteurs**.
   Pour les icônes CDN, mapper chaque type de ping vers `assets/ux/pings/…` (chemins à fiabiliser).
 
+## 🟣 7. LP par partie — option B (poller, après RSO)
+
+- [x] **Option A (fait)** : attribution best-effort du LP par partie depuis les
+  `lp_snapshots` (quand 1 seule game entre 2 snapshots) + net LP par champion dans le
+  tableau. Se remplit au fil du temps ; souvent vide au début (snapshots espacés).
+- [ ] **Option B (à faire, gated RSO)** : pour les **comptes connectés** (une fois le SSO
+  Riot dispo), un **poller** (Vercel Cron) qui enregistre le LP après chaque partie détectée
+  → attribution fiable de chaque game. Réservé aux comptes liés via RSO.
+
 ## ✅ Déjà fait
 
 - Recherche enrichie (icône/niveau/rang), profil (header, rang, historique, champions
