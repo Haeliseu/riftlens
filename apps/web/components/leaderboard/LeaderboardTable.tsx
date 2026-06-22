@@ -1,7 +1,7 @@
 "use client"
 
 import { getRankIconUrl, type TierName } from "@riftlens/riot-api"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import { useState } from "react"
 import { REGIONS } from "@/components/home/SearchHero"
@@ -31,15 +31,24 @@ interface LeaderboardData {
   tier: string
   region: string
   rows: LeaderRow[]
+  total: number
+  offset: number
 }
 
 function useLeaderboard(region: string, tier: string, queue: string) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["leaderboard", region, tier, queue],
-    queryFn: async () => {
-      const res = await fetch(`/api/riot/leaderboard?region=${region}&tier=${tier}&queue=${queue}`)
+    queryFn: async ({ pageParam }) => {
+      const res = await fetch(
+        `/api/riot/leaderboard?region=${region}&tier=${tier}&queue=${queue}&offset=${pageParam}`
+      )
       if (!res.ok) throw new Error("Leaderboard unavailable")
       return (await res.json()) as LeaderboardData
+    },
+    initialPageParam: 0,
+    getNextPageParam: (last) => {
+      const next = last.offset + last.rows.length
+      return next < last.total ? next : undefined
     },
     staleTime: 3_600_000,
   })
@@ -50,7 +59,9 @@ export function LeaderboardTable() {
   const [region, setRegion] = useState("EUW1")
   const [tier, setTier] = useState("challenger")
   const [queue, setQueue] = useState("RANKED_SOLO_5x5")
-  const { data, isLoading, isError } = useLeaderboard(region, tier, queue)
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useLeaderboard(region, tier, queue)
+  const rows = data?.pages.flatMap((p) => p.rows) ?? []
   const tierIcon = TIERS.find((t) => t.id === tier)?.icon ?? ("Challenger" as TierName)
 
   return (
@@ -99,7 +110,7 @@ export function LeaderboardTable() {
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">{t("leaderboard.loading")}</p>
-      ) : isError || !data ? (
+      ) : isError || rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("leaderboard.unavailable")}</p>
       ) : (
         <div className="rounded-xl border bg-card overflow-hidden">
@@ -110,7 +121,7 @@ export function LeaderboardTable() {
             <span className="w-28 text-right">{t("leaderboard.col.wins")}</span>
             <span className="w-12 text-right">{t("leaderboard.col.wr")}</span>
           </div>
-          {data.rows.map((r) => {
+          {rows.map((r) => {
             const href =
               r.gameName && r.tagLine
                 ? `/profile/${region}/${encodeURIComponent(r.gameName)}/${encodeURIComponent(r.tagLine)}`
@@ -147,6 +158,16 @@ export function LeaderboardTable() {
               </div>
             )
           })}
+          {hasNextPage && (
+            <button
+              type="button"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="w-full py-2.5 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
+            >
+              {isFetchingNextPage ? t("common.loading") : t("history.loadMore")}
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Search } from "lucide-react"
+import { Clock, Search, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
@@ -15,14 +15,34 @@ const NAV_LINKS: { href: string; label: TranslationKey }[] = [
   { href: "/champions", label: "champions.title" },
 ]
 
+const RECENT_KEY = "riftlens:recent"
+const MAX_RECENT = 6
+
+interface RecentSearch {
+  gameName: string
+  tagLine: string
+  region: string
+}
+
 export function Navbar() {
   const router = useRouter()
   const { t } = useI18n()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
   const [regionOpen, setRegionOpen] = useState(false)
+  const [recent, setRecent] = useState<RecentSearch[]>([])
+  const [searchOpen, setSearchOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const regionRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  // Load recent searches (shared with the home search).
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(RECENT_KEY)
+      if (stored) setRecent(JSON.parse(stored) as RecentSearch[])
+    } catch {}
+  }, [])
 
   // Ctrl/Cmd+K focuses the search input.
   useEffect(() => {
@@ -36,14 +56,30 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKey)
   }, [])
 
-  // Close the region dropdown on outside click.
+  // Close dropdowns on outside click.
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (regionRef.current && !regionRef.current.contains(e.target as Node)) setRegionOpen(false)
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false)
     }
     document.addEventListener("mousedown", onClick)
     return () => document.removeEventListener("mousedown", onClick)
   }, [])
+
+  function navigate(gameName: string, tagLine: string, reg: string) {
+    const next: RecentSearch = { gameName, tagLine, region: reg }
+    const updated = [
+      next,
+      ...recent.filter((r) => r.gameName !== gameName || r.tagLine !== tagLine),
+    ].slice(0, MAX_RECENT)
+    setRecent(updated)
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(updated))
+    } catch {}
+    setQuery("")
+    setSearchOpen(false)
+    router.push(`/profile/${reg}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`)
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
@@ -55,11 +91,20 @@ export function Navbar() {
     const gameName = parts[0] ?? ""
     const tagLine = parts.slice(1).join("").toUpperCase()
     if (!gameName || !tagLine) return
-    router.push(`/profile/${region}/${encodeURIComponent(gameName)}/${tagLine}`)
-    setQuery("")
+    navigate(gameName, tagLine, region)
+  }
+
+  function removeRecent(idx: number, e: React.MouseEvent) {
+    e.stopPropagation()
+    const updated = recent.filter((_, i) => i !== idx)
+    setRecent(updated)
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(updated))
+    } catch {}
   }
 
   const badge = regionBadge(region)
+  const showRecent = searchOpen && !query && recent.length > 0
 
   return (
     <header className="flex h-14 items-center border-b px-4 gap-4">
@@ -82,7 +127,7 @@ export function Navbar() {
         ))}
       </nav>
 
-      <div className="flex flex-1 items-center max-w-md">
+      <div ref={searchRef} className="relative flex flex-1 items-center max-w-md">
         <form
           onSubmit={handleSearch}
           className="flex flex-1 items-center rounded-l-md border border-r-0 overflow-hidden"
@@ -95,6 +140,7 @@ export function Navbar() {
               placeholder={t("nav.search.placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setSearchOpen(true)}
               className="h-9 w-full bg-transparent pl-8 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground"
               autoComplete="off"
               spellCheck={false}
@@ -104,6 +150,44 @@ export function Navbar() {
             </kbd>
           </div>
         </form>
+
+        {/* Recent searches dropdown */}
+        {showRecent && (
+          <div className="absolute left-0 top-full mt-1 z-50 w-full rounded-md border bg-popover shadow-xl overflow-hidden">
+            <p className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              {t("search.recent")}
+            </p>
+            {recent.map((r, i) => (
+              <div
+                key={`${r.gameName}#${r.tagLine}@${r.region}`}
+                className="flex items-center px-3 py-2 hover:bg-accent group"
+              >
+                <button
+                  type="button"
+                  onClick={() => navigate(r.gameName, r.tagLine, r.region)}
+                  className="flex flex-1 items-center gap-2 text-left min-w-0"
+                >
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">{r.gameName}</span>
+                  <span className="text-sm text-muted-foreground">#{r.tagLine}</span>
+                  <span
+                    className="ml-auto rounded px-1.5 py-0.5 text-[10px] font-semibold text-white flex-shrink-0"
+                    style={{ backgroundColor: regionBadge(r.region).color }}
+                  >
+                    {regionBadge(r.region).label}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => removeRecent(i, e)}
+                  className="ml-2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-muted"
+                >
+                  <X className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Region pill (same colours as profile region badges) + dropdown.
             Kept OUTSIDE the form so the dropdown isn't clipped by overflow. */}
