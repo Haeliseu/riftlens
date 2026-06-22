@@ -9,7 +9,6 @@ import {
 import type { Division, MatchDto, Region, TierName } from "@riftlens/riot-api"
 import {
   getLeagueEntriesByPuuid,
-  getMatch,
   getMatchIds,
   regionToRouting,
   SEASON_2_2026_START_MS,
@@ -17,6 +16,7 @@ import {
 } from "@riftlens/riot-api"
 import { and, desc, eq, inArray, sql } from "drizzle-orm"
 import { PING_FIELDS } from "./pings"
+import { cachedMatch } from "./riot-cache"
 import { riotClient } from "./riot-client"
 
 function capTier(tier: string): TierName {
@@ -165,7 +165,7 @@ export async function ingestRankedMatches(
 
   const toFetch = ids.filter((id) => !have.has(id)).slice(0, maxNew)
   for (const id of toFetch) {
-    const m = await getMatch(c, routing, id).catch(() => null)
+    const m = await cachedMatch(c, routing, id).catch(() => null)
     if (m) await storeMatch(region, m, puuid)
   }
 }
@@ -207,7 +207,7 @@ export async function syncSeason(region: Region, puuid: string, budget = 40): Pr
   const missing = allIds.filter((id) => !have.has(id))
   const toFetch = missing.slice(0, budget)
   for (const id of toFetch) {
-    const m = await getMatch(c, routing, id).catch(() => null)
+    const m = await cachedMatch(c, routing, id).catch(() => null)
     if (m) await storeMatch(region, m, puuid)
   }
 
