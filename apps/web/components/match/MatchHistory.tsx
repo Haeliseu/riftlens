@@ -321,9 +321,15 @@ export function MatchHistory({
                     >
                       {m.win ? "Victoire" : "Défaite"}
                     </p>
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {queueName(m.queueId)}
-                    </p>
+                    {m.queueId === 420 ? (
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {queueName(m.queueId)}
+                      </p>
+                    ) : (
+                      <span className="inline-block rounded bg-accent px-1.5 py-px text-[10px] font-medium text-foreground/80">
+                        {queueName(m.queueId)}
+                      </span>
+                    )}
                     <p className="text-[11px] text-muted-foreground">
                       {duration(m.gameDurationS)} · {relativeTime(m.gameCreationMs)}
                     </p>
