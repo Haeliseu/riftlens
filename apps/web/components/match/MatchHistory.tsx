@@ -351,10 +351,11 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     </div>
                   </div>
 
-                  {/* 4b. End-game items: 2 rows of 4 (items + trinket) */}
+                  {/* 4b. End-game items, 2 rows of 4:
+                      row 1 = items 1-3 + trinket, row 2 = items 4-6 + quest slot */}
                   <div className="grid grid-cols-4 grid-rows-2 gap-0.5 flex-shrink-0">
-                    {Array.from({ length: 8 }, (_, i) => {
-                      const url = m.itemIcons[i] ?? null
+                    {[0, 1, 2, 6, 3, 4, 5, -1].map((slot, i) => {
+                      const url = slot >= 0 ? (m.itemIcons[slot] ?? null) : null
                       return (
                         <div
                           // biome-ignore lint/suspicious/noArrayIndexKey: fixed item slots
