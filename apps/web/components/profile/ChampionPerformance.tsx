@@ -64,9 +64,9 @@ export function ChampionPerformance({ puuid, region }: Props) {
         <div className="space-y-2">
           <div className="flex items-center text-xs text-muted-foreground uppercase">
             <span className="flex-1">{t("champStats.col.champion")}</span>
+            <span className="w-12 text-right">{t("roles.col.games")}</span>
             <span className="w-14 text-right">{t("champStats.col.kda")}</span>
             <span className="w-14 text-right">{t("champStats.col.csPerMin")}</span>
-            <span className="w-12 text-right">{t("roles.col.games")}</span>
             <span className="w-12 text-right">{t("champStats.col.wr")}</span>
           </div>
           {champs.map((c) => {
@@ -83,11 +83,11 @@ export function ChampionPerformance({ puuid, region }: Props) {
                   />
                   <span className="truncate">{c.championName}</span>
                 </div>
+                <span className="w-12 text-right text-muted-foreground">{b.games}</span>
                 <span className="w-14 text-right font-medium">{kda(b)}</span>
                 <span className="w-14 text-right text-muted-foreground">
                   {avg(b.csPerMin, b.games).toFixed(1)}
                 </span>
-                <span className="w-12 text-right text-muted-foreground">{b.games}</span>
                 <span
                   className={`w-12 text-right font-semibold ${wr >= 50 ? "text-blue-500" : "text-red-500"}`}
                 >

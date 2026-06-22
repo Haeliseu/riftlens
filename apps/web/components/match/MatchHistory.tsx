@@ -149,7 +149,7 @@ function LpDelta({ value, t }: { value: number | undefined; t: T }) {
 
 export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   const { t } = useI18n()
-  const [count, setCount] = useState(30)
+  const [count, setCount] = useState(20)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
