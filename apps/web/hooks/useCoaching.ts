@@ -3,6 +3,7 @@ import type { CoachTip } from "@/lib/coaching"
 
 export interface CoachingData {
   role: string
+  tier: string | null
   games: number
   winRate: number
   tips: CoachTip[]

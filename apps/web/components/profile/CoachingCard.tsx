@@ -24,6 +24,7 @@ const METRIC_KEY: Record<CoachMetric, TranslationKey> = {
   kp: "coach.metric.kp",
   deaths: "coach.metric.deaths",
   gold: "coach.metric.gold",
+  dpm: "coach.metric.dpm",
 }
 const TIP_KEY: Record<CoachMetric, TranslationKey> = {
   csPerMin: "coach.tip.csPerMin",
@@ -31,6 +32,7 @@ const TIP_KEY: Record<CoachMetric, TranslationKey> = {
   kp: "coach.tip.kp",
   deaths: "coach.tip.deaths",
   gold: "coach.tip.gold",
+  dpm: "coach.tip.dpm",
 }
 
 function fmt(metric: CoachMetric, v: number): string {

@@ -300,6 +300,7 @@ export interface CoachInput {
   kda: number
   visionPerMin: number
   goldPerMin: number
+  dpm: number // damage to champions per minute
   winRate: number // 0..100
 }
 
@@ -315,6 +316,7 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
       win: summonerMatches.win,
       visionScore: summonerMatches.visionScore,
       goldEarned: summonerMatches.goldEarned,
+      damage: summonerMatches.totalDamageDealt,
       csPerMin: summonerMatches.csPerMin,
       kp: summonerMatches.killParticipation,
       duration: matches.gameDuration,
@@ -333,6 +335,7 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
     assists: number
     visionPerMin: number
     goldPerMin: number
+    dpm: number
     csPerMin: number
     kp: number
   }
@@ -347,6 +350,7 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
       assists: 0,
       visionPerMin: 0,
       goldPerMin: 0,
+      dpm: 0,
       csPerMin: 0,
       kp: 0,
     }
@@ -358,6 +362,7 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
     a.assists += r.assists ?? 0
     a.visionPerMin += mins > 0 ? (r.visionScore ?? 0) / mins : 0
     a.goldPerMin += mins > 0 ? (r.goldEarned ?? 0) / mins : 0
+    a.dpm += mins > 0 ? (r.damage ?? 0) / mins : 0
     a.csPerMin += r.csPerMin ?? 0
     a.kp += r.kp ?? 0
     byRole.set(role, a)
@@ -380,6 +385,7 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
     kda,
     visionPerMin: a.visionPerMin / a.games,
     goldPerMin: a.goldPerMin / a.games,
+    dpm: a.dpm / a.games,
     winRate: Math.round((a.wins / a.games) * 100),
   }
 }

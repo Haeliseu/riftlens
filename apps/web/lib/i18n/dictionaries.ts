@@ -158,6 +158,9 @@ export const dictionaries = {
     "coach.metric.kp": "Participation aux kills",
     "coach.metric.deaths": "Morts / partie",
     "coach.metric.gold": "Or / min",
+    "coach.metric.dpm": "Dégâts / min",
+    "coach.tip.dpm":
+      "Maximise tes dégâts : positionne-toi pour taper sans mourir, achète tes objets de dégâts en priorité, n'hésite pas à poke en lane.",
     "coach.tip.csPerMin":
       "Travaille tes derniers coups : last-hit sous tour, ne rate pas les vagues entre les trades.",
     "coach.tip.vision":
@@ -548,6 +551,9 @@ export const dictionaries = {
     "coach.metric.kp": "Kill participation",
     "coach.metric.deaths": "Deaths / game",
     "coach.metric.gold": "Gold / min",
+    "coach.metric.dpm": "Damage / min",
+    "coach.tip.dpm":
+      "Maximise your damage: position to deal damage without dying, prioritise your damage items, poke in lane.",
     "coach.tip.csPerMin":
       "Work on last-hitting: farm under tower, don't miss waves between trades.",
     "coach.tip.vision":
