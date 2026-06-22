@@ -1,8 +1,9 @@
 import type { Region } from "@riftlens/riot-api"
-import { getSummonerByPuuid, RiotApiClient } from "@riftlens/riot-api"
+import { getSummonerByPuuid } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { withCache } from "@/lib/cache"
 import { crossedPlayersFromDb } from "@/lib/profile-db"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const puuid = req.nextUrl.searchParams.get("puuid")
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest) {
     const players = await crossedPlayersFromDb(puuid)
     // Backfill avatars not yet stored (old participant rows have no profile
     // icon): fetch the live profile icon for the handful of players.
-    const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+    const client = riotClient()
     const enriched = await Promise.all(
       players.map(async (p) => {
         if (p.profileIconId != null) return p

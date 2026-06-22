@@ -5,7 +5,7 @@ import { Flame, Radio } from "lucide-react"
 import Link from "next/link"
 import { type LiveParticipant, useLiveGame } from "@/hooks/useLiveGame"
 import { useI18n } from "@/lib/i18n"
-import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
+import { capitalizeTier, rankLabel } from "@/lib/tiers"
 
 interface LiveGameProps {
   puuid?: string | null

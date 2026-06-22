@@ -1,8 +1,9 @@
 import type { Region } from "@riftlens/riot-api"
-import { RiotApiClient, regionToRouting } from "@riftlens/riot-api"
+import { regionToRouting } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { championSpellIcons, resolveAssets } from "@/lib/cdragon"
 import { cachedTimeline } from "@/lib/riot-cache"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
   const oppPuuid = searchParams.get("opp")
   const champId = parseInt(searchParams.get("champ") ?? "0", 10)
   const routing = regionToRouting(region)
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   if (!puuid) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })

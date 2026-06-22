@@ -1,10 +1,11 @@
 import type { Region } from "@riftlens/riot-api"
-import { getChampionRotation, RiotApiClient } from "@riftlens/riot-api"
+import { getChampionRotation } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const region = (req.nextUrl.searchParams.get("region") ?? "EUW1") as Region
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
   try {
     const rotation = await getChampionRotation(client, region)
     return NextResponse.json(rotation, {

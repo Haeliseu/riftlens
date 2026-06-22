@@ -1,8 +1,9 @@
 import type { ApexTier, Region } from "@riftlens/riot-api"
-import { getApexLeague, RiotApiClient } from "@riftlens/riot-api"
+import { getApexLeague } from "@riftlens/riot-api"
 import { after, type NextRequest, NextResponse } from "next/server"
 import { cacheGet, cacheSet, withCache } from "@/lib/cache"
 import { computeLadderId, computeLadderSeason, type LadderSeason } from "@/lib/ladder"
+import { riotClient } from "@/lib/riot-client"
 
 const PAGE = 20
 const TIERS: ApexTier[] = ["challenger", "grandmaster", "master"]
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   const queueParam = searchParams.get("queue") ?? "RANKED_SOLO_5x5"
   const queue = QUEUES.includes(queueParam) ? queueParam : "RANKED_SOLO_5x5"
   const offset = Math.max(0, parseInt(searchParams.get("offset") ?? "0", 10))
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     const league = await withCache(`apex:${region}:${tier}:${queue}`, 3600, () =>

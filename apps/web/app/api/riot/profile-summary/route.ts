@@ -1,7 +1,8 @@
 import type { Region } from "@riftlens/riot-api"
-import { getProfileSummary, RiotApiClient } from "@riftlens/riot-api"
+import { getProfileSummary } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { withCache } from "@/lib/cache"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing gameName or tagLine" }, { status: 400 })
   }
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     const summary = await withCache(

@@ -568,10 +568,9 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
 
   // Focused player + their direct lane opponent (for @15 diff and stats block).
   const owner = ownerPuuid ? data.participants.find((p) => p.puuid === ownerPuuid) : undefined
-  const laneOpp =
-    owner && owner.position
-      ? data.participants.find((p) => p.teamId !== owner.teamId && p.position === owner.position)
-      : undefined
+  const laneOpp = owner?.position
+    ? data.participants.find((p) => p.teamId !== owner.teamId && p.position === owner.position)
+    : undefined
 
   return (
     <div className="px-3 py-3">

@@ -40,6 +40,7 @@ export function I18nProvider({
     setLocaleState(l)
     if (typeof document !== "undefined") {
       document.documentElement.lang = l
+      // biome-ignore lint/suspicious/noDocumentCookie: simple locale cookie; cookieStore isn't universally available
       document.cookie = `${LOCALE_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`
     }
   }, [])

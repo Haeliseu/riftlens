@@ -394,8 +394,9 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
   const ranked = [...byRole.entries()]
     .filter(([role]) => role !== "UNKNOWN")
     .sort((a, b) => b[1].games - a[1].games)
-  const [role, a] = ranked[0] ?? [...byRole.entries()][0]!
-  if (!a) return null
+  const main = ranked[0] ?? [...byRole.entries()][0]
+  if (!main) return null
+  const [role, a] = main
 
   const kda = a.deaths === 0 ? a.kills + a.assists : (a.kills + a.assists) / a.deaths
   return {

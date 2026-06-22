@@ -1,6 +1,7 @@
 import type { ApexTier, LeagueList, Region } from "@riftlens/riot-api"
-import { getApexLeague, RiotApiClient } from "@riftlens/riot-api"
+import { getApexLeague } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
+import { riotClient } from "@/lib/riot-client"
 
 const APEX: Record<string, ApexTier> = {
   MASTER: "master",
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   if (!puuid) return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
   if (!APEX[tier]) return NextResponse.json({ rank: null })
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     const challenger = await getApexLeague(client, region, "challenger")

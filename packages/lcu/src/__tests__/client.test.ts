@@ -22,7 +22,7 @@ describe("LcuClient", () => {
     await client.get("/lol-summoner/v1/current-summoner", schema)
     const [url, init] = spy.mock.calls[0] as [string, RequestInit]
     expect(url).toBe("https://127.0.0.1:54321/lol-summoner/v1/current-summoner")
-    expect((init.headers as Record<string, string>)["Authorization"]).toMatch(/^Basic /)
+    expect((init.headers as Record<string, string>).Authorization).toMatch(/^Basic /)
   })
 
   it("GET validates and returns parsed response", async () => {

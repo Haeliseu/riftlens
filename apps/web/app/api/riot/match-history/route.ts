@@ -1,8 +1,9 @@
 import type { Region } from "@riftlens/riot-api"
-import { getMatchHistory, RiotApiClient } from "@riftlens/riot-api"
+import { getMatchHistory } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { withCache } from "@/lib/cache"
 import { resolveAssets } from "@/lib/cdragon"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
   }
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     // Cache the enriched page briefly so repeat navigations don't re-fetch the

@@ -1,6 +1,7 @@
 import type { Region } from "@riftlens/riot-api"
-import { getSummonerByPuuid, RiotApiClient } from "@riftlens/riot-api"
+import { getSummonerByPuuid } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
   }
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     const summoner = await getSummonerByPuuid(client, region, puuid)

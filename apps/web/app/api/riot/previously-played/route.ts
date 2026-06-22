@@ -46,11 +46,13 @@ export async function GET(req: NextRequest) {
   const theirTeamByMatch = new Map(theirEntries.map((e) => [e.matchId, e.teamId]))
 
   const commonGames = commonGamesRaw
-    .filter((g) => g.matchId && theirTeamByMatch.has(g.matchId))
+    .filter((g): g is typeof g & { matchId: string } =>
+      Boolean(g.matchId && theirTeamByMatch.has(g.matchId))
+    )
     .map((g) => ({
-      matchId: g.matchId!,
+      matchId: g.matchId,
       myTeamId: g.myTeamId ?? 0,
-      theirTeamId: theirTeamByMatch.get(g.matchId!) ?? 0,
+      theirTeamId: theirTeamByMatch.get(g.matchId) ?? 0,
       myWin: g.myWin ?? false,
       gameCreation: g.gameCreation ?? 0,
     }))

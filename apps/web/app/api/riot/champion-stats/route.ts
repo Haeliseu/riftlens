@@ -1,7 +1,8 @@
 import type { ChampionBucket, Region } from "@riftlens/riot-api"
-import { getChampionStats, RiotApiClient } from "@riftlens/riot-api"
+import { getChampionStats } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { type ChampDetailBucket, type ChampionDetail, championStatsFromDb } from "@/lib/profile-db"
+import { riotClient } from "@/lib/riot-client"
 
 // Map the live (basic) aggregate into the detailed shape (extra fields 0).
 function toDetailBucket(b: ChampionBucket): ChampDetailBucket {
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
     // DB not ready — fall through to live
   }
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
   try {
     const stats = await getChampionStats(client, region, puuid, count)
     const empty = (): ChampDetailBucket => ({

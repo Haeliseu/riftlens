@@ -3,12 +3,12 @@ import {
   getLeagueEntriesByPuuid,
   getLiveGame,
   getMatchIds,
-  RiotApiClient,
   regionToRouting,
 } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { cachedRanks, cacheParticipantRank } from "@/lib/profile-db"
 import { cachedMatch } from "@/lib/riot-cache"
+import { riotClient } from "@/lib/riot-client"
 
 const RECENT = 5
 
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   const region = (searchParams.get("region") ?? "EUW1") as Region
   if (!puuid) return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
   const routing = regionToRouting(region)
 
   let game: Awaited<ReturnType<typeof getLiveGame>>

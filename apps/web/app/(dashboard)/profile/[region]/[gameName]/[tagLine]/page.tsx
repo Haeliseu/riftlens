@@ -1,11 +1,6 @@
 import { db } from "@riftlens/db"
 import { summoners } from "@riftlens/db/schema"
-import {
-  getProfileSummary,
-  type ProfileSummary,
-  type Region,
-  RiotApiClient,
-} from "@riftlens/riot-api"
+import { getProfileSummary, type ProfileSummary, type Region } from "@riftlens/riot-api"
 import { sql } from "drizzle-orm"
 import { after } from "next/server"
 import { RecordRecentVisit } from "@/components/layout/RecordRecentVisit"
@@ -28,6 +23,7 @@ import { RolePerformance } from "@/components/profile/RolePerformance"
 import { getT } from "@/lib/i18n/server"
 import { ingestProfile } from "@/lib/ingest"
 import { regionBadge } from "@/lib/regions"
+import { riotClient } from "@/lib/riot-client"
 
 interface ProfilePageProps {
   params: Promise<{
@@ -82,9 +78,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const name = safeDecode(gameName)
   const tag = safeDecode(tagLine)
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY ?? "")
   let summary: ProfileSummary | null = null
   try {
+    // Built inside the try so a missing key falls through to the shell below.
+    const client = riotClient()
     summary = await getProfileSummary(client, region as Region, name, tag)
     const s = summary
     // Persist after the response is sent — `after()` keeps the serverless

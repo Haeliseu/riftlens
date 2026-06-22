@@ -3,7 +3,6 @@ import {
   computeCarryScore,
   getLeagueEntriesByPuuid,
   getMatch,
-  RiotApiClient,
   regionToRouting,
 } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
@@ -11,12 +10,13 @@ import { withCache } from "@/lib/cache"
 import { resolveAssets } from "@/lib/cdragon"
 import { PING_FIELDS, pingIconUrl } from "@/lib/pings"
 import { cachedRanks, cacheParticipantRank } from "@/lib/profile-db"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params
   const region = (req.nextUrl.searchParams.get("region") ?? "EUW1") as Region
   const routing = regionToRouting(region)
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     // The match itself is immutable; per-player ranks change slowly. Cache the

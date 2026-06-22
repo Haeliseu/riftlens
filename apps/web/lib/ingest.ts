@@ -11,17 +11,13 @@ import {
   getLeagueEntriesByPuuid,
   getMatch,
   getMatchIds,
-  RiotApiClient,
   regionToRouting,
   SEASON_2_2026_START_MS,
   tierToLP,
 } from "@riftlens/riot-api"
 import { and, desc, eq, inArray, sql } from "drizzle-orm"
 import { PING_FIELDS } from "./pings"
-
-function client() {
-  return new RiotApiClient(process.env.RIOT_API_KEY ?? "")
-}
+import { riotClient } from "./riot-client"
 
 function capTier(tier: string): TierName {
   return ((tier[0] ?? "") + tier.slice(1).toLowerCase()) as TierName
@@ -155,7 +151,7 @@ export async function ingestRankedMatches(
   maxNew = 20
 ): Promise<void> {
   const routing = regionToRouting(region)
-  const c = client()
+  const c = riotClient()
   // Pull a deep id list (1 cheap call); all queues so champion stats can split
   // by Solo/Flex/ARAM/Arena. We persist up to `maxNew` new ones per view.
   const ids = await getMatchIds(c, routing, puuid, { count: 100 })
@@ -187,7 +183,7 @@ export interface SyncResult {
  */
 export async function syncSeason(region: Region, puuid: string, budget = 40): Promise<SyncResult> {
   const routing = regionToRouting(region)
-  const c = client()
+  const c = riotClient()
 
   const allIds: string[] = []
   for (let start = 0; start < 1000; start += 100) {

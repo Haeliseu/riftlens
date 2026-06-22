@@ -3,10 +3,10 @@ import {
   computeAverageGameRank,
   getAverageGameRank,
   getLeagueEntriesByPuuid,
-  RiotApiClient,
 } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { cachedRanks, cacheParticipantRank, recentParticipantPuuids } from "@/lib/profile-db"
+import { riotClient } from "@/lib/riot-client"
 
 function capTier(tier: string): TierName {
   return ((tier[0] ?? "") + tier.slice(1).toLowerCase()) as TierName
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
   }
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   // DB-backed path: participants of the last (up to) 20 stored games, ranks
   // mostly from the shared summoner cache, only missing ones fetched live.

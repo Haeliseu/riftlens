@@ -1,5 +1,5 @@
 import type { Region } from "@riftlens/riot-api"
-import { getMatchIds, RiotApiClient, regionToRouting } from "@riftlens/riot-api"
+import { getMatchIds, regionToRouting } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { cacheGet, cacheSet } from "@/lib/cache"
 import {
@@ -9,6 +9,7 @@ import {
   summarizeObjectives,
 } from "@/lib/objectives"
 import { cachedTimeline } from "@/lib/riot-cache"
+import { riotClient } from "@/lib/riot-client"
 
 const GAMES = 6
 
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
   if (cached !== null)
     return NextResponse.json(cached, { headers: { "Cache-Control": "no-store" } })
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
   const routing = regionToRouting(region)
 
   try {

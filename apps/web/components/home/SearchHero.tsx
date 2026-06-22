@@ -254,52 +254,47 @@ export function SearchHero() {
       {(showRecent || showSuggestions) && (
         <div className="absolute top-full mt-1 w-full rounded-xl border bg-card shadow-xl z-50 overflow-hidden">
           {/* Live suggestions */}
-          {showSuggestions && (
-            <>
-              {loading ? (
-                <div className="px-4 py-3 text-xs text-muted-foreground">
-                  {t("search.searching")}
-                </div>
-              ) : suggestions.length === 0 && error ? (
-                <div className="px-4 py-3 text-xs text-muted-foreground">{error}</div>
-              ) : (
-                suggestions.map((s) => (
-                  <button
-                    key={`${s.gameName}#${s.tagLine}@${s.region}`}
-                    type="button"
-                    onClick={() => navigate(s.gameName, s.tagLine, s.region)}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-accent transition-colors text-left"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {s.profileIconId != null ? (
-                        // biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed
-                        <img
-                          src={profileIconUrl(s.profileIconId)}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-3.5 w-3.5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm truncate">
-                        <span className="font-medium">{s.gameName}</span>
-                        <span className="text-muted-foreground">#{s.tagLine}</span>
-                      </span>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {s.soloRank ? formatRank(t, s.soloRank) : t("profile.unranked")}
-                        {s.summonerLevel ? ` · ${t("search.level", { n: s.summonerLevel })}` : ""}
-                      </span>
-                    </div>
-                    <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex-shrink-0">
-                      {regionLabel(s.region)}
+          {showSuggestions &&
+            (loading ? (
+              <div className="px-4 py-3 text-xs text-muted-foreground">{t("search.searching")}</div>
+            ) : suggestions.length === 0 && error ? (
+              <div className="px-4 py-3 text-xs text-muted-foreground">{error}</div>
+            ) : (
+              suggestions.map((s) => (
+                <button
+                  key={`${s.gameName}#${s.tagLine}@${s.region}`}
+                  type="button"
+                  onClick={() => navigate(s.gameName, s.tagLine, s.region)}
+                  className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-accent transition-colors text-left"
+                >
+                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {s.profileIconId != null ? (
+                      // biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed
+                      <img
+                        src={profileIconUrl(s.profileIconId)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm truncate">
+                      <span className="font-medium">{s.gameName}</span>
+                      <span className="text-muted-foreground">#{s.tagLine}</span>
                     </span>
-                  </button>
-                ))
-              )}
-            </>
-          )}
+                    <span className="text-xs text-muted-foreground truncate">
+                      {s.soloRank ? formatRank(t, s.soloRank) : t("profile.unranked")}
+                      {s.summonerLevel ? ` · ${t("search.level", { n: s.summonerLevel })}` : ""}
+                    </span>
+                  </div>
+                  <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex-shrink-0">
+                    {regionLabel(s.region)}
+                  </span>
+                </button>
+              ))
+            ))}
 
           {/* Recent searches */}
           {showRecent && (

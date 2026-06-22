@@ -1,7 +1,8 @@
 import type { Region } from "@riftlens/riot-api"
-import { getTopChampionMasteries, RiotApiClient } from "@riftlens/riot-api"
+import { getTopChampionMasteries } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { withCache } from "@/lib/cache"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
   }
 
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
 
   try {
     const masteries = await withCache(`mastery:${region}:${puuid}`, 3600, () =>

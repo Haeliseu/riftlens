@@ -36,8 +36,8 @@ export const auth = betterAuth({
   plugins,
   socialProviders: {
     discord: {
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      clientId: process.env.DISCORD_CLIENT_ID ?? "",
+      clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
     },
   },
   databaseHooks: {

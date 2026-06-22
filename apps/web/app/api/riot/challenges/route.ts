@@ -1,13 +1,14 @@
 import type { Region } from "@riftlens/riot-api"
-import { getPlayerChallenges, RiotApiClient } from "@riftlens/riot-api"
+import { getPlayerChallenges } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { withCache } from "@/lib/cache"
+import { riotClient } from "@/lib/riot-client"
 
 export async function GET(req: NextRequest) {
   const puuid = req.nextUrl.searchParams.get("puuid")
   const region = (req.nextUrl.searchParams.get("region") ?? "EUW1") as Region
   if (!puuid) return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
-  const client = new RiotApiClient(process.env.RIOT_API_KEY!)
+  const client = riotClient()
   try {
     const data = await withCache(`chal:${region}:${puuid}`, 3600, () =>
       getPlayerChallenges(client, region, puuid)
