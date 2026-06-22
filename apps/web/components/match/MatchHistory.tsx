@@ -6,7 +6,7 @@ import {
   type MatchSummary,
   type TierName,
 } from "@riftlens/riot-api"
-import { ChevronDown } from "lucide-react"
+import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
@@ -157,19 +157,29 @@ function LpDelta({
   }
   const positive = value >= 0
   const color = positive ? "text-green-500" : "text-red-500"
+  const promo = rankChange?.dir === "promotion"
+  const rankIcon = rankChange && (
+    <span
+      className="flex flex-col items-center leading-none"
+      title={t(promo ? "history.promotion" : "history.demotion", {
+        rank: rankLabel(t, rankChange.tier, rankChange.division),
+      })}
+    >
+      {/* Promotion: green up arrow above the rank icon. */}
+      {promo && <ArrowUp className="h-3.5 w-3.5 text-green-500" />}
+      {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
+      <img
+        src={getRankIconUrl(capitalizeTier(rankChange.tier) as TierName)}
+        alt={rankLabel(t, rankChange.tier, rankChange.division)}
+        className="h-6 w-6"
+      />
+      {/* Demotion: red down arrow below the rank icon. */}
+      {!promo && <ArrowDown className="h-3.5 w-3.5 text-red-500" />}
+    </span>
+  )
   return (
     <span className={`flex flex-col items-center leading-tight ${color}`}>
-      {rankChange && (
-        // biome-ignore lint/performance/noImgElement: external CDN icon
-        <img
-          src={getRankIconUrl(capitalizeTier(rankChange.tier) as TierName)}
-          alt={rankLabel(t, rankChange.tier, rankChange.division)}
-          title={t(rankChange.dir === "promotion" ? "history.promotion" : "history.demotion", {
-            rank: rankLabel(t, rankChange.tier, rankChange.division),
-          })}
-          className="h-6 w-6"
-        />
-      )}
+      {rankIcon}
       <span className="text-base font-bold tabular-nums">
         {value > 0 ? "+" : ""}
         {value}
