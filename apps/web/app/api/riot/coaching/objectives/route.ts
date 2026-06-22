@@ -1,13 +1,14 @@
 import type { Region } from "@riftlens/riot-api"
-import { getMatchIds, getMatchTimeline, RiotApiClient, regionToRouting } from "@riftlens/riot-api"
+import { getMatchIds, RiotApiClient, regionToRouting } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
-import { cacheGet, cacheSet, withCache } from "@/lib/cache"
+import { cacheGet, cacheSet } from "@/lib/cache"
 import {
   analyzeMatchObjectives,
   type MatchObjectiveResult,
   type ObjectiveSummary,
   summarizeObjectives,
 } from "@/lib/objectives"
+import { cachedTimeline } from "@/lib/riot-cache"
 
 const GAMES = 6
 
@@ -28,11 +29,13 @@ export async function GET(req: NextRequest) {
 
   try {
     const ids = await getMatchIds(client, routing, puuid, { type: "ranked", count: GAMES })
+    // Timelines are independent reads; the Riot client throttles concurrency
+    // globally, so fetching them together is safe and cuts cold-cache latency.
+    const timelines = await Promise.all(
+      ids.map((id) => cachedTimeline(client, routing, id).catch(() => null))
+    )
     const results: MatchObjectiveResult[] = []
-    for (const id of ids) {
-      const tl = await withCache(`tl:${routing}:${id}`, 2_592_000, () =>
-        getMatchTimeline(client, routing, id)
-      ).catch(() => null)
+    for (const tl of timelines) {
       if (!tl) continue
       const r = analyzeMatchObjectives(tl, puuid)
       if (r) results.push(r)

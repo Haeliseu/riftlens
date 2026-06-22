@@ -1,7 +1,8 @@
 import type { Region } from "@riftlens/riot-api"
-import { getMatchTimeline, RiotApiClient, regionToRouting } from "@riftlens/riot-api"
+import { RiotApiClient, regionToRouting } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
 import { championSpellIcons, resolveAssets } from "@/lib/cdragon"
+import { cachedTimeline } from "@/lib/riot-cache"
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ matchId: string }> }) {
   const { matchId } = await params
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
 
   try {
     const [tl, assets, spellIcons] = await Promise.all([
-      getMatchTimeline(client, routing, matchId),
+      cachedTimeline(client, routing, matchId),
       resolveAssets(),
       champId > 0 ? championSpellIcons(champId) : Promise.resolve([null, null, null, null]),
     ])

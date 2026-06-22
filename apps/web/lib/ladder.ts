@@ -1,13 +1,12 @@
 import type { Region, RiotApiClient } from "@riftlens/riot-api"
 import {
   getAccountByPuuid,
-  getMatch,
   getMatchIds,
   getSummonerByPuuid,
   regionToRouting,
 } from "@riftlens/riot-api"
-import { withCache } from "@/lib/cache"
 import type { SeasonChamp } from "@/lib/profile-db"
+import { cachedMatch } from "@/lib/riot-cache"
 
 /** Cheap identity: name + avatar (2 Riot calls). */
 export interface LadderId {
@@ -55,10 +54,8 @@ export async function computeLadderSeason(
   const roleGames = new Map<string, number>()
   const byChamp = new Map<number, SeasonChamp>()
   for (const id of ids) {
-    // Matches are immutable → cached and shared with the match-detail view.
-    const m = await withCache(`match:${routing}:${id}`, 2_592_000, () =>
-      getMatch(client, routing, id)
-    ).catch(() => null)
+    // Cached and shared with the match-detail view (immutable).
+    const m = await cachedMatch(client, routing, id).catch(() => null)
     const me = m?.info.participants.find((p) => p.puuid === puuid)
     if (!me) continue
     const role = me.teamPosition || me.individualPosition || "UNKNOWN"

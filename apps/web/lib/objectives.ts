@@ -63,9 +63,14 @@ export interface ObjectiveSummary {
 
 export function summarizeObjectives(results: MatchObjectiveResult[]): ObjectiveSummary | null {
   if (results.length === 0) return null
-  const deaths = results.reduce((s, r) => s + r.deaths, 0)
-  const enemyObjectives = results.reduce((s, r) => s + r.enemyObjectives, 0)
-  const near = results.reduce((s, r) => s + r.deathsNearLostObjective, 0)
+  let deaths = 0
+  let enemyObjectives = 0
+  let near = 0
+  for (const r of results) {
+    deaths += r.deaths
+    enemyObjectives += r.enemyObjectives
+    near += r.deathsNearLostObjective
+  }
   const ratio = deaths > 0 ? near / deaths : 0
   const severity = ratio >= 0.3 ? "bad" : ratio >= 0.15 ? "warn" : "good"
   return {

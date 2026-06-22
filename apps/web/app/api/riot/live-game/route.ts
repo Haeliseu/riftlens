@@ -2,14 +2,13 @@ import type { Region } from "@riftlens/riot-api"
 import {
   getLeagueEntriesByPuuid,
   getLiveGame,
-  getMatch,
   getMatchIds,
   RiotApiClient,
   regionToRouting,
 } from "@riftlens/riot-api"
 import { type NextRequest, NextResponse } from "next/server"
-import { withCache } from "@/lib/cache"
 import { cachedRanks, cacheParticipantRank } from "@/lib/profile-db"
+import { cachedMatch } from "@/lib/riot-cache"
 
 const RECENT = 5
 
@@ -90,11 +89,9 @@ export async function GET(req: NextRequest) {
         const ids = await getMatchIds(client, routing, p.puuid, { type: "ranked", count: RECENT })
         const results: boolean[] = []
         for (const id of ids) {
-          // Matches are immutable — cache long so a live lookup over 10 players
-          // doesn't re-fetch the same games and exhaust the dev rate limit.
-          const m = await withCache(`match:${routing}:${id}`, 2_592_000, () =>
-            getMatch(client, routing, id)
-          ).catch(() => null)
+          // Cached so a live lookup over 10 players doesn't re-fetch the same
+          // immutable matches and exhaust the dev rate limit.
+          const m = await cachedMatch(client, routing, id).catch(() => null)
           const me = m?.info.participants.find((x) => x.puuid === p.puuid)
           if (me) results.push(me.win)
         }
