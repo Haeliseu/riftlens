@@ -1,6 +1,11 @@
 "use client"
 
-import { getChampionIconUrl, type MatchSummary, queueName } from "@riftlens/riot-api"
+import {
+  getChampionIconUrl,
+  getItemIconUrl,
+  type MatchSummary,
+  queueName,
+} from "@riftlens/riot-api"
 import { ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -275,9 +280,9 @@ export function MatchHistory({
                   onClick={() => setExpandedId(expanded ? null : m.matchId)}
                   className="flex w-full items-center gap-3 px-3 py-2 text-left"
                 >
-                  {/* Matchup: played champion VS lane opponent (enemy carry as a
-                      small top-right badge that doesn't cover the 'vs'). */}
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {/* Matchup: played champion on top, "vs lane opponent" below it
+                      (enemy carry shown as a small badge on the opponent). */}
+                  <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-11">
                     {/* biome-ignore lint/performance/noImgElement: external CDN icon, no domain config needed */}
                     <img
                       src={getChampionIconUrl(m.championId)}
@@ -285,15 +290,15 @@ export function MatchHistory({
                       className="h-9 w-9 rounded-md"
                     />
                     {m.laneOpponentChampionId != null && (
-                      <>
-                        <span className="text-[9px] font-bold text-muted-foreground">VS</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] font-bold text-muted-foreground">VS</span>
                         <div className="relative">
                           {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
                           <img
                             src={getChampionIconUrl(m.laneOpponentChampionId)}
                             alt="adversaire de lane"
                             title="Adversaire de lane"
-                            className="h-8 w-8 rounded-md opacity-90"
+                            className="h-5 w-5 rounded-sm opacity-90"
                           />
                           {m.enemyCarryChampionId != null &&
                             m.enemyCarryChampionId !== m.laneOpponentChampionId && (
@@ -302,11 +307,11 @@ export function MatchHistory({
                                 src={getChampionIconUrl(m.enemyCarryChampionId)}
                                 alt="carry adverse"
                                 title="Carry adverse"
-                                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-sm border border-background shadow ring-1 ring-amber-400/70"
+                                className="absolute -top-1 -right-1 h-3 w-3 rounded-sm border border-background shadow ring-1 ring-amber-400/70"
                               />
                             )}
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
 
@@ -335,8 +340,8 @@ export function MatchHistory({
                       </p>
                     )}
                   </div>
-                  <div className="w-[76px] flex-shrink-0">
-                    <p className="text-sm font-medium font-mono">
+                  <div className="w-[84px] flex-shrink-0">
+                    <p className="text-sm font-medium font-mono whitespace-nowrap">
                       {m.kills}
                       <span className="text-muted-foreground font-normal"> / {m.deaths} / </span>
                       {m.assists}
@@ -353,7 +358,25 @@ export function MatchHistory({
                     <p className="text-xs font-medium">{kp}%</p>
                     <p className="text-[11px] text-muted-foreground">KP</p>
                   </div>
-                  <div className="ml-auto text-center w-10 flex-shrink-0">
+                  {/* Items equipped at the end of the game, filling the empty space */}
+                  <div className="ml-auto flex gap-0.5 flex-shrink-0">
+                    {m.items.map((id, i) => {
+                      const url = getItemIconUrl(id)
+                      return (
+                        <div
+                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed item slots
+                          key={i}
+                          className="h-5 w-5 rounded-sm bg-muted/40"
+                        >
+                          {url && (
+                            // biome-ignore lint/performance/noImgElement: external CDN icon
+                            <img src={url} alt="" className="h-5 w-5 rounded-sm" />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="text-center w-10 flex-shrink-0">
                     <p className={`text-base font-bold leading-none ${carryColor(m.carryScore)}`}>
                       {m.carryScore}
                     </p>

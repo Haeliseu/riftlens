@@ -76,6 +76,13 @@ export function getChampionIconUrl(championId: number): string {
   return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${championId}.png`
 }
 
+/** DDragon item icon keyed by item id. Item icons are stable across patches. */
+const DDRAGON_VERSION = "15.13.1"
+export function getItemIconUrl(itemId: number): string | null {
+  if (!itemId) return null
+  return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${itemId}.png`
+}
+
 const QUEUE_NAMES: Record<number, string> = {
   400: "Normale",
   420: "Classé Solo/Duo",
@@ -130,6 +137,8 @@ export interface MatchSummary {
   /** champion ids per side, for with/against filtering */
   allyChampionIds: number[]
   enemyChampionIds: number[]
+  /** items equipped at the end of the game (slots 0–6, 0 = empty) */
+  items: number[]
 }
 
 // Reachable benchmarks (a full mark, not the theoretical max).
@@ -319,6 +328,9 @@ export async function getMatchHistory(
             enemyCarryPosition: enemyCarry?.position ?? null,
             allyChampionIds: scored.filter((s) => s.teamId === p.teamId).map((s) => s.championId),
             enemyChampionIds: enemies.map((s) => s.championId),
+            items: [p.item0, p.item1, p.item2, p.item3, p.item4, p.item5, p.item6].map(
+              (i) => i ?? 0
+            ),
           }
         })
         .catch(() => null)
