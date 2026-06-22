@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { useI18n } from "@/lib/i18n"
 import { capitalizeTier, rankLabel, tierColor } from "@/lib/tiers"
+import { LpChart } from "./LpChart"
 import type { SoloRank } from "./RankedCard"
 
 interface FlexCardProps {
@@ -13,7 +14,7 @@ interface FlexCardProps {
   flexRank?: SoloRank | null
 }
 
-export function FlexCard({ flexRank }: FlexCardProps) {
+export function FlexCard({ region, puuid, flexRank }: FlexCardProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
 
@@ -93,6 +94,8 @@ export function FlexCard({ flexRank }: FlexCardProps) {
               </div>
             </>
           )}
+
+          <LpChart embedded puuid={puuid ?? null} region={region} queueId={440} />
         </div>
       )}
     </div>

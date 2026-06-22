@@ -125,7 +125,7 @@ export interface LpPoint {
 }
 
 /** Solo/Duo LP snapshots over time (chronological) for the LP chart. */
-export async function lpHistoryFromDb(puuid: string): Promise<LpPoint[]> {
+export async function lpHistoryFromDb(puuid: string, queueId = 420): Promise<LpPoint[]> {
   const rows = await db
     .select({
       value: lpSnapshots.value,
@@ -135,7 +135,7 @@ export async function lpHistoryFromDb(puuid: string): Promise<LpPoint[]> {
       recordedAt: lpSnapshots.recordedAt,
     })
     .from(lpSnapshots)
-    .where(and(eq(lpSnapshots.puuid, puuid), eq(lpSnapshots.queueId, 420)))
+    .where(and(eq(lpSnapshots.puuid, puuid), eq(lpSnapshots.queueId, queueId)))
     .orderBy(lpSnapshots.recordedAt)
 
   return rows.map((r) => ({

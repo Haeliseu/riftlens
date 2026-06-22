@@ -24,6 +24,8 @@ interface LpChartProps {
   tagLine?: string
   puuid?: string | null
   data?: LpDataPoint[]
+  /** queue to chart: 420 = Solo/Duo (default), 440 = Flex */
+  queueId?: number
   /** render without the card chrome (for embedding into another card) */
   embedded?: boolean
 }
@@ -36,10 +38,16 @@ function formatDate(ms: number, locale: string) {
   return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(new Date(ms))
 }
 
-export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: LpChartProps) {
+export function LpChart({
+  data: dataProp,
+  puuid,
+  region = "EUW1",
+  queueId = 420,
+  embedded,
+}: LpChartProps) {
   const { t, locale } = useI18n()
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-  const { data: history } = useLpHistory(dataProp ? null : puuid, region)
+  const { data: history } = useLpHistory(dataProp ? null : puuid, region, queueId)
   const cardClass = embedded ? "mt-3 border-t pt-3" : "rounded-xl border bg-card p-4"
 
   const data: LpDataPoint[] =

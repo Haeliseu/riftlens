@@ -85,7 +85,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     // function alive on Vercel (a bare `void` promise would be frozen/killed).
     after(async () => {
       await indexSummoner(region, s)
-      await ingestProfile(region as Region, s.puuid, s.soloRank).catch(() => {})
+      await ingestProfile(region as Region, s.puuid, s.soloRank, s.flexRank).catch(() => {})
     })
   } catch {
     // Riot lookup failed (bad key / unknown player) — render shells

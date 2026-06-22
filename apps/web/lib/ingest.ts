@@ -34,24 +34,31 @@ interface SoloRank {
 }
 
 /** Cache the player's current Solo rank + append an LP snapshot (deduped). */
-export async function recordRankSnapshot(puuid: string, solo: SoloRank | null): Promise<void> {
-  if (!solo) return
-  const value = tierToLP(capTier(solo.tier), solo.rank as Division, solo.leaguePoints)
+export async function recordRankSnapshot(
+  puuid: string,
+  rank: SoloRank | null,
+  queueId = 420
+): Promise<void> {
+  if (!rank) return
+  const value = tierToLP(capTier(rank.tier), rank.rank as Division, rank.leaguePoints)
 
-  await db
-    .update(summoners)
-    .set({
-      soloTier: solo.tier,
-      soloDivision: solo.rank,
-      soloLeaguePoints: solo.leaguePoints,
-      rankCheckedAt: sql`now()`,
-    })
-    .where(eq(summoners.puuid, puuid))
+  // The summoners cache only tracks the Solo/Duo rank.
+  if (queueId === 420) {
+    await db
+      .update(summoners)
+      .set({
+        soloTier: rank.tier,
+        soloDivision: rank.rank,
+        soloLeaguePoints: rank.leaguePoints,
+        rankCheckedAt: sql`now()`,
+      })
+      .where(eq(summoners.puuid, puuid))
+  }
 
   const last = await db
     .select({ value: lpSnapshots.value })
     .from(lpSnapshots)
-    .where(and(eq(lpSnapshots.puuid, puuid), eq(lpSnapshots.queueId, 420)))
+    .where(and(eq(lpSnapshots.puuid, puuid), eq(lpSnapshots.queueId, queueId)))
     .orderBy(desc(lpSnapshots.recordedAt))
     .limit(1)
 
@@ -59,10 +66,10 @@ export async function recordRankSnapshot(puuid: string, solo: SoloRank | null): 
 
   await db.insert(lpSnapshots).values({
     puuid,
-    queueId: 420,
-    tier: solo.tier,
-    division: solo.rank,
-    leaguePoints: solo.leaguePoints,
+    queueId,
+    tier: rank.tier,
+    division: rank.rank,
+    leaguePoints: rank.leaguePoints,
     value,
   })
 }
@@ -208,15 +215,23 @@ export async function syncSeason(region: Region, puuid: string, budget = 40): Pr
     if (m) await storeMatch(region, m, puuid)
   }
 
-  // Also capture a fresh LP snapshot + rank cache on each sync.
+  // Also capture a fresh LP snapshot + rank cache on each sync (Solo + Flex).
   const entries = await getLeagueEntriesByPuuid(c, region, puuid).catch(() => [])
   const solo = entries.find((e) => e.queueType === "RANKED_SOLO_5x5")
+  const flex = entries.find((e) => e.queueType === "RANKED_FLEX_SR")
   if (solo) {
-    await recordRankSnapshot(puuid, {
-      tier: solo.tier,
-      rank: solo.rank,
-      leaguePoints: solo.leaguePoints,
-    }).catch(() => {})
+    await recordRankSnapshot(
+      puuid,
+      { tier: solo.tier, rank: solo.rank, leaguePoints: solo.leaguePoints },
+      420
+    ).catch(() => {})
+  }
+  if (flex) {
+    await recordRankSnapshot(
+      puuid,
+      { tier: flex.tier, rank: flex.rank, leaguePoints: flex.leaguePoints },
+      440
+    ).catch(() => {})
   }
 
   const remaining = missing.length - toFetch.length
@@ -227,7 +242,12 @@ export async function syncSeason(region: Region, puuid: string, budget = 40): Pr
 export async function ingestProfile(
   region: Region,
   puuid: string,
-  solo: SoloRank | null
+  solo: SoloRank | null,
+  flex: SoloRank | null = null
 ): Promise<void> {
-  await Promise.allSettled([recordRankSnapshot(puuid, solo), ingestRankedMatches(region, puuid)])
+  await Promise.allSettled([
+    recordRankSnapshot(puuid, solo, 420),
+    recordRankSnapshot(puuid, flex, 440),
+    ingestRankedMatches(region, puuid),
+  ])
 }
