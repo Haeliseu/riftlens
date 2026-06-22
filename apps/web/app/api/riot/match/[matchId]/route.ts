@@ -29,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ matc
         : []
 
       const pings = PING_FIELDS.map((f) => ({
-        label: f.label,
+        key: f.key,
         icon: pingIconUrl(f.icon),
         count: (p[f.key as keyof Participant] as number | undefined) ?? 0,
       })).filter((x) => x.count > 0)

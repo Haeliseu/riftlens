@@ -4,8 +4,10 @@ import { getChampionIconUrl } from "@riftlens/riot-api"
 import { Search } from "lucide-react"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
+import { useI18n } from "@/lib/i18n"
 
 export function ChampionGrid() {
+  const { t } = useI18n()
   const { data, isLoading, isError } = useChampions()
   const [q, setQ] = useState("")
 
@@ -19,15 +21,15 @@ export function ChampionGrid() {
           type="text"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Rechercher un champion…"
+          placeholder={t("champFilter.searchPlaceholder")}
           className="h-10 w-full rounded-lg border bg-card pl-9 pr-3 text-sm focus:outline-none"
         />
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Chargement des champions…</p>
+        <p className="text-sm text-muted-foreground">{t("champions.loading")}</p>
       ) : isError ? (
-        <p className="text-sm text-muted-foreground">Liste indisponible.</p>
+        <p className="text-sm text-muted-foreground">{t("champions.listUnavailable")}</p>
       ) : (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9">
           {champs.map((c) => (
@@ -43,7 +45,7 @@ export function ChampionGrid() {
             </div>
           ))}
           {champs.length === 0 && (
-            <p className="col-span-full text-sm text-muted-foreground">Aucun champion.</p>
+            <p className="col-span-full text-sm text-muted-foreground">{t("champions.none")}</p>
           )}
         </div>
       )}

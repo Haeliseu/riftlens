@@ -49,10 +49,16 @@ export function PingStats({ puuid }: Props) {
             const f = PING_BY_KEY[r.key]
             if (!f) return null
             return (
-              <div key={r.key} className="flex items-center gap-2" title={f.label}>
+              <div key={r.key} className="flex items-center gap-2" title={t(f.labelKey)}>
                 {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
-                <img src={pingIconUrl(f.icon)} alt={f.label} className="h-5 w-5 flex-shrink-0" />
-                <span className="text-sm text-muted-foreground truncate flex-1">{f.label}</span>
+                <img
+                  src={pingIconUrl(f.icon)}
+                  alt={t(f.labelKey)}
+                  className="h-5 w-5 flex-shrink-0"
+                />
+                <span className="text-sm text-muted-foreground truncate flex-1">
+                  {t(f.labelKey)}
+                </span>
                 <span className="text-sm font-medium">{r.count}</span>
               </div>
             )

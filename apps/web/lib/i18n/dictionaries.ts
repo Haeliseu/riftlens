@@ -87,6 +87,8 @@ export const dictionaries = {
     "champFilter.with": "Avec (allié)",
     "champFilter.against": "Contre (ennemi)",
     "champFilter.searchPlaceholder": "Rechercher un champion…",
+    "champFilter.hint":
+      "Choisis un champion joué avec et/ou contre. Aucun sélectionné = pas de filtre.",
 
     // champion stats table
     "champStats.title": "Statistiques par champion",
@@ -239,6 +241,19 @@ export const dictionaries = {
     "pings.titleUsed": "Pings utilisés",
     "pings.total": "{n} au total",
     "pings.syncHint": "Aucune donnée — synchronise pour enregistrer les pings de tes parties.",
+    "ping.onMyWay": "En route",
+    "ping.assistMe": "Aidez-moi",
+    "ping.enemyMissing": "Ennemi absent",
+    "ping.danger": "Danger",
+    "ping.getBack": "Repli",
+    "ping.push": "Pousser",
+    "ping.needVision": "Vision",
+    "ping.enemyVision": "Vision ennemie",
+    "ping.hold": "Tenir",
+    "ping.allIn": "All-in",
+    "ping.command": "Commande",
+    "ping.visionCleared": "Vision nettoyée",
+    "ping.basic": "Basique",
 
     // refresh
     "refresh.syncing": "Synchro… {n} parties",
@@ -279,8 +294,17 @@ export const dictionaries = {
 
     "leaderboard.title": "Classement",
     "leaderboard.soon": "Le classement arrive bientôt.",
+    "leaderboard.loading": "Chargement du classement…",
+    "leaderboard.unavailable": "Classement indisponible (clé API Riot ?).",
+    "leaderboard.col.player": "Joueur",
+    "leaderboard.col.wins": "Victoires",
+    "leaderboard.col.wr": "VIC",
+    "leaderboard.hidden": "Joueur masqué",
     "champions.title": "Champions",
     "champions.soon": "La page champions arrive bientôt.",
+    "champions.loading": "Chargement des champions…",
+    "champions.listUnavailable": "Liste indisponible.",
+    "champions.none": "Aucun champion.",
 
     // login
     "login.title": "Connexion",
@@ -393,6 +417,7 @@ export const dictionaries = {
     "champFilter.with": "With (ally)",
     "champFilter.against": "Against (enemy)",
     "champFilter.searchPlaceholder": "Search a champion…",
+    "champFilter.hint": "Pick a champion played with and/or against. None selected = no filter.",
 
     "champStats.title": "Champion statistics",
     "champStats.empty": "No ranked games for this filter.",
@@ -529,6 +554,19 @@ export const dictionaries = {
     "pings.titleUsed": "Pings used",
     "pings.total": "{n} total",
     "pings.syncHint": "No data — sync to record the pings from your games.",
+    "ping.onMyWay": "On my way",
+    "ping.assistMe": "Assist me",
+    "ping.enemyMissing": "Enemy missing",
+    "ping.danger": "Danger",
+    "ping.getBack": "Retreat",
+    "ping.push": "Push",
+    "ping.needVision": "Need vision",
+    "ping.enemyVision": "Enemy vision",
+    "ping.hold": "Hold",
+    "ping.allIn": "All-in",
+    "ping.command": "Command",
+    "ping.visionCleared": "Vision cleared",
+    "ping.basic": "Basic",
 
     "refresh.syncing": "Syncing… {n} games",
     "refresh.added": "+{n} games",
@@ -565,8 +603,17 @@ export const dictionaries = {
 
     "leaderboard.title": "Leaderboard",
     "leaderboard.soon": "The leaderboard is coming soon.",
+    "leaderboard.loading": "Loading leaderboard…",
+    "leaderboard.unavailable": "Leaderboard unavailable (Riot API key?).",
+    "leaderboard.col.player": "Player",
+    "leaderboard.col.wins": "Wins",
+    "leaderboard.col.wr": "WR",
+    "leaderboard.hidden": "Hidden player",
     "champions.title": "Champions",
     "champions.soon": "The champions page is coming soon.",
+    "champions.loading": "Loading champions…",
+    "champions.listUnavailable": "List unavailable.",
+    "champions.none": "No champion.",
 
     "login.title": "Sign in",
     "login.discord": "Continue with Discord",

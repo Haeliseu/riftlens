@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import { useState } from "react"
 import { REGIONS } from "@/components/home/SearchHero"
+import { useI18n } from "@/lib/i18n"
 
 const TIERS = [
   { id: "challenger", label: "Challenger", icon: "Challenger" as TierName },
@@ -45,6 +46,7 @@ function useLeaderboard(region: string, tier: string, queue: string) {
 }
 
 export function LeaderboardTable() {
+  const { t } = useI18n()
   const [region, setRegion] = useState("EUW1")
   const [tier, setTier] = useState("challenger")
   const [queue, setQueue] = useState("RANKED_SOLO_5x5")
@@ -96,17 +98,17 @@ export function LeaderboardTable() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Chargement du classement…</p>
+        <p className="text-sm text-muted-foreground">{t("leaderboard.loading")}</p>
       ) : isError || !data ? (
-        <p className="text-sm text-muted-foreground">Classement indisponible (clé API Riot ?).</p>
+        <p className="text-sm text-muted-foreground">{t("leaderboard.unavailable")}</p>
       ) : (
         <div className="rounded-xl border bg-card overflow-hidden">
           <div className="flex items-center gap-3 px-4 py-2 border-b text-[11px] text-muted-foreground uppercase">
             <span className="w-8">#</span>
-            <span className="flex-1">Joueur</span>
+            <span className="flex-1">{t("leaderboard.col.player")}</span>
             <span className="w-16 text-right">LP</span>
-            <span className="w-28 text-right">Victoires</span>
-            <span className="w-12 text-right">WR</span>
+            <span className="w-28 text-right">{t("leaderboard.col.wins")}</span>
+            <span className="w-12 text-right">{t("leaderboard.col.wr")}</span>
           </div>
           {data.rows.map((r) => {
             const href =
@@ -128,12 +130,14 @@ export function LeaderboardTable() {
                       <span className="text-muted-foreground font-normal"> #{r.tagLine}</span>
                     </Link>
                   ) : (
-                    <span className="text-sm text-muted-foreground">Joueur masqué</span>
+                    <span className="text-sm text-muted-foreground">{t("leaderboard.hidden")}</span>
                   )}
                 </div>
                 <span className="w-16 text-right text-sm font-mono">{r.leaguePoints}</span>
                 <span className="w-28 text-right text-xs text-muted-foreground">
-                  {r.wins}V {r.losses}D
+                  {r.wins}
+                  {t("perf.winShort")} {r.losses}
+                  {t("perf.lossShort")}
                 </span>
                 <span
                   className={`w-12 text-right text-sm font-semibold ${r.winRate >= 50 ? "text-blue-500" : "text-red-500"}`}

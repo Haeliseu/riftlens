@@ -103,7 +103,7 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
     <div className={cardClass}>
       {!embedded && (
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium">LP Chart</span>
+          <span className="text-sm font-medium">{t("lpchart.title")}</span>
           <span className="text-xs text-muted-foreground">{CURRENT_SEASON_LABEL}</span>
         </div>
       )}
@@ -113,9 +113,9 @@ export function LpChart({ data: dataProp, puuid, region = "EUW1", embedded }: Lp
         className="w-full"
         onMouseLeave={() => setHoverIndex(null)}
         role="img"
-        aria-label="Graphique LP Saison 2 2026"
+        aria-label={t("lpchart.title")}
       >
-        <title>LP Chart S2 2026</title>
+        <title>{t("lpchart.title")}</title>
         {/* Grid lines */}
         {[0, 0.25, 0.5, 0.75, 1].map((t) => (
           <line

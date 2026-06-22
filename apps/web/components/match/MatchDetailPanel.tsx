@@ -8,6 +8,7 @@ import { type MatchDetailParticipant, useMatchDetail } from "@/hooks/useMatchDet
 import { useMatchTimeline } from "@/hooks/useMatchTimeline"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
+import { PING_BY_KEY } from "@/lib/pings"
 
 interface MatchDetailPanelProps {
   matchId: string
@@ -400,8 +401,8 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
   const pingTotals = new Map<string, { icon: string; count: number }>()
   for (const p of data.participants) {
     for (const ping of p.pings) {
-      const cur = pingTotals.get(ping.label)
-      pingTotals.set(ping.label, { icon: ping.icon, count: (cur?.count ?? 0) + ping.count })
+      const cur = pingTotals.get(ping.key)
+      pingTotals.set(ping.key, { icon: ping.icon, count: (cur?.count ?? 0) + ping.count })
     }
   }
   const pingRows = [...pingTotals.entries()].sort((a, b) => b[1].count - a[1].count)
@@ -466,12 +467,16 @@ export function MatchDetailPanel({ matchId, region, ownerPuuid }: MatchDetailPan
               {t("pings.title")} · {totalPings}
             </p>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-muted-foreground">
-              {pingRows.map(([label, v]) => (
-                <span key={label} className="flex items-center gap-1" title={label}>
-                  <Icon src={v.icon} size={16} alt={label} />
-                  <span className="text-foreground font-medium">{v.count}</span>
-                </span>
-              ))}
+              {pingRows.map(([key, v]) => {
+                const f = PING_BY_KEY[key]
+                const label = f ? t(f.labelKey) : key
+                return (
+                  <span key={key} className="flex items-center gap-1" title={label}>
+                    <Icon src={v.icon} size={16} alt={label} />
+                    <span className="text-foreground font-medium">{v.count}</span>
+                  </span>
+                )
+              })}
             </div>
           </div>
         </>

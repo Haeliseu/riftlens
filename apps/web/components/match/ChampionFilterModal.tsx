@@ -4,6 +4,7 @@ import { getChampionIconUrl } from "@riftlens/riot-api"
 import { X } from "lucide-react"
 import { useState } from "react"
 import type { ChampionSummary } from "@/hooks/useChampions"
+import { useI18n } from "@/lib/i18n"
 
 interface Props {
   champions: ChampionSummary[]
@@ -25,6 +26,7 @@ function ChampionPicker({
   selected: number | null
   onSelect: (id: number | null) => void
 }) {
+  const { t } = useI18n()
   const [q, setQ] = useState("")
   const list = champions.filter((c) => c.name.toLowerCase().includes(q.trim().toLowerCase()))
   return (
@@ -37,14 +39,14 @@ function ChampionPicker({
             onClick={() => onSelect(null)}
             className="text-xs text-muted-foreground hover:underline"
           >
-            Effacer
+            {t("common.clear")}
           </button>
         )}
       </div>
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Rechercher…"
+        placeholder={t("champFilter.searchPlaceholder")}
         className="mb-2 h-8 w-full rounded-md border bg-card px-2 text-sm focus:outline-none"
       />
       <div className="grid max-h-64 grid-cols-5 gap-1.5 overflow-y-auto sm:grid-cols-6">
@@ -73,6 +75,7 @@ export function ChampionFilterModal({
   onAgainst,
   onClose,
 }: Props) {
+  const { t } = useI18n()
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click-to-close
     <div
@@ -85,24 +88,21 @@ export function ChampionFilterModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Filtrer par champion</h3>
+          <h3 className="text-sm font-semibold">{t("champFilter.title")}</h3>
           <button type="button" onClick={onClose} className="rounded p-1 hover:bg-accent">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Sélectionne un champion joué <strong>avec</strong> et/ou <strong>contre</strong>. Aucun
-          sélectionné = pas de filtre.
-        </p>
+        <p className="mb-3 text-xs text-muted-foreground">{t("champFilter.hint")}</p>
         <div className="flex flex-col gap-4 sm:flex-row">
           <ChampionPicker
-            title="Avec (allié)"
+            title={t("champFilter.with")}
             champions={champions}
             selected={withChamp}
             onSelect={onWith}
           />
           <ChampionPicker
-            title="Contre (ennemi)"
+            title={t("champFilter.against")}
             champions={champions}
             selected={againstChamp}
             onSelect={onAgainst}
@@ -117,14 +117,14 @@ export function ChampionFilterModal({
             }}
             className="rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent"
           >
-            Réinitialiser
+            {t("common.reset")}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
           >
-            Appliquer
+            {t("common.apply")}
           </button>
         </div>
       </div>
