@@ -274,14 +274,15 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                         {t(queueKey(m.queueId))}
                       </span>
                     )}
+                    <p className="text-[11px] text-muted-foreground">
+                      {relativeTime(t, m.gameCreationMs)}
+                    </p>
                     <p
                       className={`text-xs font-semibold ${m.win ? "text-green-500" : "text-red-500"}`}
                     >
                       {m.win ? t("common.win") : t("common.loss")}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {duration(m.gameDurationS)} · {relativeTime(t, m.gameCreationMs)}
-                    </p>
+                    <p className="text-[11px] text-muted-foreground">{duration(m.gameDurationS)}</p>
                     <LpDelta value={lpPerGame?.matchLp[m.matchId]} t={t} />
                   </div>
 
