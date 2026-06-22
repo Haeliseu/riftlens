@@ -14,11 +14,11 @@ export function useRolePerformance(puuid: string | null | undefined) {
   })
 }
 
-export function useCrossedPlayers(puuid: string | null | undefined) {
+export function useCrossedPlayers(puuid: string | null | undefined, region = "EUW1") {
   return useQuery({
-    queryKey: ["crossed-players", puuid],
+    queryKey: ["crossed-players", puuid, region],
     queryFn: async () => {
-      const res = await fetch(`/api/riot/crossed-players?puuid=${puuid}`)
+      const res = await fetch(`/api/riot/crossed-players?puuid=${puuid}&region=${region}`)
       if (!res.ok) throw new Error("Crossed players unavailable")
       return (await res.json()) as CrossedPlayer[]
     },

@@ -12,7 +12,7 @@ interface Props {
 
 export function CrossedPlayers({ puuid, region }: Props) {
   const { t } = useI18n()
-  const { data, isLoading } = useCrossedPlayers(puuid)
+  const { data, isLoading } = useCrossedPlayers(puuid, region)
   const rows = data ?? []
 
   return (
