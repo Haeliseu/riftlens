@@ -1,6 +1,6 @@
 "use client"
 
-import { getChampionIconUrl, getItemIconUrl, type MatchSummary } from "@riftlens/riot-api"
+import { getChampionIconUrl, type MatchSummary } from "@riftlens/riot-api"
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react"
 import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
@@ -354,7 +354,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                   {/* 4b. End-game items: 2 rows of 4 (items + trinket) */}
                   <div className="grid grid-cols-4 grid-rows-2 gap-0.5 flex-shrink-0">
                     {Array.from({ length: 8 }, (_, i) => {
-                      const url = getItemIconUrl(m.items[i] ?? 0)
+                      const url = m.itemIcons[i] ?? null
                       return (
                         <div
                           // biome-ignore lint/suspicious/noArrayIndexKey: fixed item slots

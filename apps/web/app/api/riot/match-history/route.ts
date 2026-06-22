@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     // the history row can render them inline (à la DPM) without a per-row fetch.
     const enriched = matches.map((m) => ({
       ...m,
+      itemIcons: m.items.map((id) => assets.item(id)),
       spellIcons: m.summonerSpellIds.map((id) => assets.spell(id)),
       keystoneIcon: assets.perk(m.keystoneId ?? undefined),
       secondaryIcon: assets.perk(m.secondaryPerkId ?? undefined),

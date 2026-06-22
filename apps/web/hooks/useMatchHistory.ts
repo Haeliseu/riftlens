@@ -1,8 +1,9 @@
 import type { MatchSummary } from "@riftlens/riot-api"
 import { useQuery } from "@tanstack/react-query"
 
-/** Match summary enriched (server-side) with resolved spell/rune icon URLs. */
+/** Match summary enriched (server-side) with resolved item/spell/rune icon URLs. */
 export interface EnrichedMatch extends MatchSummary {
+  itemIcons: (string | null)[]
   spellIcons: (string | null)[]
   keystoneIcon: string | null
   secondaryIcon: string | null
