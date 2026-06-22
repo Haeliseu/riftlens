@@ -1,5 +1,6 @@
 "use client"
 
+import { getProfileIconUrl } from "@riftlens/riot-api"
 import { Clock, Search, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -22,6 +23,7 @@ interface RecentSearch {
   gameName: string
   tagLine: string
   region: string
+  profileIconId?: number | null
 }
 
 export function Navbar() {
@@ -36,13 +38,15 @@ export function Navbar() {
   const regionRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
 
-  // Load recent searches (shared with the home search).
-  useEffect(() => {
+  // Load recent searches (shared with the home search + profile visits).
+  function loadRecent() {
     try {
       const stored = localStorage.getItem(RECENT_KEY)
-      if (stored) setRecent(JSON.parse(stored) as RecentSearch[])
+      setRecent(stored ? (JSON.parse(stored) as RecentSearch[]) : [])
     } catch {}
-  }, [])
+  }
+  // biome-ignore lint/correctness/useExhaustiveDependencies: load once on mount
+  useEffect(() => loadRecent(), [])
 
   // Ctrl/Cmd+K focuses the search input.
   useEffect(() => {
@@ -140,7 +144,10 @@ export function Navbar() {
               placeholder={t("nav.search.placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setSearchOpen(true)}
+              onFocus={() => {
+                loadRecent()
+                setSearchOpen(true)
+              }}
               className="h-9 w-full bg-transparent pl-8 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground"
               autoComplete="off"
               spellCheck={false}
@@ -167,7 +174,18 @@ export function Navbar() {
                   onClick={() => navigate(r.gameName, r.tagLine, r.region)}
                   className="flex flex-1 items-center gap-2 text-left min-w-0"
                 >
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                  <div className="h-6 w-6 flex-shrink-0 overflow-hidden rounded bg-muted flex items-center justify-center">
+                    {r.profileIconId != null ? (
+                      // biome-ignore lint/performance/noImgElement: external CDN icon
+                      <img
+                        src={getProfileIconUrl(r.profileIconId)}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                    )}
+                  </div>
                   <span className="text-sm font-medium truncate">{r.gameName}</span>
                   <span className="text-sm text-muted-foreground">#{r.tagLine}</span>
                   <span

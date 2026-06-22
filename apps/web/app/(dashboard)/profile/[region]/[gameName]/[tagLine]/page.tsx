@@ -8,6 +8,7 @@ import {
 } from "@riftlens/riot-api"
 import { sql } from "drizzle-orm"
 import { after } from "next/server"
+import { RecordRecentVisit } from "@/components/layout/RecordRecentVisit"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChallengesCard } from "@/components/profile/ChallengesCard"
 import { ChampionPerformance } from "@/components/profile/ChampionPerformance"
@@ -97,6 +98,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="space-y-6">
+      {summary && (
+        <RecordRecentVisit
+          gameName={summary.gameName}
+          tagLine={summary.tagLine}
+          region={region}
+          profileIconId={summary.profileIconId}
+        />
+      )}
       <ProfileHeader
         region={region}
         gameName={summary?.gameName ?? name}
