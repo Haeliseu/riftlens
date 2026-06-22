@@ -160,7 +160,10 @@ export interface CachedRank {
 }
 
 /** Distinct participant puuids from the player's most recent stored matches. */
-export async function recentParticipantPuuids(puuid: string, games = 20): Promise<string[]> {
+export async function recentParticipantPuuids(
+  puuid: string,
+  games = 20
+): Promise<{ puuids: string[]; games: number }> {
   const recent = await db
     .select({ matchId: summonerMatches.matchId })
     .from(summonerMatches)
@@ -168,13 +171,13 @@ export async function recentParticipantPuuids(puuid: string, games = 20): Promis
     .orderBy(desc(summonerMatches.gameCreation))
     .limit(games)
   const ids = recent.map((r) => r.matchId).filter((x): x is string => x != null)
-  if (ids.length === 0) return []
+  if (ids.length === 0) return { puuids: [], games: 0 }
 
   const parts = await db
     .select({ puuid: matchParticipants.puuid })
     .from(matchParticipants)
     .where(inArray(matchParticipants.matchId, ids))
-  return [...new Set(parts.map((p) => p.puuid))]
+  return { puuids: [...new Set(parts.map((p) => p.puuid))], games: ids.length }
 }
 
 /** Read cached Solo ranks for a set of puuids (only those checked recently). */

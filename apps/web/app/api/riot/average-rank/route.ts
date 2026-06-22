@@ -29,11 +29,10 @@ export async function GET(req: NextRequest) {
   // DB-backed path: participants of the last (up to) 20 stored games, ranks
   // mostly from the shared summoner cache, only missing ones fetched live.
   try {
-    const participants = await recentParticipantPuuids(puuid, 20)
+    const { puuids: participants, games: sampledGames } = await recentParticipantPuuids(puuid, 20)
     if (participants.length > 0) {
       const cache = await cachedRanks(participants)
       const ranks: RankedEntry[] = []
-      let sampledGames = Math.min(20, Math.ceil(participants.length / 10))
       let liveBudget = MAX_LIVE_LOOKUPS
 
       for (const pid of participants) {
@@ -66,9 +65,8 @@ export async function GET(req: NextRequest) {
 
       if (ranks.length > 0) {
         const { tier, division } = computeAverageGameRank(ranks)
-        sampledGames = Math.max(1, sampledGames)
         return NextResponse.json(
-          { tier, division, sampleGames: sampledGames, sampledPlayers: ranks.length },
+          { tier, division, sampleGames: Math.max(1, sampledGames), sampledPlayers: ranks.length },
           { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800" } }
         )
       }
