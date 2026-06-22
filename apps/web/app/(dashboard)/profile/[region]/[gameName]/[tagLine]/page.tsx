@@ -99,8 +99,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <div className="flex items-start justify-between gap-4">
         <ProfileHeader
           region={region}
-          gameName={name}
-          tagLine={tag}
+          gameName={summary?.gameName ?? name}
+          tagLine={summary?.tagLine ?? tag}
           profileIconId={summary?.profileIconId ?? null}
           summonerLevel={summary?.summonerLevel ?? null}
           soloRank={summary?.soloRank ?? null}

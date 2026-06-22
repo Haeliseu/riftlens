@@ -179,6 +179,7 @@ export function Navbar() {
                 </button>
                 <button
                   type="button"
+                  aria-label={t("common.clear")}
                   onClick={(e) => removeRecent(i, e)}
                   className="ml-2 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-muted"
                 >
