@@ -8,6 +8,8 @@ import { roleKey } from "@/lib/roles"
 
 interface Props {
   puuid?: string | null
+  /** sidebar mode: show only the issues, condensed */
+  compact?: boolean
 }
 
 const SEVERITY: Record<CoachSeverity, { dot: string; text: string }> = {
@@ -21,21 +23,28 @@ const METRIC_KEY: Record<CoachMetric, TranslationKey> = {
   vision: "coach.metric.vision",
   kp: "coach.metric.kp",
   deaths: "coach.metric.deaths",
+  gold: "coach.metric.gold",
 }
 const TIP_KEY: Record<CoachMetric, TranslationKey> = {
   csPerMin: "coach.tip.csPerMin",
   vision: "coach.tip.vision",
   kp: "coach.tip.kp",
   deaths: "coach.tip.deaths",
+  gold: "coach.tip.gold",
 }
 
 function fmt(metric: CoachMetric, v: number): string {
   return metric === "kp" ? `${v}%` : String(v)
 }
 
-export function CoachingCard({ puuid }: Props) {
+export function CoachingCard({ puuid, compact }: Props) {
   const { t } = useI18n()
   const { data, isLoading } = useCoaching(puuid)
+
+  const tips = data?.tips ?? []
+  const issues = tips.filter((tip) => tip.severity !== "good")
+  // Sidebar shows only the issues; the tab shows every metric.
+  const shown = compact ? issues : tips
 
   return (
     <div className="rounded-xl border bg-card p-4">
@@ -51,30 +60,34 @@ export function CoachingCard({ puuid }: Props) {
               wr: data.winRate,
             })}
           </p>
-          <div className="space-y-3">
-            {data.tips.map((tip) => {
-              const sev = SEVERITY[tip.severity]
-              return (
-                <div key={tip.metric}>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className={`h-2 w-2 rounded-full flex-shrink-0 ${sev.dot}`} />
-                    <span className="flex-1 truncate">{t(METRIC_KEY[tip.metric])}</span>
-                    <span className={`font-semibold ${sev.text}`}>
-                      {fmt(tip.metric, tip.value)}
-                    </span>
-                    <span className="text-muted-foreground text-xs">
-                      / {fmt(tip.metric, tip.target)}
-                    </span>
+          {compact && issues.length === 0 ? (
+            <p className="text-sm text-emerald-500">{t("coach.allGood")}</p>
+          ) : (
+            <div className="space-y-3">
+              {shown.map((tip) => {
+                const sev = SEVERITY[tip.severity]
+                return (
+                  <div key={tip.metric}>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className={`h-2 w-2 rounded-full flex-shrink-0 ${sev.dot}`} />
+                      <span className="flex-1 truncate">{t(METRIC_KEY[tip.metric])}</span>
+                      <span className={`font-semibold ${sev.text}`}>
+                        {fmt(tip.metric, tip.value)}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        / {fmt(tip.metric, tip.target)}
+                      </span>
+                    </div>
+                    {tip.severity !== "good" && (
+                      <p className="mt-1 ml-4 text-xs text-muted-foreground">
+                        {t(TIP_KEY[tip.metric])}
+                      </p>
+                    )}
                   </div>
-                  {tip.severity !== "good" && (
-                    <p className="mt-1 ml-4 text-xs text-muted-foreground">
-                      {t(TIP_KEY[tip.metric])}
-                    </p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </>
       ) : null}
     </div>

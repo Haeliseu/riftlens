@@ -154,18 +154,22 @@ export const dictionaries = {
     "coach.your": "Toi",
     "coach.target": "Objectif",
     "coach.metric.csPerMin": "CS / min",
-    "coach.metric.vision": "Score de vision",
+    "coach.metric.vision": "Vision / min",
     "coach.metric.kp": "Participation aux kills",
     "coach.metric.deaths": "Morts / partie",
+    "coach.metric.gold": "Or / min",
     "coach.tip.csPerMin":
       "Travaille tes derniers coups : last-hit sous tour, ne rate pas les vagues entre les trades.",
     "coach.tip.vision":
-      "Pose et détruis plus de balises : achète un pink à chaque retour, ward les entrées de jungle.",
+      "Pose et détruis plus de balises : achète un pink à chaque retour, ward les entrées de jungle et autour des objectifs.",
     "coach.tip.kp":
-      "Sois plus présent autour de la carte : roam après ta vague, rejoins les fights et objectifs.",
+      "Sois plus présent autour de la carte : roam après ta vague, rejoins les fights et objectifs (dragon/héraut).",
     "coach.tip.deaths":
-      "Réduis tes morts : surveille la minimap, garde un repli, ne force pas sans vision ni avantage.",
+      "Réduis tes morts : surveille la minimap, garde un repli, ne force pas sans vision ni avantage — surtout avant un objectif.",
+    "coach.tip.gold":
+      "Optimise ton économie : recall sur des paliers d'achat propres, ne meurs pas avec de l'or en poche, garde la vague qui pousse.",
     "coach.good": "Bon",
+    "coach.allGood": "Solide sur ce rôle — rien d'alarmant dans tes moyennes.",
     "mastery.title": "Maestria",
     "mastery.level": "Niv. {n}",
     "mastery.empty": "Aucune donnée de maestria.",
@@ -540,18 +544,22 @@ export const dictionaries = {
     "coach.your": "You",
     "coach.target": "Target",
     "coach.metric.csPerMin": "CS / min",
-    "coach.metric.vision": "Vision score",
+    "coach.metric.vision": "Vision / min",
     "coach.metric.kp": "Kill participation",
     "coach.metric.deaths": "Deaths / game",
+    "coach.metric.gold": "Gold / min",
     "coach.tip.csPerMin":
       "Work on last-hitting: farm under tower, don't miss waves between trades.",
     "coach.tip.vision":
-      "Place and clear more wards: buy a control ward each back, ward jungle entrances.",
+      "Place and clear more wards: buy a control ward each back, ward jungle entrances and around objectives.",
     "coach.tip.kp":
-      "Be more present around the map: roam after your wave, join fights and objectives.",
+      "Be more present around the map: roam after your wave, join fights and objectives (dragon/herald).",
     "coach.tip.deaths":
-      "Cut your deaths: watch the minimap, keep an escape, don't force without vision or a lead.",
+      "Cut your deaths: watch the minimap, keep an escape, don't force without vision or a lead — especially before an objective.",
+    "coach.tip.gold":
+      "Tighten your economy: back on clean item breakpoints, don't die with gold on you, keep the wave pushing.",
     "coach.good": "Good",
+    "coach.allGood": "Solid for this role — nothing alarming in your averages.",
     "mastery.title": "Mastery",
     "mastery.level": "Lv. {n}",
     "mastery.empty": "No mastery data.",

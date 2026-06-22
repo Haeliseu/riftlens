@@ -1,5 +1,11 @@
 import { db } from "@riftlens/db"
-import { lpSnapshots, matchParticipants, summonerMatches, summoners } from "@riftlens/db/schema"
+import {
+  lpSnapshots,
+  matches,
+  matchParticipants,
+  summonerMatches,
+  summoners,
+} from "@riftlens/db/schema"
 import { and, desc, eq, inArray } from "drizzle-orm"
 
 // Detailed per-champion aggregate. Bucket holds SUMS; the UI divides by games.
@@ -292,11 +298,13 @@ export interface CoachInput {
   kp: number // 0..1
   deathsPerGame: number
   kda: number
-  visionPerGame: number
+  visionPerMin: number
+  goldPerMin: number
   winRate: number // 0..100
 }
 
-/** Aggregate the player's main role from stored ranked games for the coaching engine. */
+/** Aggregate the player's main role from stored ranked games for the coaching
+ * engine. Joins matches for game duration → per-minute gold/vision. */
 export async function coachingFromDb(puuid: string): Promise<CoachInput | null> {
   const rows = await db
     .select({
@@ -306,10 +314,13 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
       assists: summonerMatches.assists,
       win: summonerMatches.win,
       visionScore: summonerMatches.visionScore,
+      goldEarned: summonerMatches.goldEarned,
       csPerMin: summonerMatches.csPerMin,
       kp: summonerMatches.killParticipation,
+      duration: matches.gameDuration,
     })
     .from(summonerMatches)
+    .innerJoin(matches, eq(summonerMatches.matchId, matches.matchId))
     .where(and(eq(summonerMatches.puuid, puuid), inArray(summonerMatches.queueId, [420, 440])))
 
   if (rows.length === 0) return null
@@ -320,7 +331,8 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
     kills: number
     deaths: number
     assists: number
-    vision: number
+    visionPerMin: number
+    goldPerMin: number
     csPerMin: number
     kp: number
   }
@@ -333,16 +345,19 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
       kills: 0,
       deaths: 0,
       assists: 0,
-      vision: 0,
+      visionPerMin: 0,
+      goldPerMin: 0,
       csPerMin: 0,
       kp: 0,
     }
+    const mins = (r.duration ?? 0) / 60
     a.games += 1
     a.wins += r.win ? 1 : 0
     a.kills += r.kills ?? 0
     a.deaths += r.deaths ?? 0
     a.assists += r.assists ?? 0
-    a.vision += r.visionScore ?? 0
+    a.visionPerMin += mins > 0 ? (r.visionScore ?? 0) / mins : 0
+    a.goldPerMin += mins > 0 ? (r.goldEarned ?? 0) / mins : 0
     a.csPerMin += r.csPerMin ?? 0
     a.kp += r.kp ?? 0
     byRole.set(role, a)
@@ -363,7 +378,8 @@ export async function coachingFromDb(puuid: string): Promise<CoachInput | null> 
     kp: a.kp / a.games,
     deathsPerGame: a.deaths / a.games,
     kda,
-    visionPerGame: a.vision / a.games,
+    visionPerMin: a.visionPerMin / a.games,
+    goldPerMin: a.goldPerMin / a.games,
     winRate: Math.round((a.wins / a.games) * 100),
   }
 }
