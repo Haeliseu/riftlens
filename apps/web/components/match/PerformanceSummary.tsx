@@ -93,6 +93,16 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           </div>
         </div>
 
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+          <span className="text-muted-foreground text-xs">{t("perf.kda")}</span>
+          <span className="font-medium">{avgKda}</span>
+          <span className="text-muted-foreground text-xs">{t("perf.kdaPerGame")}</span>
+          <span className="font-medium">{perGameKda}</span>
+          <span className="text-muted-foreground text-xs">{t("perf.carryAvg")}</span>
+          <span className="font-medium text-violet-400">{avgCarry}</span>
+        </div>
+
         {/* Top champions — avatar · WR% + W-L · KDA (DPM-style) */}
         <div className="flex flex-col gap-1.5">
           {champs.map((c) => {
@@ -125,17 +135,7 @@ export function PerformanceSummary({ matches }: { matches: MatchSummary[] }) {
           })}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-          <span className="text-muted-foreground text-xs">{t("perf.kda")}</span>
-          <span className="font-medium">{avgKda}</span>
-          <span className="text-muted-foreground text-xs">{t("perf.kdaPerGame")}</span>
-          <span className="font-medium">{perGameKda}</span>
-          <span className="text-muted-foreground text-xs">{t("perf.carryAvg")}</span>
-          <span className="font-medium text-violet-400">{avgCarry}</span>
-        </div>
-
-        {/* MVP and ACE — moved to where the champions used to be */}
+        {/* MVP and ACE — far right (swapped with the champions block) */}
         <div className="ml-auto flex gap-4">
           <div className="text-center">
             <p className="text-[11px] font-semibold text-amber-400">MVP</p>
