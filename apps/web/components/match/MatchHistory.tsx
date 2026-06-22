@@ -36,6 +36,13 @@ function inQueueGroup(queueId: number | null, group: string): boolean {
   return queueId !== 420 && queueId !== 440 // OTHER (ARAM, Arena, normals…)
 }
 
+function carryColor(score: number): string {
+  if (score >= 65) return "text-violet-400"
+  if (score >= 45) return "text-blue-400"
+  if (score >= 30) return "text-muted-foreground"
+  return "text-red-400"
+}
+
 // Role-quest item ids (CommunityDragon): they sit in a normal slot but we pull
 // them out into the dedicated last cell of the item grid.
 const QUEST_ITEM_IDS = new Set([
@@ -436,11 +443,14 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                     )}
                   </div>
 
-                  {/* 6. MVP / ACE / placement */}
+                  {/* 6. Carry score (no label) + MVP / ACE / placement */}
                   <div className="flex flex-col items-center justify-center w-12 flex-shrink-0">
+                    <p className={`text-base font-bold leading-none ${carryColor(m.carryScore)}`}>
+                      {m.carryScore}
+                    </p>
                     {m.badge ? (
                       <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                        className={`mt-1 rounded px-1.5 py-0.5 text-[10px] font-bold ${
                           m.badge === "MVP"
                             ? "bg-amber-400/20 text-amber-400"
                             : "bg-violet-400/20 text-violet-400"
@@ -449,7 +459,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                         {m.badge}
                       </span>
                     ) : (
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="mt-1 text-[11px] text-muted-foreground">
                         {placementLabel(t, m.placement)}
                       </span>
                     )}
