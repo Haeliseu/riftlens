@@ -42,3 +42,23 @@ export async function withCache<T>(
   }
   return value
 }
+
+/** Read a cached value without computing anything (null = miss / no Redis). */
+export async function cacheGet<T>(key: string): Promise<T | null> {
+  if (!redis) return null
+  try {
+    return (await redis.get<T>(key)) ?? null
+  } catch {
+    return null
+  }
+}
+
+/** Write a value to the cache (no-op without Redis). */
+export async function cacheSet<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
+  if (!redis) return
+  try {
+    await redis.set(key, value, { ex: ttlSeconds })
+  } catch {
+    // non-fatal
+  }
+}
