@@ -2,7 +2,7 @@
 
 import { getChampionIconUrl, type MatchSummary } from "@riftlens/riot-api"
 import { ArrowDown, ArrowUp, ChevronDown } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
@@ -28,6 +28,9 @@ const QUEUE_GROUPS: { id: string; label: TranslationKey }[] = [
   { id: "FLEX", label: "filter.queue.flex" },
   { id: "OTHER", label: "filter.queue.other" },
 ]
+
+// SOLO/FLEX filter server-side (Riot queue param) → an exact page of that queue.
+const SERVER_QUEUE: Record<string, number | undefined> = { SOLO: 420, FLEX: 440 }
 
 function inQueueGroup(queueId: number | null, group: string): boolean {
   if (group === "ALL") return true
@@ -159,18 +162,32 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
   const [filterOpen, setFilterOpen] = useState(false)
   const { data: champions } = useChampions()
   const { data: lpPerGame } = useLpPerGame(puuid)
-  const { data: rawMatches, isLoading, isError, isFetching } = useMatchHistory(puuid, region, count)
+  // Solo/Flex are filtered server-side (Riot queue param) so a page is exactly
+  // 20 of that queue. Other filters (role, champion, OTHER, period) are applied
+  // client-side — "load more" lets the user fetch deeper to fill 20.
+  const serverQueue = SERVER_QUEUE[queueGroup]
+  // Reset to the first page whenever the active filters change.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on filter change only
+  useEffect(() => {
+    setCount(20)
+  }, [queueGroup, role, period, withChamp, againstChamp])
+  const {
+    data: rawMatches,
+    isLoading,
+    isError,
+    isFetching,
+  } = useMatchHistory(puuid, region, count, serverQueue)
 
   let matches = rawMatches ? filterByPeriod(rawMatches, period) : rawMatches
-  if (matches && queueGroup !== "ALL")
+  // Client-side queue filter only needed for OTHER (no single Riot queue id).
+  if (matches && queueGroup === "OTHER")
     matches = matches.filter((m) => inQueueGroup(m.queueId, queueGroup))
   if (matches && role !== "ALL") matches = matches.filter((m) => m.position === role)
   // "with" now means the champion the player themselves played.
   if (matches && withChamp != null) matches = matches.filter((m) => m.championId === withChamp)
   if (matches && againstChamp != null)
     matches = matches.filter((m) => m.enemyChampionIds.includes(againstChamp))
-  const canLoadMore =
-    (rawMatches?.length ?? 0) >= count && count < 50 && period === "all" && queueGroup === "ALL"
+  const canLoadMore = (rawMatches?.length ?? 0) >= count && count < 100
 
   return (
     <div className="space-y-2">
@@ -481,7 +498,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
           {canLoadMore && (
             <button
               type="button"
-              onClick={() => setCount((c) => Math.min(50, c + 20))}
+              onClick={() => setCount((c) => Math.min(100, c + 20))}
               disabled={isFetching}
               className="w-full rounded-md border bg-card py-2 text-xs text-muted-foreground hover:bg-accent disabled:opacity-50"
             >

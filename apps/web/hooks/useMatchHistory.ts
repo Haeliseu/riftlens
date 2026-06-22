@@ -9,12 +9,18 @@ export interface EnrichedMatch extends MatchSummary {
   secondaryIcon: string | null
 }
 
-export function useMatchHistory(puuid: string | null | undefined, region = "EUW1", count = 10) {
+export function useMatchHistory(
+  puuid: string | null | undefined,
+  region = "EUW1",
+  count = 10,
+  queueId?: number
+) {
   return useQuery({
-    queryKey: ["match-history", region, puuid, count],
+    queryKey: ["match-history", region, puuid, count, queueId ?? "all"],
     queryFn: async () => {
+      const q = queueId ? `&queue=${queueId}` : ""
       const res = await fetch(
-        `/api/riot/match-history?puuid=${puuid}&region=${region}&count=${count}`
+        `/api/riot/match-history?puuid=${puuid}&region=${region}&count=${count}${q}`
       )
       if (!res.ok) throw new Error("Match history unavailable")
       return (await res.json()) as EnrichedMatch[]
