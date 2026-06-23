@@ -15,6 +15,7 @@ import { ThemeToggle } from "./ThemeToggle"
 const NAV_LINKS: { href: string; label: TranslationKey }[] = [
   { href: "/leaderboard", label: "leaderboard.title" },
   { href: "/champions", label: "champions.title" },
+  { href: "/download", label: "nav.download" },
 ]
 
 const RECENT_KEY = "riftlens:recent"
