@@ -406,6 +406,16 @@ export const dictionaries = {
 
     // footer
     "a11y.skipToContent": "Aller au contenu principal",
+    "account.title": "Mon compte",
+    "account.notSignedIn": "Tu n'es pas connecté.",
+    "account.signedInAs": "Connecté en tant que {name}.",
+    "account.deleteTitle": "Supprimer mon compte",
+    "account.deleteWarning":
+      "Cette action supprime définitivement ton profil et toutes les données liées à ton compte Riot. Irréversible.",
+    "account.delete": "Supprimer mon compte",
+    "account.deleteConfirm": "Confirmer la suppression",
+    "account.deleting": "Suppression…",
+    "account.deleteError": "Échec de la suppression. Réessaie.",
     "footer.tagline": "Tracker League of Legends — profils, classement, coaching et live game.",
     "footer.nav": "Navigation",
     "footer.legal": "Légal",
@@ -815,6 +825,16 @@ export const dictionaries = {
 
     // footer
     "a11y.skipToContent": "Skip to main content",
+    "account.title": "My account",
+    "account.notSignedIn": "You are not signed in.",
+    "account.signedInAs": "Signed in as {name}.",
+    "account.deleteTitle": "Delete my account",
+    "account.deleteWarning":
+      "This permanently deletes your profile and all data linked to your Riot account. This cannot be undone.",
+    "account.delete": "Delete my account",
+    "account.deleteConfirm": "Confirm deletion",
+    "account.deleting": "Deleting…",
+    "account.deleteError": "Deletion failed. Please try again.",
     "footer.tagline": "League of Legends tracker — profiles, leaderboard, coaching and live game.",
     "footer.nav": "Navigation",
     "footer.legal": "Legal",

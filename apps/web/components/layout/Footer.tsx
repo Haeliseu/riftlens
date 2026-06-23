@@ -55,6 +55,11 @@ export function Footer() {
                     {t("footer.terms")}
                   </Link>
                 </li>
+                <li>
+                  <Link href="/account" className="text-muted-foreground hover:text-foreground">
+                    {t("account.title")}
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
