@@ -30,11 +30,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: pnpm install --frozen-lockfile
+      # Builds the frontend (beforeBuildCommand) + the native bundle, then
+      # publishes the binaries to a GitHub Release for the pushed tag.
       - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: apps/desktop
-          args: "--config apps/desktop/src-tauri/tauri.conf.json"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: riftlens-${{ matrix.os }}
-          path: apps/desktop/src-tauri/target/release/bundle
+          tagName: ${{ github.ref_name }}
+          releaseName: "RiftLens ${{ github.ref_name }}"
+          releaseDraft: false
+          prerelease: false

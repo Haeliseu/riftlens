@@ -5,7 +5,9 @@
   "identifier": "app.riftlens.desktop",
   "build": {
     "frontendDist": "../out",
-    "devUrl": "http://localhost:3001"
+    "devUrl": "http://localhost:3001",
+    "beforeBuildCommand": "pnpm build:web",
+    "beforeDevCommand": "pnpm dev:web"
   },
   "app": {
     "windows": [

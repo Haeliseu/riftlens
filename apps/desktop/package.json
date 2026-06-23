@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "tauri dev",
+    "dev:web": "next dev -p 3001",
     "build": "tauri build",
+    "build:web": "next build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
