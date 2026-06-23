@@ -25,7 +25,7 @@ function FeatureCard({ feature: f }: { feature: Feature }) {
         <p className="font-semibold text-sm">{f.title}</p>
         <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
       </div>
-      {f.hint && <p className="text-xs text-muted-foreground/60 italic">{f.hint}</p>}
+      {f.hint && <p className="text-xs text-muted-foreground italic">{f.hint}</p>}
     </div>
   )
   return f.href ? (

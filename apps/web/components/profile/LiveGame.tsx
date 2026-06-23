@@ -75,7 +75,7 @@ function PlayerRow({ p, region, t }: { p: LiveParticipant; region: string; t: T 
               return (
                 <span
                   key={tag}
-                  className="rounded bg-accent px-1.5 py-0.5 text-[11px] font-medium text-foreground/80"
+                  className="rounded bg-accent px-1.5 py-0.5 text-[11px] font-medium text-foreground"
                 >
                   {meta.emoji} {t(meta.label)}
                 </span>

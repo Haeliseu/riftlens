@@ -359,7 +359,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
                         {t(queueKey(m.queueId, m.gameMode))}
                       </p>
                     ) : (
-                      <span className="inline-block rounded bg-accent px-1.5 py-px text-[11px] font-medium text-foreground/80">
+                      <span className="inline-block rounded bg-accent px-1.5 py-px text-[11px] font-medium text-foreground">
                         {t(queueKey(m.queueId, m.gameMode))}
                       </span>
                     )}

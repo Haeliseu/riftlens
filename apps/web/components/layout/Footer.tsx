@@ -60,7 +60,7 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="mt-8 text-[11px] leading-relaxed text-muted-foreground/70">
+        <p className="mt-8 text-[11px] leading-relaxed text-muted-foreground">
           {t("footer.disclaimer")}
         </p>
         <p className="mt-3 text-xs text-muted-foreground">{t("footer.rights", { year })}</p>

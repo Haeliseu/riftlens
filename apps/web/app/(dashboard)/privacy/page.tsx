@@ -32,8 +32,24 @@ const CONTENT = {
         p: "Les données sont stockées sur Supabase (PostgreSQL) et mises en cache sur Upstash (Redis). Les données de parties (immuables) sont conservées pour l'historique ; les caches expirent automatiquement.",
       },
       {
+        h: "Données d'autres joueurs",
+        p: "RiftLens affiche et met en cache des données publiques d'autres joueurs (classement, adversaires, alliés) issues de l'API Riot, dans un but d'analyse et d'auto-amélioration. Aucun contenu dégradant n'est affiché. Un joueur peut demander le retrait de ses données publiques en nous contactant.",
+      },
+      {
+        h: "Conservation",
+        p: "Les données de parties (immuables) sont conservées pour l'historique. Les caches Redis expirent automatiquement. Le profil d'un compte Riot lié est supprimé sur demande, et les comptes liés restés inactifs de façon prolongée peuvent être purgés.",
+      },
+      {
+        h: "Hébergement",
+        p: "Les données sont hébergées sur Supabase (PostgreSQL) et Upstash (Redis), en région Union européenne. Aucune publicité ni aucun traceur tiers n'est utilisé.",
+      },
+      {
+        h: "Stockage local",
+        p: "Ton navigateur conserve localement (localStorage) tes recherches récentes pour te les reproposer. Ces données ne quittent pas ton appareil et peuvent être effacées en vidant le stockage du site.",
+      },
+      {
         h: "Tes droits",
-        p: "Conformément au RGPD, tu peux demander l'accès, la rectification ou la suppression de tes données en nous contactant. Les données publiques Riot restent soumises aux conditions de Riot Games.",
+        p: "Conformément au RGPD, tu peux accéder, rectifier ou supprimer tes données. Si tu es connecté avec Riot, la suppression de ton compte (profil + données liées) est disponible depuis ton compte ou via l'endpoint dédié ; sinon, contacte-nous. Les données publiques Riot restent soumises aux conditions de Riot Games.",
       },
       { h: "Contact", p: "Pour toute question : aris.alexia@outlook.fr." },
     ],
@@ -59,8 +75,24 @@ const CONTENT = {
         p: "Data is stored on Supabase (PostgreSQL) and cached on Upstash (Redis). Match data (immutable) is kept for history; caches expire automatically.",
       },
       {
+        h: "Other players' data",
+        p: "RiftLens displays and caches other players' public data (leaderboard, opponents, allies) from the Riot API, for analytics and self-improvement. No shaming content is shown. A player may request removal of their public data by contacting us.",
+      },
+      {
+        h: "Retention",
+        p: "Match data (immutable) is kept for history. Redis caches expire automatically. A linked Riot account's profile is deleted on request, and linked accounts left inactive for a long time may be purged.",
+      },
+      {
+        h: "Hosting",
+        p: "Data is hosted on Supabase (PostgreSQL) and Upstash (Redis), in the European Union region. No ads and no third-party trackers are used.",
+      },
+      {
+        h: "Local storage",
+        p: "Your browser keeps your recent searches locally (localStorage) to suggest them again. This data never leaves your device and can be cleared by clearing the site's storage.",
+      },
+      {
         h: "Your rights",
-        p: "Under GDPR you can request access, rectification or deletion of your data by contacting us. Public Riot data remains subject to Riot Games' terms.",
+        p: "Under GDPR you can access, rectify or delete your data. If you signed in with Riot, account deletion (profile + linked data) is available from your account or via the dedicated endpoint; otherwise, contact us. Public Riot data remains subject to Riot Games' terms.",
       },
       { h: "Contact", p: "For any question: aris.alexia@outlook.fr." },
     ],

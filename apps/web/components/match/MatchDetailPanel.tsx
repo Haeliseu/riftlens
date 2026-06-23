@@ -90,7 +90,7 @@ function BuildSkillOrder({
           <p className="text-xs font-semibold mb-2 uppercase text-muted-foreground">
             {t("detail.laning15")}{" "}
             {a.csDiff !== null && (
-              <span className="font-normal normal-case text-muted-foreground/70">
+              <span className="font-normal normal-case text-muted-foreground">
                 {t("detail.vsLaneOpp")}
               </span>
             )}
@@ -155,7 +155,7 @@ function BuildSkillOrder({
                   <span className="text-[9px] text-muted-foreground mt-0.5">{last?.minute}'</span>
                 </div>
                 {gi < buildGroups.length - 1 && (
-                  <ChevronRight className="mx-0.5 h-3 w-3 text-muted-foreground/60 self-start mt-2" />
+                  <ChevronRight className="mx-0.5 h-3 w-3 text-muted-foreground self-start mt-2" />
                 )}
               </div>
             )
@@ -190,7 +190,7 @@ function BuildSkillOrder({
                       className={`flex h-4 w-4 items-center justify-center rounded text-[8px] font-medium ${
                         leveled
                           ? `${SKILL_COLOR[slot]?.bg} text-white`
-                          : "bg-muted/60 text-muted-foreground/40"
+                          : "bg-muted/60 text-muted-foreground"
                       }`}
                     >
                       {leveled ? lvl + 1 : ""}

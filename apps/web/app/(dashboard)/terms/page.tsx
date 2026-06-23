@@ -75,9 +75,7 @@ export default async function TermsPage() {
           <p className="text-sm leading-relaxed text-muted-foreground">{s.p}</p>
         </section>
       ))}
-      <p className="border-t pt-4 text-xs leading-relaxed text-muted-foreground/70">
-        {c.disclaimer}
-      </p>
+      <p className="border-t pt-4 text-xs leading-relaxed text-muted-foreground">{c.disclaimer}</p>
     </article>
   )
 }
