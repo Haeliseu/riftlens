@@ -1,17 +1,10 @@
-import { cookies } from "next/headers"
-import {
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE,
-  LOCALES,
-  type Locale,
-  type TranslationKey,
-  translate,
-} from "./dictionaries"
+import { headers } from "next/headers"
+import { DEFAULT_LOCALE, type Locale, type TranslationKey, translate } from "./dictionaries"
 
-/** Resolve the active locale from the request cookie (server components). */
+/** Resolve the active locale from the path (set by middleware as `x-locale`). */
 export async function getLocale(): Promise<Locale> {
-  const stored = (await cookies()).get(LOCALE_COOKIE)?.value as Locale | undefined
-  return stored && LOCALES.includes(stored) ? stored : DEFAULT_LOCALE
+  const fromHeader = (await headers()).get("x-locale")
+  return fromHeader === "fr" || fromHeader === "en" ? fromHeader : DEFAULT_LOCALE
 }
 
 /** Server-side translator bound to the request locale. */

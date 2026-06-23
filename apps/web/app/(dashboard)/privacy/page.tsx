@@ -4,7 +4,10 @@ import { getLocale } from "@/lib/i18n/server"
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "What data RiftLens collects, why, and how it is stored and protected.",
-  alternates: { canonical: "/privacy" },
+  alternates: {
+    canonical: "/privacy",
+    languages: { en: "/privacy", fr: "/fr/privacy", "x-default": "/privacy" },
+  },
 }
 
 const CONTENT = {

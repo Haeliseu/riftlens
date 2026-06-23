@@ -1,19 +1,13 @@
 "use client"
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react"
-import {
-  DEFAULT_LOCALE,
-  dictionaries,
-  LOCALE_COOKIE,
-  type Locale,
-  type TranslationKey,
-} from "./dictionaries"
+import { usePathname } from "next/navigation"
+import { createContext, useCallback, useContext, useEffect, useMemo } from "react"
+import { DEFAULT_LOCALE, dictionaries, type Locale, type TranslationKey } from "./dictionaries"
 
 type Vars = Record<string, string | number>
 
 interface I18nValue {
   locale: Locale
-  setLocale: (l: Locale) => void
   t: (key: TranslationKey, vars?: Vars) => string
 }
 
@@ -27,23 +21,24 @@ function interpolate(template: string, vars?: Vars): string {
   })
 }
 
+/**
+ * Locale is derived from the URL (English at the root, French under /fr) so it
+ * stays in sync with path-based routing. A `locale` override is accepted for
+ * tests where there's no router.
+ */
 export function I18nProvider({
-  initialLocale,
   children,
+  locale: forced,
 }: {
-  initialLocale: Locale
   children: React.ReactNode
+  locale?: Locale
 }) {
-  const [locale, setLocaleState] = useState<Locale>(initialLocale)
+  const pathname = usePathname()
+  const locale: Locale = forced ?? (pathname?.startsWith("/fr") ? "fr" : DEFAULT_LOCALE)
 
-  const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l)
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = l
-      // biome-ignore lint/suspicious/noDocumentCookie: simple locale cookie; cookieStore isn't universally available
-      document.cookie = `${LOCALE_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`
-    }
-  }, [])
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
   const t = useCallback(
     (key: TranslationKey, vars?: Vars) => {
@@ -54,7 +49,7 @@ export function I18nProvider({
     [locale]
   )
 
-  const value = useMemo<I18nValue>(() => ({ locale, setLocale, t }), [locale, setLocale, t])
+  const value = useMemo<I18nValue>(() => ({ locale, t }), [locale, t])
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 

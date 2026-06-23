@@ -3,9 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
 import { I18nProvider } from "@/lib/i18n"
-import type { Locale } from "@/lib/i18n/dictionaries"
 
-export function Providers({ locale, children }: { locale: Locale; children: React.ReactNode }) {
+export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(
     () =>
       new QueryClient({
@@ -15,7 +14,7 @@ export function Providers({ locale, children }: { locale: Locale; children: Reac
       })
   )
   return (
-    <I18nProvider initialLocale={locale}>
+    <I18nProvider>
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     </I18nProvider>
   )

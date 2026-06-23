@@ -5,7 +5,10 @@ import { RIOT_DISCLAIMER, RIOT_DISCLAIMER_EN } from "@/lib/seo"
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "RiftLens terms of service and the Riot Games disclaimer.",
-  alternates: { canonical: "/terms" },
+  alternates: {
+    canonical: "/terms",
+    languages: { en: "/terms", fr: "/fr/terms", "x-default": "/terms" },
+  },
 }
 
 const CONTENT = {

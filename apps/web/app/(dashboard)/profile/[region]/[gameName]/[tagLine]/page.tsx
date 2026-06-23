@@ -21,7 +21,8 @@ import { ProfileTabs } from "@/components/profile/ProfileTabs"
 import { RankedCard } from "@/components/profile/RankedCard"
 import { RefreshButton } from "@/components/profile/RefreshButton"
 import { RolePerformance } from "@/components/profile/RolePerformance"
-import { getT } from "@/lib/i18n/server"
+import { localePath } from "@/lib/i18n/locale-path"
+import { getLocale, getT } from "@/lib/i18n/server"
 import { ingestProfile } from "@/lib/ingest"
 import { regionBadge } from "@/lib/regions"
 import { riotClient } from "@/lib/riot-client"
@@ -84,7 +85,10 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
   return {
     title: `${riotId} (${reg})`,
     description,
-    alternates: { canonical: path },
+    alternates: {
+      canonical: localePath(await getLocale(), path),
+      languages: { en: path, fr: localePath("fr", path), "x-default": path },
+    },
     openGraph: { title: `${riotId} — RiftLens`, description, url: path },
   }
 }
@@ -92,6 +96,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { region, gameName, tagLine } = await params
   const t = await getT()
+  const locale = await getLocale()
 
   const name = safeDecode(gameName)
   const tag = safeDecode(tagLine)
@@ -139,7 +144,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
       {summary?.activeRegion && summary.activeRegion.toUpperCase() !== region.toUpperCase() && (
         <a
-          href={`/profile/${summary.activeRegion}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`}
+          href={localePath(
+            locale,
+            `/profile/${summary.activeRegion}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`
+          )}
           className="block rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-2.5 text-sm text-blue-300 hover:bg-blue-500/15"
         >
           {t("profile.activeRegion", {

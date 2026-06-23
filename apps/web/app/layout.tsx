@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import { Geist } from "next/font/google"
-import { cookies } from "next/headers"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
-import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES, type Locale } from "@/lib/i18n/dictionaries"
+import { getLocale } from "@/lib/i18n/server"
 import { siteConfig, siteUrl } from "@/lib/seo"
 import { Providers } from "./providers"
 import "./globals.css"
@@ -22,7 +21,10 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
   manifest: "/manifest.webmanifest",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    languages: { en: "/", fr: "/fr", "x-default": "/" },
+  },
   openGraph: {
     type: "website",
     siteName: siteConfig.name,
@@ -45,15 +47,13 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const stored = cookieStore.get(LOCALE_COOKIE)?.value as Locale | undefined
-  const locale: Locale = stored && LOCALES.includes(stored) ? stored : DEFAULT_LOCALE
+  const locale = await getLocale()
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={geist.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <Providers locale={locale}>{children}</Providers>
+          <Providers>{children}</Providers>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>

@@ -1,7 +1,7 @@
 "use client"
 
 import { getProfileIconUrl } from "@riftlens/riot-api"
-import Link from "next/link"
+import { Link } from "@/components/Link"
 import { useCrossedPlayers } from "@/hooks/useProfilePanels"
 import { useI18n } from "@/lib/i18n"
 

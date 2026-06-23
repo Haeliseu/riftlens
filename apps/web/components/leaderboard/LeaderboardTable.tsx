@@ -2,9 +2,9 @@
 
 import { getChampionIconUrl, getProfileIconUrl, type TierName } from "@riftlens/riot-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import Link from "next/link"
 import { useState } from "react"
 import { REGIONS } from "@/components/home/SearchHero"
+import { Link } from "@/components/Link"
 import { useLiveStatus } from "@/hooks/useLiveStatus"
 import { useI18n } from "@/lib/i18n"
 import { ROLES, roleIconUrl } from "@/lib/roles"

@@ -7,7 +7,7 @@ import {
   type TierName,
 } from "@riftlens/riot-api"
 import { Flame, Radio } from "lucide-react"
-import Link from "next/link"
+import { Link } from "@/components/Link"
 import { type LiveParticipant, useLiveGame } from "@/hooks/useLiveGame"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"

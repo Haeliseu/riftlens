@@ -7,8 +7,8 @@ import {
   type TierName,
 } from "@riftlens/riot-api"
 import { Bug, Castle, ChevronRight, Eye, Flame, Link2, Skull, Swords } from "lucide-react"
-import Link from "next/link"
 import { useState } from "react"
+import { Link } from "@/components/Link"
 import { type MatchDetailParticipant, type MatchTeam, useMatchDetail } from "@/hooks/useMatchDetail"
 import { useMatchTimeline } from "@/hooks/useMatchTimeline"
 import { useI18n } from "@/lib/i18n"

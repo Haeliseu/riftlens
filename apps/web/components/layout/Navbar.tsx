@@ -2,11 +2,12 @@
 
 import { getProfileIconUrl } from "@riftlens/riot-api"
 import { Clock, Search, X } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import { Link } from "@/components/Link"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
+import { localePath } from "@/lib/i18n/locale-path"
 import { REGION_IDS, REGION_NAME_KEY, regionBadge } from "@/lib/regions"
 import { LanguageToggle } from "./LanguageToggle"
 import { ThemeToggle } from "./ThemeToggle"
@@ -28,7 +29,7 @@ interface RecentSearch {
 
 export function Navbar() {
   const router = useRouter()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
   const [regionOpen, setRegionOpen] = useState(false)
@@ -90,7 +91,12 @@ export function Navbar() {
     } catch {}
     setQuery("")
     setSearchOpen(false)
-    router.push(`/profile/${reg}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`)
+    router.push(
+      localePath(
+        locale,
+        `/profile/${reg}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`
+      )
+    )
   }
 
   function handleSearch(e: React.FormEvent) {

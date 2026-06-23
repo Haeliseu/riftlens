@@ -4,6 +4,7 @@ import { Clock, Search, User, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { useI18n } from "@/lib/i18n"
+import { localePath } from "@/lib/i18n/locale-path"
 import { tierLabel } from "@/lib/tiers"
 
 export const REGIONS = [
@@ -73,7 +74,7 @@ function regionLabel(id: string) {
 
 export function SearchHero() {
   const router = useRouter()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [query, setQuery] = useState("")
   const [region, setRegion] = useState("EUW1")
   const [recent, setRecent] = useState<RecentSearch[]>([])
@@ -180,7 +181,12 @@ export function SearchHero() {
     setOpen(false)
     setQuery("")
     setSuggestions([])
-    router.push(`/profile/${reg}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`)
+    router.push(
+      localePath(
+        locale,
+        `/profile/${reg}/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`
+      )
+    )
   }
 
   function handleSubmit(e: React.FormEvent) {

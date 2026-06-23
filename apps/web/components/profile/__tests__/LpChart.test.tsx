@@ -9,7 +9,7 @@ import { LpChart } from "../LpChart"
 function render(ui: ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return rtlRender(
-    <I18nProvider initialLocale="fr">
+    <I18nProvider locale="fr">
       <QueryClientProvider client={client}>{ui}</QueryClientProvider>
     </I18nProvider>
   )
