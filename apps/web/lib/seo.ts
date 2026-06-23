@@ -8,26 +8,26 @@ export const siteUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:300
 export const siteConfig = {
   name: "RiftLens",
   url: siteUrl,
+  // English is the site's default language.
   description:
-    "RiftLens — tracker League of Legends : profils, historique, classement, coaching et live game. Suis et améliore tes performances, gratuitement.",
-  descriptionEn:
     "RiftLens — League of Legends tracker: profiles, match history, leaderboard, coaching and live game. Track and improve your performance, for free.",
+  descriptionFr:
+    "RiftLens — tracker League of Legends : profils, historique, classement, coaching et live game. Suis et améliore tes performances, gratuitement.",
   keywords: [
     "League of Legends",
     "LoL tracker",
     "LoL stats",
     "op.gg",
-    "classement LoL",
     "leaderboard",
     "live game",
-    "coaching LoL",
+    "LoL coaching",
     "RiftLens",
     "ranked",
     "winrate",
     "KDA",
   ],
-  locale: "fr_FR",
-  alternateLocale: "en_US",
+  locale: "en_US",
+  alternateLocale: "fr_FR",
 } as const
 
 /** Required by Riot's developer policy on every product surface. */

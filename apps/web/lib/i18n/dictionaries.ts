@@ -1,7 +1,7 @@
 export type Locale = "fr" | "en"
 
-export const LOCALES: Locale[] = ["fr", "en"]
-export const DEFAULT_LOCALE: Locale = "fr"
+export const LOCALES: Locale[] = ["en", "fr"]
+export const DEFAULT_LOCALE: Locale = "en"
 export const LOCALE_COOKIE = "riftlens-locale"
 
 /**

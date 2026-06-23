@@ -2,9 +2,8 @@ import type { Metadata } from "next"
 import { getLocale } from "@/lib/i18n/server"
 
 export const metadata: Metadata = {
-  title: "Politique de confidentialité",
-  description:
-    "Quelles données RiftLens collecte, pourquoi, et comment elles sont stockées et protégées.",
+  title: "Privacy Policy",
+  description: "What data RiftLens collects, why, and how it is stored and protected.",
   alternates: { canonical: "/privacy" },
 }
 

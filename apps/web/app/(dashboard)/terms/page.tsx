@@ -3,8 +3,8 @@ import { getLocale } from "@/lib/i18n/server"
 import { RIOT_DISCLAIMER, RIOT_DISCLAIMER_EN } from "@/lib/seo"
 
 export const metadata: Metadata = {
-  title: "Conditions d'utilisation",
-  description: "Les conditions d'utilisation du service RiftLens et le disclaimer Riot Games.",
+  title: "Terms of Service",
+  description: "RiftLens terms of service and the Riot Games disclaimer.",
   alternates: { canonical: "/terms" },
 }
 

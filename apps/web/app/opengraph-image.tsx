@@ -23,7 +23,7 @@ export default function OgImage() {
       <div style={{ fontSize: 120, fontWeight: 800, letterSpacing: -2 }}>{siteConfig.name}</div>
       <div style={{ fontSize: 40, color: "#a78bfa", marginTop: 8 }}>League of Legends Tracker</div>
       <div style={{ fontSize: 28, color: "#9ca3af", marginTop: 32 }}>
-        Profils · Classement · Coaching · Live Game
+        Profiles · Leaderboard · Coaching · Live Game
       </div>
     </div>,
     { ...size }
