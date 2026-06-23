@@ -238,11 +238,12 @@ export function SearchHero() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
+            aria-label={t("search.placeholder")}
             placeholder={t("search.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setOpen(true)}
-            className="h-12 w-full bg-transparent pl-9 pr-4 text-sm focus:outline-none placeholder:text-muted-foreground"
+            className="h-12 w-full bg-transparent pl-9 pr-4 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring placeholder:text-muted-foreground"
             autoComplete="off"
             spellCheck={false}
           />

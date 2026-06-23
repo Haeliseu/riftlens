@@ -155,6 +155,7 @@ export function Navbar() {
             <input
               ref={inputRef}
               type="text"
+              aria-label={t("nav.search.placeholder")}
               placeholder={t("nav.search.placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -162,7 +163,7 @@ export function Navbar() {
                 loadRecent()
                 setSearchOpen(true)
               }}
-              className="h-9 w-full bg-transparent pl-8 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground"
+              className="h-9 w-full bg-transparent pl-8 pr-12 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring placeholder:text-muted-foreground"
               autoComplete="off"
               spellCheck={false}
             />

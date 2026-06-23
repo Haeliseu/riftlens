@@ -405,6 +405,7 @@ export const dictionaries = {
     "login.error": "Erreur de connexion",
 
     // footer
+    "a11y.skipToContent": "Aller au contenu principal",
     "footer.tagline": "Tracker League of Legends — profils, classement, coaching et live game.",
     "footer.nav": "Navigation",
     "footer.legal": "Légal",
@@ -813,6 +814,7 @@ export const dictionaries = {
     "login.error": "Sign-in error",
 
     // footer
+    "a11y.skipToContent": "Skip to main content",
     "footer.tagline": "League of Legends tracker — profiles, leaderboard, coaching and live game.",
     "footer.nav": "Navigation",
     "footer.legal": "Legal",
