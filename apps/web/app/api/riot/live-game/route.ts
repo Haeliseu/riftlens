@@ -90,11 +90,13 @@ export async function GET(req: NextRequest) {
       // Recent ranked form (last few games, newest first) → W/L, streak, tags.
       try {
         const ids = await getMatchIds(client, routing, p.puuid, { type: "ranked", count: RECENT })
+        // Fetch the recent matches in parallel (cached + globally throttled by
+        // the Riot client) — keeps the live lookup snappy without re-fetching.
+        const fetched = await Promise.all(
+          ids.map((id) => cachedMatch(client, routing, id).catch(() => null))
+        )
         const recent: { win: boolean; championId: number; k: number; d: number; a: number }[] = []
-        for (const id of ids) {
-          // Cached so a live lookup over 10 players doesn't re-fetch the same
-          // immutable matches and exhaust the dev rate limit.
-          const m = await cachedMatch(client, routing, id).catch(() => null)
+        for (const m of fetched) {
           const me = m?.info.participants.find((x) => x.puuid === p.puuid)
           if (me)
             recent.push({
