@@ -423,6 +423,10 @@ export const dictionaries = {
     "download.forOS": "Télécharger pour {os}",
     "download.get": "Télécharger",
     "download.note": "Builds open source publiées sur GitHub Releases.",
+    "download.premiumTitle": "Fonctionnalité premium",
+    "download.premiumDesc":
+      "L'application bureau est réservée aux membres premium. Connecte-toi avec Riot pour y accéder.",
+    "download.premiumSoon": "Les offres premium arrivent bientôt.",
     "download.featuresTitle": "Ce que l'app bureau ajoute",
     "download.feature.overlay": "Overlay in-game (scoreboard live, timers d'objectifs).",
     "download.feature.champSelect": "Panneau allié/ennemi en champ select.",
@@ -854,6 +858,10 @@ export const dictionaries = {
     "download.forOS": "Download for {os}",
     "download.get": "Download",
     "download.note": "Open-source builds published on GitHub Releases.",
+    "download.premiumTitle": "Premium feature",
+    "download.premiumDesc":
+      "The desktop app is reserved for premium members. Sign in with Riot to get access.",
+    "download.premiumSoon": "Premium plans are coming soon.",
     "download.featuresTitle": "What the desktop app adds",
     "download.feature.overlay": "In-game overlay (live scoreboard, objective timers).",
     "download.feature.champSelect": "Ally/enemy panel in champ select.",

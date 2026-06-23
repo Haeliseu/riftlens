@@ -1,27 +1,25 @@
-"use client"
+import { db } from "@riftlens/db"
+import { profiles } from "@riftlens/db/schema"
+import { eq } from "drizzle-orm"
+import { Lock } from "lucide-react"
+import { headers } from "next/headers"
+import { DownloadOptions } from "@/components/download/DownloadOptions"
+import { Link } from "@/components/Link"
+import { auth } from "@/lib/auth"
+import { getT } from "@/lib/i18n/server"
 
-import { Apple, Download, Monitor, Terminal } from "lucide-react"
-import { useEffect, useState } from "react"
-import { DESKTOP_RELEASES_URL, type DesktopOS, detectOS, OS_LABEL } from "@/lib/desktop"
-import { useI18n } from "@/lib/i18n"
-
-const ICON: Record<DesktopOS, typeof Monitor> = {
-  windows: Monitor,
-  mac: Apple,
-  linux: Terminal,
+async function isPremium(userId: string): Promise<boolean> {
+  const [p] = await db
+    .select({ premium: profiles.isPremium })
+    .from(profiles)
+    .where(eq(profiles.id, userId))
+  return p?.premium ?? false
 }
-const PLATFORMS: DesktopOS[] = ["windows", "mac", "linux"]
 
-export default function DownloadPage() {
-  const { t } = useI18n()
-  // null until mounted, so OS-specific UI renders client-side only.
-  const [os, setOs] = useState<DesktopOS | null | "unknown">("unknown")
-
-  useEffect(() => {
-    setOs(detectOS())
-  }, [])
-
-  const PrimaryIcon = os && os !== "unknown" ? ICON[os] : Download
+export default async function DownloadPage() {
+  const t = await getT()
+  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null)
+  const premium = session?.user?.id ? await isPremium(session.user.id) : false
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -30,41 +28,28 @@ export default function DownloadPage() {
         <p className="text-muted-foreground">{t("download.subtitle")}</p>
       </header>
 
-      {/* Primary CTA for the detected OS */}
-      {os !== "unknown" && (
-        <div className="flex flex-col items-center gap-2">
-          <a
-            href={DESKTOP_RELEASES_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            <PrimaryIcon className="h-5 w-5" />
-            {os ? t("download.forOS", { os: OS_LABEL[os] }) : t("download.cta")}
-          </a>
-          <p className="text-xs text-muted-foreground">{t("download.note")}</p>
+      {/* Premium-gated download. */}
+      {premium ? (
+        <DownloadOptions />
+      ) : (
+        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card p-8 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
+            <Lock className="h-6 w-6" />
+          </span>
+          <h2 className="text-lg font-semibold">{t("download.premiumTitle")}</h2>
+          <p className="max-w-sm text-sm text-muted-foreground">{t("download.premiumDesc")}</p>
+          {!session?.user ? (
+            <Link
+              href="/login"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              {t("nav.login")}
+            </Link>
+          ) : (
+            <p className="text-xs text-muted-foreground">{t("download.premiumSoon")}</p>
+          )}
         </div>
       )}
-
-      {/* All platforms */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {PLATFORMS.map((p) => {
-          const Icon = ICON[p]
-          return (
-            <a
-              key={p}
-              href={DESKTOP_RELEASES_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-5 text-center transition-colors hover:bg-accent/40"
-            >
-              <Icon className="h-7 w-7 text-muted-foreground" />
-              <span className="text-sm font-medium">{OS_LABEL[p]}</span>
-              <span className="text-xs text-muted-foreground">{t("download.get")}</span>
-            </a>
-          )
-        })}
-      </div>
 
       <section className="rounded-xl border bg-card p-5 text-sm text-muted-foreground space-y-2">
         <h2 className="text-base font-semibold text-foreground">{t("download.featuresTitle")}</h2>

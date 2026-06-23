@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
 // Better Auth manages its own tables (user, session, account, verification)
 // via the Drizzle adapter. Generate them with:
@@ -17,6 +17,8 @@ export const profiles = pgTable("profiles", {
   tagLine: text("tag_line"),
   region: text(),
   lastRefreshedAt: timestamp("last_refreshed_at", { withTimezone: true }),
+  // Premium access (e.g. desktop app download). Set by billing later.
+  isPremium: boolean("is_premium").default(false).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })
