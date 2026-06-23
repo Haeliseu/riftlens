@@ -2,6 +2,7 @@ import { db } from "@riftlens/db"
 import { summoners } from "@riftlens/db/schema"
 import { getProfileSummary, type ProfileSummary, type Region } from "@riftlens/riot-api"
 import { sql } from "drizzle-orm"
+import type { Metadata } from "next"
 import { after } from "next/server"
 import { RecordRecentVisit } from "@/components/layout/RecordRecentVisit"
 import { MatchHistory } from "@/components/match/MatchHistory"
@@ -68,6 +69,23 @@ function safeDecode(value: string): string {
     return decodeURIComponent(value)
   } catch {
     return value
+  }
+}
+
+export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
+  const { region, gameName, tagLine } = await params
+  const t = await getT()
+  const name = safeDecode(gameName)
+  const tag = safeDecode(tagLine)
+  const riotId = `${name} #${tag}`
+  const reg = region.toUpperCase()
+  const path = `/profile/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`
+  const description = t("seo.profileDesc", { name: riotId, region: reg })
+  return {
+    title: `${riotId} (${reg})`,
+    description,
+    alternates: { canonical: path },
+    openGraph: { title: `${riotId} — RiftLens`, description, url: path },
   }
 }
 

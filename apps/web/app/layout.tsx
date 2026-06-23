@@ -4,14 +4,44 @@ import { cookies } from "next/headers"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
 import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALES, type Locale } from "@/lib/i18n/dictionaries"
+import { siteConfig, siteUrl } from "@/lib/seo"
 import { Providers } from "./providers"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "RiftLens — LoL Tracker",
-  description: "Track your League of Legends performance with RiftLens.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: `${siteConfig.name} — LoL Tracker`,
+    template: `%s — ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  applicationName: siteConfig.name,
+  keywords: [...siteConfig.keywords],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  manifest: "/manifest.webmanifest",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} — LoL Tracker`,
+    description: siteConfig.description,
+    url: siteUrl,
+    locale: siteConfig.locale,
+    alternateLocale: siteConfig.alternateLocale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} — LoL Tracker`,
+    description: siteConfig.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

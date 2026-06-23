@@ -404,6 +404,18 @@ export const dictionaries = {
     "login.or": "ou",
     "login.error": "Erreur de connexion",
 
+    // footer
+    "footer.tagline": "Tracker League of Legends — profils, classement, coaching et live game.",
+    "footer.nav": "Navigation",
+    "footer.legal": "Légal",
+    "footer.privacy": "Confidentialité",
+    "footer.terms": "Conditions d'utilisation",
+    "footer.rights": "© {year} RiftLens. Tous droits réservés.",
+    "footer.disclaimer":
+      "RiftLens n'est pas approuvé par Riot Games et ne reflète pas les opinions de Riot Games ou de toute personne impliquée officiellement dans la production ou la gestion de League of Legends. League of Legends et Riot Games sont des marques de Riot Games, Inc.",
+    "seo.profileDesc":
+      "Stats, rang, historique de parties et coaching de {name} sur {region} — RiftLens.",
+
     // home landing
     "home.hero.title1": "Analyse ton jeu.",
     "home.hero.title2": "Dépasse tes limites.",
@@ -799,6 +811,17 @@ export const dictionaries = {
     "login.submitting": "Signing in…",
     "login.or": "or",
     "login.error": "Sign-in error",
+
+    // footer
+    "footer.tagline": "League of Legends tracker — profiles, leaderboard, coaching and live game.",
+    "footer.nav": "Navigation",
+    "footer.legal": "Legal",
+    "footer.privacy": "Privacy",
+    "footer.terms": "Terms of Service",
+    "footer.rights": "© {year} RiftLens. All rights reserved.",
+    "footer.disclaimer":
+      "RiftLens isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc.",
+    "seo.profileDesc": "Stats, rank, match history and coaching for {name} on {region} — RiftLens.",
 
     "home.hero.title1": "Analyze your game.",
     "home.hero.title2": "Break your limits.",
