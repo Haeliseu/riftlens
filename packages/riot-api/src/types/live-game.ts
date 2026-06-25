@@ -10,6 +10,8 @@ export const LiveGameParticipantSchema = z.object({
   teamId: z.number(),
   championId: z.number(),
   profileIconId: z.number().optional(),
+  spell1Id: z.number().optional(),
+  spell2Id: z.number().optional(),
   perks: z
     .object({
       perkStyle: z.number(),

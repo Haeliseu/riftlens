@@ -8,6 +8,7 @@ import {
   regionToRouting,
 } from "@riftlens/riot-api"
 import { withCache } from "@/lib/cache"
+import { type ResolvedAssets, resolveAssets } from "@/lib/cdragon"
 import { cachedRanks, cacheParticipantRank } from "@/lib/profile-db"
 import { cachedMatch } from "@/lib/riot-cache"
 import { riotClient } from "@/lib/riot-client"
@@ -78,6 +79,10 @@ export interface LiveParticipant {
   teamId: number
   championId: number
   name: string
+  /** [summoner spell 1, summoner spell 2] icon URLs (from spectator). */
+  spellIcons: (string | null)[]
+  /** Keystone rune icon URL (primary perk). */
+  keystoneIcon: string | null
   tier: string | null
   division: string | null
   lp: number | null
@@ -95,19 +100,31 @@ export interface LiveGameData {
   participants: LiveParticipant[]
 }
 
-/** A live participant before enrichment — just what spectator-v5 returns. */
-function toBaseParticipant(p: {
-  puuid?: string | undefined
-  teamId: number
-  championId: number
-  riotId?: string | undefined
-  summonerName?: string | undefined
-}): LiveParticipant {
+/**
+ * A live participant before rank/form enrichment. Summoner spells + keystone
+ * rune come straight from the spectator payload (no extra API call), resolved
+ * to icon URLs via `assets`.
+ */
+function toBaseParticipant(
+  p: {
+    puuid?: string | undefined
+    teamId: number
+    championId: number
+    riotId?: string | undefined
+    summonerName?: string | undefined
+    spell1Id?: number | undefined
+    spell2Id?: number | undefined
+    perks?: { perkIds: number[] } | undefined
+  },
+  assets: ResolvedAssets
+): LiveParticipant {
   return {
     puuid: p.puuid ?? null,
     teamId: p.teamId,
     championId: p.championId,
     name: p.riotId ?? p.summonerName ?? "",
+    spellIcons: [assets.spell(p.spell1Id), assets.spell(p.spell2Id)],
+    keystoneIcon: assets.perk(p.perks?.perkIds?.[0]),
     tier: null,
     division: null,
     lp: null,
@@ -134,11 +151,12 @@ export async function detectLiveGame(puuid: string, region: Region): Promise<Liv
     if ((err as { status?: number }).status === 404) return null
     throw err
   }
+  const assets = await resolveAssets()
   return {
     gameMode: game.gameMode ?? null,
     queueId: game.gameQueueConfigId ?? null,
     gameLengthS: game.gameLength ?? 0,
-    participants: game.participants.map(toBaseParticipant),
+    participants: game.participants.map((p) => toBaseParticipant(p, assets)),
   }
 }
 
@@ -161,11 +179,14 @@ export async function buildLiveGame(puuid: string, region: Region): Promise<Live
   }
 
   const puuids = game.participants.map((p) => p.puuid).filter((x): x is string => !!x)
-  const cache = await cachedRanks(puuids).catch(() => new Map())
+  const [cache, assets] = await Promise.all([
+    cachedRanks(puuids).catch(() => new Map()),
+    resolveAssets(),
+  ])
 
   const participants = await Promise.all(
     game.participants.map(async (p): Promise<LiveParticipant> => {
-      const base = toBaseParticipant(p)
+      const base = toBaseParticipant(p, assets)
       if (!p.puuid) return base
 
       // Rank — from cache, else league-v4 + cache.

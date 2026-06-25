@@ -6,6 +6,8 @@ export interface LiveParticipant {
   teamId: number
   championId: number
   name: string
+  spellIcons: (string | null)[]
+  keystoneIcon: string | null
   tier: string | null
   division: string | null
   lp: number | null

@@ -65,6 +65,31 @@ function PlayerCard({
 
       {p.onFire && <Flame className="absolute right-2 top-2 h-5 w-5 text-orange-400 drop-shadow" />}
 
+      {/* Summoner spells + keystone rune (top-left, like champ select) */}
+      <div className="absolute left-1.5 top-1.5 flex flex-col gap-1">
+        {p.spellIcons.map((url, i) =>
+          url ? (
+            // biome-ignore lint/performance/noImgElement: external CDN icon
+            <img
+              key={`sp-${i}-${url}`}
+              src={url}
+              alt=""
+              className="h-5 w-5 rounded border border-black/40"
+              loading="lazy"
+            />
+          ) : null
+        )}
+        {p.keystoneIcon && (
+          // biome-ignore lint/performance/noImgElement: external CDN icon
+          <img
+            src={p.keystoneIcon}
+            alt=""
+            className="h-5 w-5 rounded-full bg-black/40"
+            loading="lazy"
+          />
+        )}
+      </div>
+
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-1.5 pb-2 text-center">
         {/* Winged rank emblem framing the champion avatar */}
         <div className="relative mb-1 flex h-16 w-32 items-center justify-center">
