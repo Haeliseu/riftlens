@@ -5,6 +5,7 @@ import { PlayerSearch } from "@/components/search/PlayerSearch"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { LanguageToggle } from "./LanguageToggle"
+import { ServerStatus } from "./ServerStatus"
 import { ThemeToggle } from "./ThemeToggle"
 
 const NAV_LINKS: { href: string; label: TranslationKey }[] = [
@@ -41,6 +42,7 @@ export function Navbar() {
       <PlayerSearch variant="compact" />
 
       <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+        <ServerStatus />
         <LanguageToggle />
         <ThemeToggle />
         <Link
