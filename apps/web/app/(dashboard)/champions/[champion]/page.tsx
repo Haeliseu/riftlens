@@ -115,12 +115,9 @@ export default async function ChampionPage({ params }: PageProps) {
 
       {/* Splash header */}
       <div className="relative overflow-hidden rounded-xl border">
+        {/* Full splash at its natural ratio (no cropping) */}
         {/* biome-ignore lint/performance/noImgElement: external CDN splash */}
-        <img
-          src={championSplashUrl(c.id)}
-          alt=""
-          className="h-48 w-full object-cover object-top sm:h-64"
-        />
+        <img src={championSplashUrl(c.id)} alt="" className="block h-auto w-full" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 p-5">
           <div className="flex flex-wrap items-center gap-2">
