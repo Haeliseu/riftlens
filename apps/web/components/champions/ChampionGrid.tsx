@@ -3,6 +3,7 @@
 import { getChampionIconUrl } from "@riftlens/riot-api"
 import { Search } from "lucide-react"
 import { useState } from "react"
+import { Link } from "@/components/Link"
 import { useChampionRotation } from "@/hooks/useChampionRotation"
 import { useChampions } from "@/hooks/useChampions"
 import { useI18n } from "@/lib/i18n"
@@ -54,7 +55,11 @@ export function ChampionGrid() {
           {champs.map((c) => {
             const isFree = free.has(c.id)
             return (
-              <div key={c.id} className="flex flex-col items-center gap-1">
+              <Link
+                key={c.id}
+                href={`/champions/${c.alias}`}
+                className="flex flex-col items-center gap-1 rounded-lg p-1 hover:bg-accent"
+              >
                 <div className="relative">
                   {/* biome-ignore lint/performance/noImgElement: external CDN icon */}
                   <img
@@ -70,7 +75,7 @@ export function ChampionGrid() {
                   )}
                 </div>
                 <span className="text-[11px] text-center truncate w-full">{c.name}</span>
-              </div>
+              </Link>
             )
           })}
           {champs.length === 0 && (
