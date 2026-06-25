@@ -42,3 +42,37 @@ export const REGION_NAME_KEY: Record<string, TranslationKey> = {
 export function regionBadge(region: string): { label: string; color: string } {
   return REGION_BADGE[region] ?? { label: region, color: "#64748B" }
 }
+
+/** Friendly URL slug for each region id (e.g. NA1 -> "na", EUW1 -> "euw"). */
+export const REGION_SLUG: Record<string, string> = {
+  NA1: "na",
+  EUW1: "euw",
+  EUN1: "eune",
+  KR: "kr",
+  BR1: "br",
+  JP1: "jp",
+  RU: "ru",
+  OC1: "oce",
+  TR1: "tr",
+  LA1: "lan",
+  LA2: "las",
+  SG2: "sea",
+  TW2: "tw",
+  VN2: "vn",
+}
+
+export function regionToSlug(regionId: string): string {
+  return REGION_SLUG[regionId] ?? regionId.toLowerCase()
+}
+
+// Accept the slug ("na"), the raw id ("na1"), or the badge label ("eune").
+const SLUG_TO_ID = new Map<string, string>()
+for (const [id, slug] of Object.entries(REGION_SLUG)) {
+  SLUG_TO_ID.set(slug, id)
+  SLUG_TO_ID.set(id.toLowerCase(), id)
+}
+
+/** Resolve a URL slug back to a Riot region id, or null if unknown. */
+export function regionFromSlug(slug: string): string | null {
+  return SLUG_TO_ID.get(slug.toLowerCase()) ?? null
+}

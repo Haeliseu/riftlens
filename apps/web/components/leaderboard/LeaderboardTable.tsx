@@ -7,7 +7,12 @@ import { REGIONS } from "@/components/home/SearchHero"
 import { Link } from "@/components/Link"
 import { useLiveStatus } from "@/hooks/useLiveStatus"
 import { useI18n } from "@/lib/i18n"
+import { localePath } from "@/lib/i18n/locale-path"
+import { regionToSlug } from "@/lib/regions"
 import { ROLES, roleIconUrl } from "@/lib/roles"
+
+/** Remembers the last region so a bare /leaderboard restores it. */
+export const LB_REGION_COOKIE = "riftlens-lb-region"
 
 const TIERS = [
   { id: "challenger", label: "Challenger", icon: "Challenger" as TierName },
@@ -70,10 +75,20 @@ function useLeaderboard(region: string, tier: string, queue: string) {
   })
 }
 
-export function LeaderboardTable() {
-  const { t } = useI18n()
-  const [region, setRegion] = useState("EUW1")
+export function LeaderboardTable({ initialRegion = "EUW1" }: { initialRegion?: string }) {
+  const { t, locale } = useI18n()
+  const [region, setRegion] = useState(initialRegion)
   const [tier, setTier] = useState("challenger")
+
+  // Persist the region (cookie) and reflect it in the URL without a remount, so
+  // it's shareable (/leaderboard/na) and restored on the next visit.
+  function changeRegion(id: string) {
+    setRegion(id)
+    const slug = regionToSlug(id)
+    // biome-ignore lint/suspicious/noDocumentCookie: simple first-party preference cookie
+    document.cookie = `${LB_REGION_COOKIE}=${slug}; path=/; max-age=31536000; samesite=lax`
+    window.history.replaceState(null, "", localePath(locale, `/leaderboard/${slug}`))
+  }
   const [queue, setQueue] = useState("RANKED_SOLO_5x5")
   const [role, setRole] = useState<string>("ALL")
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -92,7 +107,7 @@ export function LeaderboardTable() {
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={region}
-          onChange={(e) => setRegion(e.target.value)}
+          onChange={(e) => changeRegion(e.target.value)}
           className="h-9 rounded-md border bg-card px-3 text-sm"
         >
           {REGIONS.map((r) => (
