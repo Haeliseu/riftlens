@@ -7,9 +7,16 @@ import {
   summonerMatches,
   summoners,
 } from "@riftlens/db/schema"
-import { eq, sql } from "drizzle-orm"
+import { eq } from "drizzle-orm"
+import { pgTable, text } from "drizzle-orm/pg-core"
 import { type NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
+
+// Minimal typed handle on the Better-Auth-owned `user` table (verified via
+// `better-auth generate`). Better Auth manages this table's migrations, so it's
+// intentionally not part of the Drizzle-managed schema — we only need a typed
+// delete here. Session/account rows cascade off the FK.
+const authUser = pgTable("user", { id: text("id").primaryKey() })
 
 // GDPR "right to erasure": delete the signed-in user's RiftLens profile and the
 // Riot data linked to their puuid. Requires an authenticated session.
@@ -41,7 +48,10 @@ export async function POST(req: NextRequest) {
     // Delete the profile (rune_pages cascade off it), then the Better Auth user
     // (which cascades to its session/account rows).
     await db.delete(profiles).where(eq(profiles.id, userId))
-    await db.execute(sql`delete from "user" where id = ${userId}`).catch(() => {})
+    await db
+      .delete(authUser)
+      .where(eq(authUser.id, userId))
+      .catch(() => {})
 
     return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } })
   } catch (err) {
