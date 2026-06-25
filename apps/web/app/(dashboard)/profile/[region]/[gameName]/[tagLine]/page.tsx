@@ -12,7 +12,6 @@ import { ChampionStats } from "@/components/profile/ChampionStats"
 import { CoachingCard } from "@/components/profile/CoachingCard"
 import { CrossedPlayers } from "@/components/profile/CrossedPlayers"
 import { FlexCard } from "@/components/profile/FlexCard"
-import { LiveGame } from "@/components/profile/LiveGame"
 import { MasteryCard } from "@/components/profile/MasteryCard"
 import { ObjectiveInsight } from "@/components/profile/ObjectiveInsight"
 import { PingStats } from "@/components/profile/PingStats"
@@ -191,7 +190,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <ChallengesCard puuid={summary.puuid} region={region} />
             </div>
           }
-          live={<LiveGame puuid={summary.puuid} region={region} />}
+          liveHref={`/profile/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}/live`}
         />
       )}
     </div>
