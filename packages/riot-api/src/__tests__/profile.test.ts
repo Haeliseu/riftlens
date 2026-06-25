@@ -6,6 +6,7 @@ import {
   computeCarryScore,
   getAverageGameRank,
   getChampionIconUrl,
+  getChampionPortraitUrl,
   getChampionStats,
   getMatchHistory,
   getProfileIconUrl,
@@ -143,6 +144,9 @@ describe("url + queue helpers", () => {
       "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/42.jpg"
     )
     expect(getChampionIconUrl(64)).toContain("champion-icons/64.png")
+    expect(getChampionPortraitUrl(103)).toBe(
+      "https://cdn.communitydragon.org/latest/champion/103/portrait"
+    )
   })
 
   it("maps queue ids to names", () => {

@@ -85,6 +85,14 @@ export function getChampionIconUrl(championId: number): string {
   return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${championId}.png`
 }
 
+/**
+ * CommunityDragon champion loading-screen portrait (tall art), keyed by
+ * championId — the artwork shown on the in-game loading screen cards.
+ */
+export function getChampionPortraitUrl(championId: number): string {
+  return `https://cdn.communitydragon.org/latest/champion/${championId}/portrait`
+}
+
 /** DDragon item icon keyed by item id. Item icons are stable across patches. */
 const DDRAGON_VERSION = "15.13.1"
 export function getItemIconUrl(itemId: number): string | null {
