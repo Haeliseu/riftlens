@@ -6,7 +6,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { ProfileTabBar } from "@/components/profile/ProfileTabBar"
 import { localePath } from "@/lib/i18n/locale-path"
 import { getLocale, getT } from "@/lib/i18n/server"
-import { buildLiveGame } from "@/lib/live-game"
+import { detectLiveGame } from "@/lib/live-game"
 import { riotClient } from "@/lib/riot-client"
 
 interface LivePageProps {
@@ -45,16 +45,11 @@ function Card({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** Builds the live game server-side; streamed on its own so the header + tab
- *  bar can paint as soon as the player resolves. */
-async function LiveData({ region, puuid }: { region: string; puuid: string }) {
-  const data = await buildLiveGame(puuid, region as Region).catch(() => null)
-  return <LiveGame region={region} puuid={puuid} initialData={data} />
-}
-
 /**
- * Resolves the player, then renders the profile header + tab bar (Live active)
- * so navigation matches the profile page, with the live game streamed below.
+ * Resolves the player and detects (fast) whether they're in a game, then
+ * renders the profile header + tab bar (Live active) with the live game below.
+ * When in a game, the cards paint immediately from the detected data and the
+ * client enriches them (rank/form) — so the loading is visible.
  */
 async function LiveSection({
   region,
@@ -86,6 +81,8 @@ async function LiveSection({
     )
   }
 
+  const detected = await detectLiveGame(summary.puuid, region as Region).catch(() => null)
+
   return (
     <div className="space-y-6">
       <ProfileHeader
@@ -96,9 +93,11 @@ async function LiveSection({
         summonerLevel={summary.summonerLevel}
       />
       <ProfileTabBar active="live" basePath={basePath} />
-      <Suspense fallback={<Card>{t("live.loading")}</Card>}>
-        <LiveData region={region} puuid={summary.puuid} />
-      </Suspense>
+      {detected ? (
+        <LiveGame region={region} puuid={summary.puuid} initialBasic={detected} />
+      ) : (
+        <Card>{t("live.notInGame")}</Card>
+      )}
     </div>
   )
 }

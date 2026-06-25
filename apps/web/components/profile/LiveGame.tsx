@@ -22,10 +22,30 @@ const TAG_EMOJI: Record<PlayerTag, string> = {
 
 type T = ReturnType<typeof useI18n>["t"]
 
-/** A League loading-screen style card: champion portrait, the winged rank
- *  emblem framing a champion avatar, then the player name with the rank spelled
- *  out where the champion title sits on the real loading screen. */
-function PlayerCard({ p, region, t }: { p: LiveParticipant; region: string; t: T }) {
+/** Image that sits over a pulsing placeholder, so you see it stream in from the
+ *  CDN — the placeholder shows through until the (opaque) art has loaded. */
+function CdnImg({ src, className }: { src: string; className: string }) {
+  return (
+    <span className="absolute inset-0 animate-pulse rounded-[inherit] bg-white/10">
+      {/* biome-ignore lint/performance/noImgElement: external CDN art */}
+      <img src={src} alt="" loading="lazy" className={className} />
+    </span>
+  )
+}
+
+/** A League loading-screen style card. While the game is only *detected* (not
+ *  yet enriched), rank/form render as skeletons so you watch them fill in. */
+function PlayerCard({
+  p,
+  region,
+  enriched,
+  t,
+}: {
+  p: LiveParticipant
+  region: string
+  enriched: boolean
+  t: T
+}) {
   const displayName = p.name.split("#")[0] || t("common.player")
   const href = p.name.includes("#")
     ? `/profile/${region}/${encodeURIComponent(p.name.split("#")[0] ?? "")}/${encodeURIComponent(
@@ -37,15 +57,10 @@ function PlayerCard({ p, region, t }: { p: LiveParticipant; region: string; t: T
 
   return (
     <div className="group relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-black">
-      {/* Champion loading art */}
-      {/* biome-ignore lint/performance/noImgElement: external CDN art */}
-      <img
+      <CdnImg
         src={getChampionPortraitUrl(p.championId)}
-        alt=""
-        loading="lazy"
         className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
       />
-      {/* Darken the bottom so the name/rank read clearly */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
 
       {p.onFire && <Flame className="absolute right-2 top-2 h-5 w-5 text-orange-400 drop-shadow" />}
@@ -54,13 +69,15 @@ function PlayerCard({ p, region, t }: { p: LiveParticipant; region: string; t: T
         {/* Winged rank emblem framing the champion avatar */}
         <div className="relative mb-1 flex h-16 w-32 items-center justify-center">
           {tierKey && (
-            // biome-ignore lint/performance/noImgElement: external CDN art
-            <img
-              src={getRankEmblemUrl(tierKey)}
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_5px_rgba(0,0,0,0.9)]"
-            />
+            <>
+              {/* biome-ignore lint/performance/noImgElement: external CDN art */}
+              <img
+                src={getRankEmblemUrl(tierKey)}
+                alt=""
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_5px_rgba(0,0,0,0.9)]"
+              />
+            </>
           )}
           {/* biome-ignore lint/performance/noImgElement: external CDN art */}
           <img
@@ -83,31 +100,39 @@ function PlayerCard({ p, region, t }: { p: LiveParticipant; region: string; t: T
           </span>
         )}
 
-        {/* Rank in full words — replaces the champion title */}
-        <span className="text-[11px] font-medium uppercase tracking-wide text-yellow-200/90">
-          {rankText}
-        </span>
-
-        <div className="mt-0.5 flex items-center gap-1.5 text-[10px]">
-          <span className="font-medium text-green-400">
-            {p.recentWins}
-            {t("perf.winShort")}
-          </span>
-          <span className="font-medium text-red-400">
-            {p.recentLosses}
-            {t("perf.lossShort")}
-          </span>
-          {p.streak !== 0 && (
-            <span className="text-muted-foreground">
-              {t("live.streak", { n: Math.abs(p.streak) })}
+        {enriched ? (
+          <>
+            {/* Rank in full words — replaces the champion title */}
+            <span className="text-[11px] font-medium uppercase tracking-wide text-yellow-200/90">
+              {rankText}
             </span>
-          )}
-        </div>
-
-        {p.tags.length > 0 && (
-          <div className="mt-0.5 text-xs leading-none">
-            {p.tags.map((tag) => TAG_EMOJI[tag]).join(" ")}
-          </div>
+            <div className="mt-0.5 flex items-center gap-1.5 text-[10px]">
+              <span className="font-medium text-green-400">
+                {p.recentWins}
+                {t("perf.winShort")}
+              </span>
+              <span className="font-medium text-red-400">
+                {p.recentLosses}
+                {t("perf.lossShort")}
+              </span>
+              {p.streak !== 0 && (
+                <span className="text-muted-foreground">
+                  {t("live.streak", { n: Math.abs(p.streak) })}
+                </span>
+              )}
+            </div>
+            {p.tags.length > 0 && (
+              <div className="mt-0.5 text-xs leading-none">
+                {p.tags.map((tag) => TAG_EMOJI[tag]).join(" ")}
+              </div>
+            )}
+          </>
+        ) : (
+          // Loading the rank/form for this player.
+          <>
+            <span className="mt-0.5 h-2.5 w-16 animate-pulse rounded bg-white/25" />
+            <span className="mt-1 h-2 w-10 animate-pulse rounded bg-white/15" />
+          </>
         )}
       </div>
     </div>
@@ -119,12 +144,14 @@ function Team({
   color,
   players,
   region,
+  enriched,
   t,
 }: {
   title: string
   color: string
   players: LiveParticipant[]
   region: string
+  enriched: boolean
   t: T
 }) {
   return (
@@ -132,9 +159,33 @@ function Team({
       <p className={`mb-2 text-sm font-semibold ${color}`}>{title}</p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
         {players.map((p) => (
-          <PlayerCard key={`${p.puuid}-${p.championId}`} p={p} region={region} t={t} />
+          <PlayerCard
+            key={`${p.puuid}-${p.championId}`}
+            p={p}
+            region={region}
+            enriched={enriched}
+            t={t}
+          />
         ))}
       </div>
+    </div>
+  )
+}
+
+function Panel({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-xl border border-green-500/40 bg-green-500/5">{children}</div>
+}
+
+function Header({ minutes, t }: { minutes: number | null; t: T }) {
+  return (
+    <div className="flex items-center gap-2 border-b border-green-500/30 px-5 py-3">
+      <Radio className="h-5 w-5 animate-pulse text-green-500" />
+      <span className="text-base font-semibold text-green-500">{t("live.inGame")}</span>
+      {minutes != null ? (
+        <span className="text-sm text-muted-foreground">{t("live.since", { min: minutes })}</span>
+      ) : (
+        <span className="text-sm text-muted-foreground">{t("live.loading")}</span>
+      )}
     </div>
   )
 }
@@ -142,21 +193,29 @@ function Team({
 interface LiveGameProps {
   puuid?: string | null
   region: string
-  initialData?: LiveGameData | null
+  /** Un-enriched game from server-side detection — renders the cards instantly. */
+  initialBasic?: LiveGameData | null
 }
 
-export function LiveGame({ puuid, region, initialData }: LiveGameProps) {
+export function LiveGame({ puuid, region, initialBasic }: LiveGameProps) {
   const { t } = useI18n()
-  const { data, isLoading } = useLiveGame(puuid, region, initialData)
+  const { data, isLoading } = useLiveGame(puuid, region)
 
-  if (isLoading) {
-    return (
-      <div className="rounded-xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
-        {t("live.loading")}
-      </div>
-    )
-  }
-  if (!data) {
+  // Enriched client data wins; otherwise fall back to the detected (basic) game.
+  const view = data ?? initialBasic ?? null
+  const enriched = !!data
+
+  if (!view) {
+    if (isLoading) {
+      return (
+        <Panel>
+          <Header minutes={null} t={t} />
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            {t("live.loading")}
+          </div>
+        </Panel>
+      )
+    }
     return (
       <div className="rounded-xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
         {t("live.notInGame")}
@@ -164,27 +223,31 @@ export function LiveGame({ puuid, region, initialData }: LiveGameProps) {
     )
   }
 
-  const blue = data.participants.filter((p) => p.teamId === 100)
-  const red = data.participants.filter((p) => p.teamId === 200)
-  const minutes = Math.floor(data.gameLengthS / 60)
+  const blue = view.participants.filter((p) => p.teamId === 100)
+  const red = view.participants.filter((p) => p.teamId === 200)
+  const minutes = Math.floor(view.gameLengthS / 60)
 
   return (
-    <div className="rounded-xl border border-green-500/40 bg-green-500/5">
-      <div className="flex items-center gap-2 border-b border-green-500/30 px-5 py-3">
-        <Radio className="h-5 w-5 animate-pulse text-green-500" />
-        <span className="text-base font-semibold text-green-500">{t("live.inGame")}</span>
-        <span className="text-sm text-muted-foreground">{t("live.since", { min: minutes })}</span>
-      </div>
+    <Panel>
+      <Header minutes={minutes} t={t} />
       <div className="space-y-5 p-5">
         <Team
           title={t("live.blueTeam")}
           color="text-blue-400"
           players={blue}
           region={region}
+          enriched={enriched}
           t={t}
         />
-        <Team title={t("live.redTeam")} color="text-red-400" players={red} region={region} t={t} />
+        <Team
+          title={t("live.redTeam")}
+          color="text-red-400"
+          players={red}
+          region={region}
+          enriched={enriched}
+          t={t}
+        />
       </div>
-    </div>
+    </Panel>
   )
 }

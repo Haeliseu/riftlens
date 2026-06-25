@@ -43,6 +43,53 @@ export interface LiveGameData {
  * Shared by the `/api/riot/live-game` route and the `/live` page so both render
  * identical data — the page can run it server-side for a ready-on-load paint.
  */
+/** A live participant before enrichment — just what spectator-v5 returns. */
+function toBaseParticipant(p: {
+  puuid?: string | undefined
+  teamId: number
+  championId: number
+  riotId?: string | undefined
+  summonerName?: string | undefined
+}): LiveParticipant {
+  return {
+    puuid: p.puuid ?? null,
+    teamId: p.teamId,
+    championId: p.championId,
+    name: p.riotId ?? p.summonerName ?? "",
+    tier: null,
+    division: null,
+    lp: null,
+    recentWins: 0,
+    recentLosses: 0,
+    streak: 0,
+    onFire: false,
+    tags: [],
+  }
+}
+
+/**
+ * Fast in-game detection: the raw spectator game with un-enriched participants
+ * (champion, name, team — no ranks or recent form). Lets the page render the
+ * loading-screen cards immediately, then fill in the details client-side.
+ * Returns `null` when the player isn't in a game.
+ */
+export async function detectLiveGame(puuid: string, region: Region): Promise<LiveGameData | null> {
+  const client = riotClient()
+  let game: Awaited<ReturnType<typeof getLiveGame>>
+  try {
+    game = await getLiveGame(client, region, puuid)
+  } catch (err) {
+    if ((err as { status?: number }).status === 404) return null
+    throw err
+  }
+  return {
+    gameMode: game.gameMode ?? null,
+    queueId: game.gameQueueConfigId ?? null,
+    gameLengthS: game.gameLength ?? 0,
+    participants: game.participants.map(toBaseParticipant),
+  }
+}
+
 export async function buildLiveGame(puuid: string, region: Region): Promise<LiveGameData | null> {
   const client = riotClient()
   const routing = regionToRouting(region)
@@ -60,20 +107,7 @@ export async function buildLiveGame(puuid: string, region: Region): Promise<Live
 
   const participants = await Promise.all(
     game.participants.map(async (p): Promise<LiveParticipant> => {
-      const base: LiveParticipant = {
-        puuid: p.puuid ?? null,
-        teamId: p.teamId,
-        championId: p.championId,
-        name: p.riotId ?? p.summonerName ?? "",
-        tier: null,
-        division: null,
-        lp: null,
-        recentWins: 0,
-        recentLosses: 0,
-        streak: 0,
-        onFire: false,
-        tags: [],
-      }
+      const base = toBaseParticipant(p)
       if (!p.puuid) return base
 
       // Rank — from cache, else league-v4 + cache.
