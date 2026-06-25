@@ -1,9 +1,10 @@
 /** Central SEO config + the legally required Riot disclaimer. */
 
-export const siteUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(
-  /\/$/,
-  ""
-)
+// `||` (not `??`) so a blank env var in CI falls back instead of yielding ""
+// (an empty string would make `new URL(siteUrl)` in the layout throw).
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000"
+).replace(/\/$/, "")
 
 export const siteConfig = {
   name: "RiftLens",
