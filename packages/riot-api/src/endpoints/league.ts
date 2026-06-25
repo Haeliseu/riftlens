@@ -37,3 +37,22 @@ export async function getApexLeague(
   const url = `https://${region.toLowerCase()}.api.riotgames.com/lol/league/v4/${tier}leagues/by-queue/${queue}`
   return client.fetch(url, LeagueListSchema)
 }
+
+export type RankedTier = "DIAMOND" | "EMERALD" | "PLATINUM" | "GOLD" | "SILVER" | "BRONZE" | "IRON"
+
+/**
+ * Paginated entries for a non-apex tier+division (league-exp-v4). Riot returns
+ * a page (~205) of entries — callers sort within a page by LP. Absolute ladder
+ * position isn't available below Master.
+ */
+export async function getLeagueExpEntries(
+  client: RiotApiClient,
+  region: Region,
+  queue: string,
+  tier: RankedTier,
+  division: string,
+  page = 1
+): Promise<LeagueEntry[]> {
+  const url = `https://${region.toLowerCase()}.api.riotgames.com/lol/league-exp/v4/entries/${queue}/${tier}/${division}?page=${page}`
+  return client.fetch(url, LeagueEntriesSchema)
+}

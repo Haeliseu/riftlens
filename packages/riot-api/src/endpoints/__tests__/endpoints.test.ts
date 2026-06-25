@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
 import type { RiotApiClient } from "../../client"
 import { getAccountByPuuid, getAccountByRiotId, getActiveRegion } from "../account"
-import { getApexLeague, getLeagueEntriesByPuuid, getLeagueEntriesBySummonerId } from "../league"
+import {
+  getApexLeague,
+  getLeagueEntriesByPuuid,
+  getLeagueEntriesBySummonerId,
+  getLeagueExpEntries,
+} from "../league"
 import { getMatch, getMatchIds, getMatchTimeline } from "../match"
 import { getSummonerById, getSummonerByPuuid } from "../summoner"
 
@@ -35,6 +40,13 @@ describe("league endpoints", () => {
     await getApexLeague(b.client, "KR", "master", "RANKED_FLEX_SR")
     expect(urlOf(b.fetch)).toBe(
       "https://kr.api.riotgames.com/lol/league/v4/masterleagues/by-queue/RANKED_FLEX_SR"
+    )
+  })
+  it("league-exp: tier/division/page URL", async () => {
+    const { client, fetch } = mockClient([])
+    await getLeagueExpEntries(client, "EUW1", "RANKED_SOLO_5x5", "DIAMOND", "II", 3)
+    expect(urlOf(fetch)).toBe(
+      "https://euw1.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/DIAMOND/II?page=3"
     )
   })
 })

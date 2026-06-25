@@ -1,6 +1,6 @@
 "use client"
 
-import { getChampionIconUrl, getProfileIconUrl, type TierName } from "@riftlens/riot-api"
+import { getChampionIconUrl, getProfileIconUrl } from "@riftlens/riot-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { Link } from "@/components/Link"
@@ -13,11 +13,22 @@ import { ROLES, roleIconUrl } from "@/lib/roles"
 /** Remembers the last region so a bare /leaderboard restores it. */
 export const LB_REGION_COOKIE = "riftlens-lb-region"
 
-const TIERS = [
-  { id: "challenger", label: "Challenger", icon: "Challenger" as TierName },
-  { id: "grandmaster", label: "Grandmaster", icon: "Grandmaster" as TierName },
-  { id: "master", label: "Master", icon: "Master" as TierName },
+const APEX_TIERS = [
+  { id: "challenger", label: "Challenger" },
+  { id: "grandmaster", label: "Grandmaster" },
+  { id: "master", label: "Master" },
 ]
+const NON_APEX_TIERS = [
+  { id: "diamond", label: "Diamond" },
+  { id: "emerald", label: "Emerald" },
+  { id: "platinum", label: "Platinum" },
+  { id: "gold", label: "Gold" },
+  { id: "silver", label: "Silver" },
+  { id: "bronze", label: "Bronze" },
+  { id: "iron", label: "Iron" },
+]
+const APEX_IDS = new Set(APEX_TIERS.map((t) => t.id))
+const DIVISIONS = ["I", "II", "III", "IV"]
 const QUEUES = [
   { id: "RANKED_SOLO_5x5", label: "Solo/Duo" },
   { id: "RANKED_FLEX_SR", label: "Flex" },
@@ -54,12 +65,12 @@ interface LeaderboardData {
   offset: number
 }
 
-function useLeaderboard(region: string, tier: string, queue: string) {
+function useLeaderboard(region: string, tier: string, queue: string, division: string) {
   return useInfiniteQuery({
-    queryKey: ["leaderboard", region, tier, queue],
+    queryKey: ["leaderboard", region, tier, queue, division],
     queryFn: async ({ pageParam }) => {
       const res = await fetch(
-        `/api/riot/leaderboard?region=${region}&tier=${tier}&queue=${queue}&offset=${pageParam}`
+        `/api/riot/leaderboard?region=${region}&tier=${tier}&queue=${queue}&division=${division}&offset=${pageParam}`
       )
       if (!res.ok) throw new Error("Leaderboard unavailable")
       return (await res.json()) as LeaderboardData
@@ -89,9 +100,11 @@ export function LeaderboardTable({ initialRegion = "EUW1" }: { initialRegion?: s
     window.history.replaceState(null, "", localePath(locale, `/leaderboard/${slug}`))
   }
   const [queue, setQueue] = useState("RANKED_SOLO_5x5")
+  const [division, setDivision] = useState("I")
   const [role, setRole] = useState<string>("ALL")
+  const isApex = APEX_IDS.has(tier)
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useLeaderboard(region, tier, queue)
+    useLeaderboard(region, tier, queue, division)
   const allRows = data?.pages.flatMap((p) => p.rows) ?? []
   // Role filter is best-effort: it only matches players whose season data is in
   // our DB (others fill in over time as the ladder is backfilled).
@@ -115,20 +128,39 @@ export function LeaderboardTable({ initialRegion = "EUW1" }: { initialRegion?: s
             </option>
           ))}
         </select>
-        <div className="flex rounded-md bg-muted p-0.5">
-          {TIERS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTier(t.id)}
-              className={`rounded px-2.5 py-1 text-xs ${
-                tier === t.id ? "bg-background font-medium" : "text-muted-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <select
+          value={tier}
+          onChange={(e) => setTier(e.target.value)}
+          className="h-9 rounded-md border bg-card px-3 text-sm"
+        >
+          <optgroup label="Apex">
+            {APEX_TIERS.map((tr) => (
+              <option key={tr.id} value={tr.id}>
+                {tr.label}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Divisions">
+            {NON_APEX_TIERS.map((tr) => (
+              <option key={tr.id} value={tr.id}>
+                {tr.label}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+        {!isApex && (
+          <select
+            value={division}
+            onChange={(e) => setDivision(e.target.value)}
+            className="h-9 rounded-md border bg-card px-3 text-sm"
+          >
+            {DIVISIONS.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        )}
         <div className="flex rounded-md bg-muted p-0.5">
           {QUEUES.map((q) => (
             <button
