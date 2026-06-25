@@ -1,25 +1,10 @@
-import type { Region } from "@riftlens/riot-api"
 import { getSummonerByPuuid } from "@riftlens/riot-api"
-import { type NextRequest, NextResponse } from "next/server"
+import { CACHE, jsonRoute, regionParam, requireParam } from "@/lib/api-route"
 import { riotClient } from "@/lib/riot-client"
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl
-  const puuid = searchParams.get("puuid")
-  const region = (searchParams.get("region") ?? "EUW1") as Region
-
-  if (!puuid) {
-    return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
-  }
-
-  const client = riotClient()
-
-  try {
-    const summoner = await getSummonerByPuuid(client, region, puuid)
-    return NextResponse.json(summoner, {
-      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
-    })
-  } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 })
-  }
-}
+export const GET = jsonRoute(async (req) => {
+  const puuid = requireParam(req, "puuid")
+  const region = regionParam(req)
+  const summoner = await getSummonerByPuuid(riotClient(), region, puuid)
+  return { data: summoner, cache: CACHE.long }
+})
