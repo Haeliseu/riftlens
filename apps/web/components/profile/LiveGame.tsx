@@ -43,7 +43,7 @@ function PlayerCard({ p, region, t }: { p: LiveParticipant; region: string; t: T
         src={getChampionPortraitUrl(p.championId)}
         alt=""
         loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+        className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
       />
       {/* Darken the bottom so the name/rank read clearly */}
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
@@ -52,21 +52,21 @@ function PlayerCard({ p, region, t }: { p: LiveParticipant; region: string; t: T
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-1.5 pb-2 text-center">
         {/* Winged rank emblem framing the champion avatar */}
-        <div className="relative mb-1 flex h-12 w-24 items-center justify-center">
+        <div className="relative mb-1 flex h-16 w-32 items-center justify-center">
           {tierKey && (
             // biome-ignore lint/performance/noImgElement: external CDN art
             <img
               src={getRankEmblemUrl(tierKey)}
               alt=""
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]"
+              className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_5px_rgba(0,0,0,0.9)]"
             />
           )}
           {/* biome-ignore lint/performance/noImgElement: external CDN art */}
           <img
             src={getChampionIconUrl(p.championId)}
             alt=""
-            className="relative h-8 w-8 rounded-full ring-2 ring-white/70"
+            className="relative h-9 w-9 rounded-full ring-2 ring-white/80"
           />
         </div>
 
