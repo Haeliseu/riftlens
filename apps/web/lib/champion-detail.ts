@@ -56,6 +56,42 @@ async function ddragonVersion(): Promise<string> {
   }
 }
 
+export interface ChromaInfo {
+  name: string
+  color: string
+}
+
+/**
+ * Chroma names per skin number, from CommunityDragon (DDragon only exposes a
+ * `chromas` boolean). Keyed by skin num; skins without chromas are omitted.
+ */
+export async function fetchChromas(
+  key: string,
+  locale: string
+): Promise<Record<number, ChromaInfo[]>> {
+  const loc = locale === "fr" ? "fr_fr" : "default"
+  const url = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/${loc}/v1/champions/${key}.json`
+  try {
+    const res = await fetch(url, { next: { revalidate: 86_400 } })
+    if (!res.ok) return {}
+    const data = (await res.json()) as {
+      skins?: { id: number; chromas?: { name: string; colors?: string[] }[] }[]
+    }
+    const champId = Number(key)
+    const out: Record<number, ChromaInfo[]> = {}
+    for (const s of data.skins ?? []) {
+      const chromas = (s.chromas ?? []).map((c) => ({
+        name: c.name,
+        color: c.colors?.[0] ?? "#888",
+      }))
+      if (chromas.length) out[s.id - champId * 1000] = chromas
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
 export async function fetchChampion(
   alias: string,
   locale: string

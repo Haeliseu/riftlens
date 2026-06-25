@@ -361,6 +361,7 @@ export const en = {
   "champion.cost": "Cost",
   "champion.range": "Range",
   "champion.allyTips": "Playing as",
+  "champion.chromas": "Chromas ({n})",
   "champion.enemyTips": "Playing against",
   "champion.stat.hp": "Health",
   "champion.stat.mp": "Resource",

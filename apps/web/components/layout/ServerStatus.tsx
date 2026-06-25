@@ -12,6 +12,13 @@ const DOT: Record<"ok" | "minor" | "critical", string> = {
   critical: "bg-red-500",
 }
 
+// The status icon itself is tinted by severity (green / amber / red).
+const ICON_COLOR: Record<"ok" | "minor" | "critical", string> = {
+  ok: "text-green-500",
+  minor: "text-amber-500",
+  critical: "text-red-500",
+}
+
 export function ServerStatus() {
   const { t, locale } = useI18n()
   const [open, setOpen] = useState(false)
@@ -34,12 +41,9 @@ export function ServerStatus() {
         onClick={() => setOpen(true)}
         aria-label={t("status.title")}
         title={t("status.title")}
-        className="relative flex h-8 w-8 items-center justify-center rounded-md border border-border hover:bg-accent"
+        className="flex h-8 w-8 items-center justify-center rounded-md border border-border hover:bg-accent"
       >
-        <Activity className="h-4 w-4 text-muted-foreground" />
-        <span
-          className={`absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-background ${DOT[severity]}`}
-        />
+        <Activity className={`h-4 w-4 ${ICON_COLOR[severity]}`} />
       </button>
 
       {open && (

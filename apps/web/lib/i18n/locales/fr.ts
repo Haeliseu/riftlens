@@ -395,6 +395,7 @@ export const fr = {
   "champion.cost": "Coût",
   "champion.range": "Portée",
   "champion.allyTips": "Jouer avec",
+  "champion.chromas": "Chromas ({n})",
   "champion.enemyTips": "Jouer contre",
   "champion.stat.hp": "Vie",
   "champion.stat.mp": "Ressource",

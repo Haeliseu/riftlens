@@ -7,6 +7,7 @@ import {
   type ChampionSpell,
   cleanText,
   fetchChampion,
+  fetchChromas,
   passiveIconUrl,
   SPELL_KEYS,
   spellIconUrl,
@@ -102,6 +103,7 @@ export default async function ChampionPage({ params }: PageProps) {
   const data = await fetchChampion(champion, locale)
   if (!data) notFound()
   const { champion: c, version } = data
+  const chromasBySkin = await fetchChromas(c.key, locale)
 
   return (
     <div className="space-y-6">
@@ -122,6 +124,7 @@ export default async function ChampionPage({ params }: PageProps) {
         tags={c.tags}
         partype={c.partype}
         skins={c.skins}
+        chromasBySkin={chromasBySkin}
       />
 
       {/* Lore */}

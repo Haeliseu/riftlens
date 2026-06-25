@@ -1,7 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { type ChampionSkin, centeredSplashUrl, skinLoadingUrl } from "@/lib/champion-detail"
+import {
+  type ChampionSkin,
+  type ChromaInfo,
+  centeredSplashUrl,
+  skinLoadingUrl,
+} from "@/lib/champion-detail"
+import { useI18n } from "@/lib/i18n"
 
 interface SkinGalleryProps {
   /** Numeric champion key (e.g. "266") for CommunityDragon centered art. */
@@ -13,6 +19,8 @@ interface SkinGalleryProps {
   tags: string[]
   partype: string
   skins: ChampionSkin[]
+  /** Chroma names per skin number (skins without chromas are omitted). */
+  chromasBySkin: Record<number, ChromaInfo[]>
 }
 
 /**
@@ -27,9 +35,12 @@ export function SkinGallery({
   tags,
   partype,
   skins,
+  chromasBySkin,
 }: SkinGalleryProps) {
+  const { t } = useI18n()
   const [num, setNum] = useState(0)
   const selected = skins.find((s) => s.num === num)
+  const chromas = chromasBySkin[num] ?? []
 
   return (
     <div className="space-y-3">
@@ -88,6 +99,29 @@ export function SkinGallery({
               />
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Chroma names for the selected skin */}
+      {chromas.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-medium text-muted-foreground">
+            {t("champion.chromas", { n: chromas.length })}
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {chromas.map((c) => (
+              <span
+                key={c.name}
+                className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2 py-0.5 text-xs"
+              >
+                <span
+                  className="h-2.5 w-2.5 flex-shrink-0 rounded-full border border-white/20"
+                  style={{ backgroundColor: c.color }}
+                />
+                {c.name}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>
