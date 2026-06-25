@@ -3,12 +3,11 @@
 import { getChampionIconUrl, getProfileIconUrl, type TierName } from "@riftlens/riot-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { REGIONS } from "@/components/home/SearchHero"
 import { Link } from "@/components/Link"
 import { useLiveStatus } from "@/hooks/useLiveStatus"
 import { useI18n } from "@/lib/i18n"
 import { localePath } from "@/lib/i18n/locale-path"
-import { regionToSlug } from "@/lib/regions"
+import { REGION_IDS, regionBadge, regionToSlug } from "@/lib/regions"
 import { ROLES, roleIconUrl } from "@/lib/roles"
 
 /** Remembers the last region so a bare /leaderboard restores it. */
@@ -110,9 +109,9 @@ export function LeaderboardTable({ initialRegion = "EUW1" }: { initialRegion?: s
           onChange={(e) => changeRegion(e.target.value)}
           className="h-9 rounded-md border bg-card px-3 text-sm"
         >
-          {REGIONS.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.label}
+          {REGION_IDS.map((id) => (
+            <option key={id} value={id}>
+              {regionBadge(id).label}
             </option>
           ))}
         </select>

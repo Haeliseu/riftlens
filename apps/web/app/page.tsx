@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import { Swords, Trophy, Tv, User } from "lucide-react"
 import Link from "next/link"
-import { SearchHero } from "@/components/home/SearchHero"
+import { PlayerSearch } from "@/components/search/PlayerSearch"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { localePath } from "@/lib/i18n/locale-path"
 import { getLocale, getT } from "@/lib/i18n/server"
@@ -126,7 +126,7 @@ export default async function HomePage() {
           <p className="text-muted-foreground text-lg">{t("home.hero.subtitle")}</p>
         </div>
 
-        <SearchHero />
+        <PlayerSearch variant="hero" />
 
         <p className="text-xs text-muted-foreground">
           {t("home.tryExample")}{" "}
