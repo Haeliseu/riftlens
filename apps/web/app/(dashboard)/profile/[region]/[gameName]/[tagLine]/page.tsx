@@ -190,7 +190,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <ChallengesCard puuid={summary.puuid} region={region} />
             </div>
           }
-          liveHref={`/profile/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}/live`}
+          basePath={`/profile/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`}
         />
       )}
     </div>

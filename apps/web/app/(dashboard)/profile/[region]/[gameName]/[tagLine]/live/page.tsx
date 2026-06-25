@@ -1,10 +1,9 @@
 import { getProfileSummary, type Region } from "@riftlens/riot-api"
-import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import { Suspense } from "react"
-import { Link } from "@/components/Link"
 import { LiveGame } from "@/components/profile/LiveGame"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
+import { ProfileTabBar } from "@/components/profile/ProfileTabBar"
 import { localePath } from "@/lib/i18n/locale-path"
 import { getLocale, getT } from "@/lib/i18n/server"
 import { buildLiveGame } from "@/lib/live-game"
@@ -46,12 +45,28 @@ function Card({ children }: { children: React.ReactNode }) {
   )
 }
 
+/** Builds the live game server-side; streamed on its own so the header + tab
+ *  bar can paint as soon as the player resolves. */
+async function LiveData({ region, puuid }: { region: string; puuid: string }) {
+  const data = await buildLiveGame(puuid, region as Region).catch(() => null)
+  return <LiveGame region={region} puuid={puuid} initialData={data} />
+}
+
 /**
- * Resolves the player then builds the live game server-side, so the data is
- * ready on first paint. Wrapped in <Suspense> by the page → the shell streams
- * immediately while this awaits Riot.
+ * Resolves the player, then renders the profile header + tab bar (Live active)
+ * so navigation matches the profile page, with the live game streamed below.
  */
-async function LiveSection({ region, name, tag }: { region: string; name: string; tag: string }) {
+async function LiveSection({
+  region,
+  basePath,
+  name,
+  tag,
+}: {
+  region: string
+  basePath: string
+  name: string
+  tag: string
+}) {
   const t = await getT()
 
   let summary: Awaited<ReturnType<typeof getProfileSummary>> | null = null
@@ -60,9 +75,16 @@ async function LiveSection({ region, name, tag }: { region: string; name: string
   } catch {
     // Bad key / unknown player → render the shell below.
   }
-  if (!summary) return <Card>{t("profile.noData", { name, region })}</Card>
 
-  const data = await buildLiveGame(summary.puuid, region as Region).catch(() => null)
+  if (!summary) {
+    return (
+      <div className="space-y-6">
+        <ProfileHeader region={region} gameName={name} tagLine={tag} />
+        <ProfileTabBar active="live" basePath={basePath} />
+        <Card>{t("profile.noData", { name, region })}</Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -73,7 +95,10 @@ async function LiveSection({ region, name, tag }: { region: string; name: string
         profileIconId={summary.profileIconId}
         summonerLevel={summary.summonerLevel}
       />
-      <LiveGame region={region} puuid={summary.puuid} initialData={data} />
+      <ProfileTabBar active="live" basePath={basePath} />
+      <Suspense fallback={<Card>{t("live.loading")}</Card>}>
+        <LiveData region={region} puuid={summary.puuid} />
+      </Suspense>
     </div>
   )
 }
@@ -83,20 +108,12 @@ export default async function LivePage({ params }: LivePageProps) {
   const t = await getT()
   const name = safeDecode(gameName)
   const tag = safeDecode(tagLine)
-  const profilePath = `/profile/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`
+  const basePath = `/profile/${region}/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`
 
   return (
     <div className="space-y-6">
-      <Link
-        href={profilePath}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {t("live.backToProfile")}
-      </Link>
-
       <Suspense fallback={<Card>{t("live.loading")}</Card>}>
-        <LiveSection region={region} name={name} tag={tag} />
+        <LiveSection region={region} basePath={basePath} name={name} tag={tag} />
       </Suspense>
     </div>
   )
