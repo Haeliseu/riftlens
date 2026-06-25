@@ -377,6 +377,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.2.10
         version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@riftlens/riot-api':
+        specifier: workspace:*
+        version: link:../riot-api
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1

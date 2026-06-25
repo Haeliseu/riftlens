@@ -1,5 +1,7 @@
 export * from "./components/avatar"
 export * from "./components/badge"
+export * from "./components/buddy/BuddyCard"
+export * from "./components/buddy/BuddyPanel"
 export * from "./components/button"
 export * from "./components/card"
 export * from "./components/input"

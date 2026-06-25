@@ -1,12 +1,13 @@
 "use client"
 
-import type { BuddyData } from "@riftlens/ui/../../../apps/web/components/buddy/BuddyPanel"
-import { BuddyPanel } from "@riftlens/ui/../../../apps/web/components/buddy/BuddyPanel"
+import { type BuddyData, BuddyPanel } from "@riftlens/ui"
 import { invoke } from "@tauri-apps/api/core"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { RuneImporter } from "./RuneImporter"
 
 export function ChampSelectOverlay() {
+  const router = useRouter()
   const [buddies, setBuddies] = useState<BuddyData[]>([])
   const [loading, setLoading] = useState(true)
   const [myChampion, setMyChampion] = useState<string | null>(null)
@@ -49,7 +50,12 @@ export function ChampSelectOverlay() {
         </div>
       ) : (
         <>
-          <BuddyPanel region="EUW1" buddies={buddies} />
+          <BuddyPanel
+            buddies={buddies}
+            onPlayerClick={(name, tag) =>
+              router.push(`/profile/EUW1/${encodeURIComponent(name)}/${tag}`)
+            }
+          />
           {myChampion && <RuneImporter championName={myChampion} />}
         </>
       )}

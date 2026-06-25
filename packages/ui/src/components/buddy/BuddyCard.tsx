@@ -1,11 +1,14 @@
 "use client"
 
-import type { PlayerTag, PreviouslyPlayedInfo, TierName } from "@riftlens/riot-api"
-import { getRankIconUrl } from "@riftlens/riot-api"
-import { cn } from "@riftlens/ui"
-import Image from "next/image"
+import {
+  getRankIconUrl,
+  type PlayerTag,
+  type PreviouslyPlayedInfo,
+  type TierName,
+} from "@riftlens/riot-api"
+import { cn } from "../../lib/utils"
 
-interface BuddyCardProps {
+export interface BuddyCardProps {
   summonerName: string
   tagLine: string
   tier: TierName
@@ -22,7 +25,7 @@ interface BuddyCardProps {
   isSelf?: boolean
   sessionWins?: number
   sessionLosses?: number
-  onPlayerClick?: (name: string, tag: string) => void
+  onPlayerClick?: ((name: string, tag: string) => void) | undefined
 }
 
 const HEAT_CLASS: Record<string, string> = {
@@ -118,7 +121,8 @@ export function BuddyCard({
               {isSelf && <span className="ml-1 text-[9px] text-blue-400 font-bold">you</span>}
             </p>
             <div className="flex items-center gap-1">
-              <Image
+              {/* biome-ignore lint/performance/noImgElement: external CDN icon, framework-agnostic shared component */}
+              <img
                 src={getRankIconUrl(tier)}
                 alt={tier}
                 width={12}

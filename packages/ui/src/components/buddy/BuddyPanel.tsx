@@ -1,7 +1,6 @@
 "use client"
 
 import type { PlayerTag, PreviouslyPlayedInfo, TierName } from "@riftlens/riot-api"
-import { useRouter } from "next/navigation"
 import { BuddyCard } from "./BuddyCard"
 
 export interface BuddyData {
@@ -26,18 +25,14 @@ export interface BuddyData {
 }
 
 interface BuddyPanelProps {
-  region: string
   buddies: BuddyData[]
+  /** Navigation is provided by the host app (keeps this component framework-agnostic). */
+  onPlayerClick?: (name: string, tag: string) => void
 }
 
-export function BuddyPanel({ region, buddies }: BuddyPanelProps) {
-  const router = useRouter()
+export function BuddyPanel({ buddies, onPlayerClick }: BuddyPanelProps) {
   const myTeam = buddies.filter((b) => b.teamId === 100)
   const enemyTeam = buddies.filter((b) => b.teamId === 200)
-
-  function handlePlayerClick(name: string, tag: string) {
-    router.push(`/profile/${region}/${encodeURIComponent(name)}/${tag}`)
-  }
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -46,7 +41,7 @@ export function BuddyPanel({ region, buddies }: BuddyPanelProps) {
           Votre équipe
         </h3>
         {myTeam.map((buddy) => (
-          <BuddyCard key={buddy.puuid} {...buddy} onPlayerClick={handlePlayerClick} />
+          <BuddyCard key={buddy.puuid} {...buddy} onPlayerClick={onPlayerClick} />
         ))}
       </div>
       <div className="space-y-2">
@@ -54,7 +49,7 @@ export function BuddyPanel({ region, buddies }: BuddyPanelProps) {
           Équipe ennemie
         </h3>
         {enemyTeam.map((buddy) => (
-          <BuddyCard key={buddy.puuid} {...buddy} onPlayerClick={handlePlayerClick} />
+          <BuddyCard key={buddy.puuid} {...buddy} onPlayerClick={onPlayerClick} />
         ))}
       </div>
     </div>
