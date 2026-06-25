@@ -1,5 +1,5 @@
 import "server-only"
-import type { PlayerTag, Region } from "@riftlens/riot-api"
+import type { PlayerTag, Region, RiotApiClient, RoutingRegion } from "@riftlens/riot-api"
 import {
   computePlayerTags,
   getLeagueEntriesByPuuid,
@@ -7,11 +7,71 @@ import {
   getMatchIds,
   regionToRouting,
 } from "@riftlens/riot-api"
+import { withCache } from "@/lib/cache"
 import { cachedRanks, cacheParticipantRank } from "@/lib/profile-db"
 import { cachedMatch } from "@/lib/riot-cache"
 import { riotClient } from "@/lib/riot-client"
 
 const RECENT = 5
+const FORM_TTL = 300 // 5 min — recent form is static during a live game
+
+type RecentForm = Pick<
+  LiveParticipant,
+  "recentWins" | "recentLosses" | "streak" | "onFire" | "tags"
+>
+
+/** Recent ranked form (last few games) → W/L, streak, honoring tags. */
+async function computeRecentForm(
+  client: RiotApiClient,
+  routing: RoutingRegion,
+  puuid: string,
+  championId: number
+): Promise<RecentForm> {
+  const ids = await getMatchIds(client, routing, puuid, { type: "ranked", count: RECENT })
+  const fetched = await Promise.all(
+    ids.map((id) => cachedMatch(client, routing, id).catch(() => null))
+  )
+  const recent: { win: boolean; championId: number; k: number; d: number; a: number }[] = []
+  for (const m of fetched) {
+    const me = m?.info.participants.find((x) => x.puuid === puuid)
+    if (me)
+      recent.push({
+        win: me.win,
+        championId: me.championId,
+        k: me.kills,
+        d: me.deaths,
+        a: me.assists,
+      })
+  }
+  const recentWins = recent.filter((r) => r.win).length
+  const recentLosses = recent.length - recentWins
+  // streak from most-recent (recent[0] is newest)
+  let streak = 0
+  for (const r of recent) {
+    if (streak === 0) streak = r.win ? 1 : -1
+    else if (r.win && streak > 0) streak++
+    else if (!r.win && streak < 0) streak--
+    else break
+  }
+  const onChamp = recent.filter((r) => r.championId === championId)
+  const last = recent[0]
+  const tags = computePlayerTags({
+    session: {
+      wins: recentWins,
+      losses: recentLosses,
+      winRate: recent.length ? Math.round((recentWins / recent.length) * 100) : 0,
+      gamesPlayed: recent.length,
+      streak,
+    },
+    champWinRate: onChamp.length
+      ? Math.round((onChamp.filter((r) => r.win).length / onChamp.length) * 100)
+      : 0,
+    champGames: onChamp.length,
+    recentChampGames: onChamp.length,
+    lastGameKDA: last ? [last.k, last.d, last.a] : [0, 0, 0],
+  })
+  return { recentWins, recentLosses, streak, onFire: streak >= 3, tags }
+}
 
 export interface LiveParticipant {
   puuid: string | null
@@ -35,14 +95,6 @@ export interface LiveGameData {
   participants: LiveParticipant[]
 }
 
-/**
- * Builds the enriched live-game view for a player: live spectator data joined
- * with each participant's rank (cached, else league-v4) and recent ranked form
- * (W/L, streak, honoring tags). Returns `null` when the player isn't in a game.
- *
- * Shared by the `/api/riot/live-game` route and the `/live` page so both render
- * identical data — the page can run it server-side for a ready-on-load paint.
- */
 /** A live participant before enrichment — just what spectator-v5 returns. */
 function toBaseParticipant(p: {
   puuid?: string | undefined
@@ -90,6 +142,12 @@ export async function detectLiveGame(puuid: string, region: Region): Promise<Liv
   }
 }
 
+/**
+ * Builds the enriched live-game view: live spectator data joined with each
+ * participant's rank (cached, else league-v4) and recent ranked form (W/L,
+ * streak, honoring tags). Returns `null` when the player isn't in a game.
+ * Shared by the `/api/riot/live-game` route and the `/live` page.
+ */
 export async function buildLiveGame(puuid: string, region: Region): Promise<LiveGameData | null> {
   const client = riotClient()
   const routing = regionToRouting(region)
@@ -131,57 +189,21 @@ export async function buildLiveGame(puuid: string, region: Region): Promise<Live
         }
       }
 
-      // Recent ranked form (last few games, newest first) → W/L, streak, tags.
+      // Recent ranked form — cached per player+champion: during a live game it
+      // doesn't change, so this collapses ~6 Riot calls/player into one value
+      // reused across the 30s client refetches and across viewers (the dev-key
+      // 2-min budget is the bottleneck in prod).
       try {
-        const ids = await getMatchIds(client, routing, p.puuid, { type: "ranked", count: RECENT })
-        // Fetch the recent matches in parallel (cached + globally throttled by
-        // the Riot client) — keeps the live lookup snappy without re-fetching.
-        const fetched = await Promise.all(
-          ids.map((id) => cachedMatch(client, routing, id).catch(() => null))
+        const form = await withCache(
+          `live:form:${routing}:${p.puuid}:${p.championId}`,
+          FORM_TTL,
+          () => computeRecentForm(client, routing, p.puuid as string, p.championId)
         )
-        const recent: { win: boolean; championId: number; k: number; d: number; a: number }[] = []
-        for (const m of fetched) {
-          const me = m?.info.participants.find((x) => x.puuid === p.puuid)
-          if (me)
-            recent.push({
-              win: me.win,
-              championId: me.championId,
-              k: me.kills,
-              d: me.deaths,
-              a: me.assists,
-            })
-        }
-        base.recentWins = recent.filter((r) => r.win).length
-        base.recentLosses = recent.length - base.recentWins
-        // streak from most-recent (recent[0] is newest)
-        let streak = 0
-        for (const r of recent) {
-          if (streak === 0) streak = r.win ? 1 : -1
-          else if (r.win && streak > 0) streak++
-          else if (!r.win && streak < 0) streak--
-          else break
-        }
-        base.streak = streak
-        base.onFire = streak >= 3
-
-        // Honoring/informational tags (no shaming — Riot dev policy).
-        const onChamp = recent.filter((r) => r.championId === p.championId)
-        const last = recent[0]
-        base.tags = computePlayerTags({
-          session: {
-            wins: base.recentWins,
-            losses: base.recentLosses,
-            winRate: recent.length ? Math.round((base.recentWins / recent.length) * 100) : 0,
-            gamesPlayed: recent.length,
-            streak,
-          },
-          champWinRate: onChamp.length
-            ? Math.round((onChamp.filter((r) => r.win).length / onChamp.length) * 100)
-            : 0,
-          champGames: onChamp.length,
-          recentChampGames: onChamp.length,
-          lastGameKDA: last ? [last.k, last.d, last.a] : [0, 0, 0],
-        })
+        base.recentWins = form.recentWins
+        base.recentLosses = form.recentLosses
+        base.streak = form.streak
+        base.onFire = form.onFire
+        base.tags = form.tags
       } catch {
         // best effort
       }
