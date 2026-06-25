@@ -1,6 +1,6 @@
 import { db } from "@riftlens/db"
 import { summonerMatches } from "@riftlens/db/schema"
-import { eq } from "drizzle-orm"
+import { and, eq, inArray, isNotNull, type SQL, sql } from "drizzle-orm"
 
 // Detailed per-champion aggregate. Bucket holds SUMS; the UI divides by games.
 export interface ChampDetailBucket {
@@ -41,83 +41,70 @@ function emptyDetail(): ChampDetailBucket {
   }
 }
 
-function addDetail(
-  b: ChampDetailBucket,
-  r: {
-    win: boolean
-    k: number
-    d: number
-    a: number
-    csPerMin: number
-    kp: number
-    gold: number
-    damage: number
-    vision: number
-  }
-) {
-  b.games += 1
-  b.wins += r.win ? 1 : 0
-  b.kills += r.k
-  b.deaths += r.d
-  b.assists += r.a
-  b.csPerMin += r.csPerMin
-  b.kp += r.kp
-  b.gold += r.gold
-  b.damage += r.damage
-  b.vision += r.vision
+interface AggRow extends ChampDetailBucket {
+  championId: number
+  championName: string
 }
 
-/** Detailed per-champion aggregate over ALL stored ranked games. */
-export async function championStatsFromDb(puuid: string): Promise<ChampionDetail[]> {
-  const rows = await db
-    .select({
-      championId: summonerMatches.championId,
-      championName: summonerMatches.championName,
-      queueId: summonerMatches.queueId,
-      kills: summonerMatches.kills,
-      deaths: summonerMatches.deaths,
-      assists: summonerMatches.assists,
-      win: summonerMatches.win,
-      csPerMin: summonerMatches.csPerMin,
-      kp: summonerMatches.killParticipation,
-      gold: summonerMatches.goldEarned,
-      damage: summonerMatches.totalDamageDealt,
-      vision: summonerMatches.visionScore,
-    })
-    .from(summonerMatches)
-    .where(eq(summonerMatches.puuid, puuid))
+// One GROUP BY per queue bucket — the DB does the aggregation (was an in-JS
+// reduce over every stored row). `wins` uses CASE (Postgres has no bool→int
+// cast); cs/min and kp are summed as float8, the rest as int.
+const BUCKET_SELECT = {
+  championId: summonerMatches.championId,
+  championName: sql<string>`coalesce(max(${summonerMatches.championName}), '')`,
+  games: sql<number>`count(*)::int`,
+  wins: sql<number>`coalesce(sum(case when ${summonerMatches.win} then 1 else 0 end), 0)::int`,
+  kills: sql<number>`coalesce(sum(${summonerMatches.kills}), 0)::int`,
+  deaths: sql<number>`coalesce(sum(${summonerMatches.deaths}), 0)::int`,
+  assists: sql<number>`coalesce(sum(${summonerMatches.assists}), 0)::int`,
+  csPerMin: sql<number>`coalesce(sum(${summonerMatches.csPerMin}), 0)::float8`,
+  kp: sql<number>`coalesce(sum(${summonerMatches.killParticipation}), 0)::float8`,
+  gold: sql<number>`coalesce(sum(${summonerMatches.goldEarned}), 0)::int`,
+  damage: sql<number>`coalesce(sum(${summonerMatches.totalDamageDealt}), 0)::int`,
+  vision: sql<number>`coalesce(sum(${summonerMatches.visionScore}), 0)::int`,
+}
 
-  const byChamp = new Map<number, ChampionDetail>()
-  for (const r of rows) {
-    if (r.championId == null) continue
-    const agg =
-      byChamp.get(r.championId) ??
-      ({
-        championId: r.championId,
-        championName: r.championName ?? "",
-        total: emptyDetail(),
-        solo: emptyDetail(),
-        flex: emptyDetail(),
-        aram: emptyDetail(),
-        arena: emptyDetail(),
-      } satisfies ChampionDetail)
-    const line = {
-      win: r.win ?? false,
-      k: r.kills ?? 0,
-      d: r.deaths ?? 0,
-      a: r.assists ?? 0,
-      csPerMin: r.csPerMin ?? 0,
-      kp: r.kp ?? 0,
-      gold: r.gold ?? 0,
-      damage: r.damage ?? 0,
-      vision: r.vision ?? 0,
-    }
-    addDetail(agg.total, line)
-    if (r.queueId === 420) addDetail(agg.solo, line)
-    else if (r.queueId === 440) addDetail(agg.flex, line)
-    else if (r.queueId === 450) addDetail(agg.aram, line)
-    else if (r.queueId === 1700 || r.queueId === 1710) addDetail(agg.arena, line)
-    byChamp.set(r.championId, agg)
-  }
-  return [...byChamp.values()].sort((a, b) => b.total.games - a.total.games)
+function bucket(where: SQL | undefined): Promise<AggRow[]> {
+  return db
+    .select(BUCKET_SELECT)
+    .from(summonerMatches)
+    .where(where)
+    .groupBy(summonerMatches.championId) as Promise<AggRow[]>
+}
+
+function toBucket(r: AggRow | undefined): ChampDetailBucket {
+  if (!r) return emptyDetail()
+  const { championId: _id, championName: _name, ...b } = r
+  return b
+}
+
+/** Detailed per-champion aggregate over ALL stored ranked games (DB-side). */
+export async function championStatsFromDb(puuid: string): Promise<ChampionDetail[]> {
+  const base = and(eq(summonerMatches.puuid, puuid), isNotNull(summonerMatches.championId))
+  const [total, solo, flex, aram, arena] = await Promise.all([
+    bucket(base),
+    bucket(and(base, eq(summonerMatches.queueId, 420))),
+    bucket(and(base, eq(summonerMatches.queueId, 440))),
+    bucket(and(base, eq(summonerMatches.queueId, 450))),
+    bucket(and(base, inArray(summonerMatches.queueId, [1700, 1710]))),
+  ])
+
+  const index = (rows: AggRow[]) => new Map(rows.map((r) => [r.championId, r]))
+  const soloBy = index(solo)
+  const flexBy = index(flex)
+  const aramBy = index(aram)
+  const arenaBy = index(arena)
+
+  // `total` has one row per champion the player has any game on.
+  return total
+    .map((t) => ({
+      championId: t.championId,
+      championName: t.championName,
+      total: toBucket(t),
+      solo: toBucket(soloBy.get(t.championId)),
+      flex: toBucket(flexBy.get(t.championId)),
+      aram: toBucket(aramBy.get(t.championId)),
+      arena: toBucket(arenaBy.get(t.championId)),
+    }))
+    .sort((a, b) => b.total.games - a.total.games)
 }
