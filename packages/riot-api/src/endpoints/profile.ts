@@ -93,34 +93,6 @@ export function getChampionPortraitUrl(championId: number): string {
   return `https://cdn.communitydragon.org/latest/champion/${championId}/portrait`
 }
 
-/** DDragon item icon keyed by item id. Item icons are stable across patches. */
-const DDRAGON_VERSION = "15.13.1"
-export function getItemIconUrl(itemId: number): string | null {
-  if (!itemId) return null
-  return `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/item/${itemId}.png`
-}
-
-const QUEUE_NAMES: Record<number, string> = {
-  400: "Normale",
-  420: "Classé Solo/Duo",
-  430: "Normale",
-  440: "Classé Flexible",
-  450: "ARAM",
-  490: "Partie rapide",
-  700: "Clash",
-  720: "Clash ARAM",
-  900: "ARURF",
-  1020: "Un pour tous",
-  1300: "Nexus Blitz",
-  1700: "Arena",
-  1710: "Arena",
-  1900: "URF",
-}
-
-export function queueName(queueId: number | null | undefined): string {
-  return queueId != null ? (QUEUE_NAMES[queueId] ?? "Autre") : "Autre"
-}
-
 /** Classic Summoner's Rift queues (have meaningful build/skill order). */
 export function isSummonersRift(queueId: number | null | undefined): boolean {
   return queueId != null && [400, 420, 430, 440, 490, 700].includes(queueId)

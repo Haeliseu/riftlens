@@ -133,6 +133,8 @@ interface MatchRowProps {
   rankChange: RankChange | undefined
   expanded: boolean
   onToggle: () => void
+  /** queueId → name fallback (CommunityDragon) for ids our table doesn't cover. */
+  queues: Record<number, string> | undefined
   t: T
 }
 
@@ -144,8 +146,12 @@ export function MatchRow({
   rankChange,
   expanded,
   onToggle,
+  queues,
   t,
 }: MatchRowProps) {
+  const qk = queueKey(m.queueId, m.gameMode)
+  const queueLabel =
+    qk !== "queue.other" ? t(qk) : ((m.queueId != null ? queues?.[m.queueId] : undefined) ?? t(qk))
   const csPerMin = m.gameDurationS > 0 ? (m.cs / (m.gameDurationS / 60)).toFixed(1) : "0"
   const kp = m.teamKills > 0 ? Math.round(((m.kills + m.assists) / m.teamKills) * 100) : 0
   const cells = itemCells(m.items, m.itemIcons)
@@ -169,12 +175,10 @@ export function MatchRow({
         {/* 1. Result info: queue, date, win/loss, duration */}
         <div className="w-[96px] flex-shrink-0 space-y-0.5">
           {m.queueId === 420 ? (
-            <p className="text-xs text-muted-foreground truncate">
-              {t(queueKey(m.queueId, m.gameMode))}
-            </p>
+            <p className="text-xs text-muted-foreground truncate">{queueLabel}</p>
           ) : (
             <span className="inline-block rounded bg-accent px-1.5 py-px text-[11px] font-medium text-foreground">
-              {t(queueKey(m.queueId, m.gameMode))}
+              {queueLabel}
             </span>
           )}
           <p className="text-xs text-muted-foreground">{relativeTime(t, m.gameCreationMs)}</p>

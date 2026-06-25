@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useChampions } from "@/hooks/useChampions"
 import { useLpPerGame } from "@/hooks/useLpPerGame"
 import { useMatchHistory } from "@/hooks/useMatchHistory"
+import { useQueues } from "@/hooks/useQueues"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { ROLES, roleIconUrl } from "@/lib/roles"
@@ -67,7 +68,8 @@ interface MatchHistoryProps {
 }
 
 export function MatchHistory({ region, puuid }: MatchHistoryProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const { data: queues } = useQueues(locale)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [role, setRole] = useState<string>("ALL")
   const [queueGroup, setQueueGroup] = useState<string>("ALL")
@@ -214,6 +216,7 @@ export function MatchHistory({ region, puuid }: MatchHistoryProps) {
               rankChange={lpPerGame?.matchRankChange[m.matchId]}
               expanded={expandedId === m.matchId}
               onToggle={() => setExpandedId(expandedId === m.matchId ? null : m.matchId)}
+              queues={queues}
               t={t}
             />
           ))}

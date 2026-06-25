@@ -11,7 +11,6 @@ import {
   getMatchHistory,
   getProfileIconUrl,
   getProfileSummary,
-  queueName,
 } from "../endpoints/profile"
 
 const client = new RiotApiClient("test-api-key")
@@ -147,12 +146,5 @@ describe("url + queue helpers", () => {
     expect(getChampionPortraitUrl(103)).toBe(
       "https://cdn.communitydragon.org/latest/champion/103/portrait"
     )
-  })
-
-  it("maps queue ids to names", () => {
-    expect(queueName(420)).toBe("Classé Solo/Duo")
-    expect(queueName(450)).toBe("ARAM")
-    expect(queueName(9999)).toBe("Autre")
-    expect(queueName(null)).toBe("Autre")
   })
 })
