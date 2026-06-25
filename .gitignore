@@ -28,3 +28,4 @@ ios/
 # Logs
 *.log
 pnpm-debug.log*
+.claude/

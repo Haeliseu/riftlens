@@ -1,11 +1,7 @@
-import PQueue from "p-queue"
 import type { ZodType } from "zod"
 import { RiotApiError } from "./errors"
+import { defaultRateLimiter, type RateLimiter } from "./rate-limit"
 import { withRetry } from "./retry"
-
-// Dev key limits: 20 req/s, 100 req/2min
-const perSecondQueue = new PQueue({ interval: 1_000, intervalCap: 18 })
-const per2MinQueue = new PQueue({ interval: 120_000, intervalCap: 95 })
 
 export type Region =
   | "EUW1"
@@ -52,9 +48,11 @@ export function regionToRouting(region: string): RoutingRegion {
 
 export class RiotApiClient {
   private readonly apiKey: string
+  private readonly limiter: RateLimiter
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, limiter: RateLimiter = defaultRateLimiter) {
     this.apiKey = apiKey
+    this.limiter = limiter
   }
 
   getRoutingRegion(region: Region): RoutingRegion {
@@ -62,21 +60,19 @@ export class RiotApiClient {
   }
 
   async fetch<T>(url: string, schema: ZodType<T>): Promise<T> {
-    return per2MinQueue.add(() =>
-      perSecondQueue.add(() =>
-        withRetry(async () => {
-          const res = await fetch(url, {
-            headers: { "X-Riot-Token": this.apiKey },
-          })
-          if (!res.ok) {
-            const retryAfterHeader = res.headers.get("Retry-After")
-            const err = new RiotApiError(res.status, url, await res.text())
-            err.retryAfterSeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : null
-            throw err
-          }
-          return schema.parse(await res.json())
+    return this.limiter.schedule(() =>
+      withRetry(async () => {
+        const res = await fetch(url, {
+          headers: { "X-Riot-Token": this.apiKey },
         })
-      )
-    ) as Promise<T>
+        if (!res.ok) {
+          const retryAfterHeader = res.headers.get("Retry-After")
+          const err = new RiotApiError(res.status, url, await res.text())
+          err.retryAfterSeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) : null
+          throw err
+        }
+        return schema.parse(await res.json())
+      })
+    )
   }
 }

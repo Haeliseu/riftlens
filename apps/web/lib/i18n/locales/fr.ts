@@ -1,0 +1,471 @@
+/**
+ * Flat, namespaced translation keys. Every user-facing string lives here so the
+ * UI is fully French OR fully English — never mixed. Use `{var}` placeholders
+ * for interpolation (see the `t` helper).
+ *
+ * This is the source of `TranslationKey` — keep that derivation in sync with
+ * `dictionaries.ts`.
+ */
+export const fr = {
+  // generic
+  "common.loading": "Chargement…",
+  "common.clear": "Effacer",
+  "common.reset": "Réinitialiser",
+  "common.apply": "Appliquer",
+  "common.search": "Rechercher",
+  "common.none": "Aucun",
+  "common.win": "Victoire",
+  "common.loss": "Défaite",
+  "common.player": "Joueur",
+
+  // navbar / layout
+  "nav.search.placeholder": "Rechercher un joueur",
+  "nav.toggleTheme": "Basculer le thème",
+  "nav.language": "Langue",
+  "nav.login": "Se connecter",
+  "nav.region": "Région",
+  "region.NA1": "Amérique du Nord",
+  "region.EUW1": "Europe de l'Ouest",
+  "region.EUN1": "Europe Nord & Est",
+  "region.KR": "Corée",
+  "region.BR1": "Brésil",
+  "region.JP1": "Japon",
+  "region.RU": "Russie",
+  "region.OC1": "Océanie",
+  "region.TR1": "Turquie",
+  "region.LA1": "Amérique latine Nord",
+  "region.LA2": "Amérique latine Sud",
+  "region.SG2": "Asie du Sud-Est",
+  "region.TW2": "Taïwan",
+  "region.VN2": "Vietnam",
+  "sidebar.overview": "Aperçu",
+  "sidebar.leaderboard": "Classement",
+  "sidebar.champions": "Champions",
+
+  // home
+  "home.tagline": "Suis tes performances sur League of Legends.",
+  "home.search.placeholder": "Pseudo#TAG",
+  "home.search.button": "Rechercher",
+  "home.region": "Région",
+
+  // profile header
+  "profile.level": "Niveau {level}",
+  "profile.unranked": "Non classé",
+  "profile.activeRegion": "Ce joueur est actif sur {region} →",
+  "profile.refresh": "Actualiser",
+  "profile.refreshing": "Actualisation…",
+  "profile.noData":
+    "Aucune donnée Riot pour {name} sur {region}. Vérifie la région (le compte joue peut-être sur une autre) ou la validité de la clé API Riot.",
+
+  // tabs
+  "tab.overview": "Aperçu",
+  "tab.champions": "Champions",
+  "tab.live": "En direct",
+
+  // match history filters
+  "filter.period.all": "Aucun",
+  "filter.period.day": "Jour",
+  "filter.period.session": "Session",
+  "filter.queue.all": "Toutes",
+  "filter.queue.solo": "Solo/Duo",
+  "filter.queue.flex": "Flex",
+  "filter.queue.other": "Autre",
+  "filter.champion": "Filtrer",
+
+  // match history
+  "history.empty": "Aucune partie récente.",
+  "history.notFound": "Joueur introuvable sur cette région.",
+  "history.error": "Historique indisponible (clé API Riot ?).",
+  "history.loading": "Chargement de l'historique…",
+  "history.loadMore": "Voir plus de parties",
+  "history.kda": "{ratio} KDA",
+  "history.carry": "carry",
+  "history.cs": "{cs} CS",
+  "history.csPerMin": "{value} CS/min",
+  "history.kp": "KP",
+  "history.lp": "{value} LP",
+  "history.promotion": "Promotion vers {rank}",
+  "history.demotion": "Rétrogradation vers {rank}",
+  "history.placement.first": "1er",
+  "history.placement.nth": "{n}e",
+  "history.vs": "VS",
+  "history.laneOpponent": "Adversaire de lane",
+  "history.enemyCarry": "Carry adverse",
+  "time.now": "à l'instant",
+  "time.hoursAgo": "il y a {h} h",
+  "time.daysAgo": "il y a {d} j",
+
+  // champion filter modal
+  "champFilter.title": "Filtrer par champion",
+  "champFilter.with": "Joué (ce champion)",
+  "champFilter.against": "Contre (ennemi)",
+  "champFilter.searchPlaceholder": "Rechercher un champion…",
+  "champFilter.hint":
+    "Choisis le champion que tu as joué et/ou un champion adverse. Aucun sélectionné = pas de filtre.",
+
+  // champion stats table
+  "champStats.title": "Statistiques par champion",
+  "champStats.empty": "Aucune partie classée pour ce filtre.",
+  "champStats.tab.total": "Total",
+  "champStats.tab.solo": "Solo/Duo",
+  "champStats.tab.flex": "Flex",
+  "champStats.col.champion": "Champion",
+  "champStats.col.games": "Parties",
+  "champStats.col.wr": "VIC",
+  "champStats.col.lp": "LP",
+  "champStats.col.kda": "KDA",
+  "champStats.col.kdaDetail": "K/D/A",
+  "champStats.col.csPerMin": "CS/min",
+  "champStats.col.kp": "KP",
+  "champStats.col.gold": "Or",
+  "champStats.col.damage": "Dégâts",
+  "champStats.col.vision": "Vision",
+
+  // performance summary
+  "perf.title": "Performances sur les {n} dernières parties",
+  "perf.winrate": "Winrate",
+  "perf.avgKda": "KDA moyen",
+  "perf.avgCarry": "Carry moyen",
+  "perf.mvp": "MVP",
+  "perf.ace": "ACE",
+  "perf.topChampions": "Meilleurs champions",
+
+  // ranked card
+  "ranked.soloDuo": "Classé Solo/Duo",
+  "ranked.flex": "Classé Flexible",
+  "ranked.lp": "{lp} PL",
+  "ranked.wins": "{n} V",
+  "ranked.losses": "{n} D",
+  "ranked.winrate": "{wr}% de victoires",
+  "ranked.ladder": "#{rank} du ladder",
+  "ranked.delta7d": "7 j",
+  "ranked.delta30d": "30 j",
+  "ranked.lpChart": "Évolution des PL",
+  "ranked.lpChart.empty": "Pas encore assez de données pour tracer la courbe.",
+
+  // role performance
+  "champPerf.title": "Performances par champion",
+  "coach.title": "Coaching",
+  "coach.empty": "Pas encore assez de parties classées pour analyser.",
+  "coach.subtitle": "{role} · {games} parties · {wr}% VIC",
+  "coach.your": "Toi",
+  "coach.target": "Objectif",
+  "coach.metric.csPerMin": "CS / min",
+  "coach.metric.vision": "Vision / min",
+  "coach.metric.kp": "Participation aux kills",
+  "coach.metric.deaths": "Morts / partie",
+  "coach.metric.gold": "Or / min",
+  "coach.metric.dpm": "Dégâts / min",
+  "coach.tip.dpm":
+    "Maximise tes dégâts : positionne-toi pour taper sans mourir, achète tes objets de dégâts en priorité, n'hésite pas à poke en lane.",
+  "coach.tip.csPerMin":
+    "Travaille tes derniers coups : last-hit sous tour, ne rate pas les vagues entre les trades.",
+  "coach.tip.vision":
+    "Pose et détruis plus de balises : achète un pink à chaque retour, ward les entrées de jungle et autour des objectifs.",
+  "coach.tip.kp":
+    "Sois plus présent autour de la carte : roam après ta vague, rejoins les fights et objectifs (dragon/héraut).",
+  "coach.tip.deaths":
+    "Réduis tes morts : surveille la minimap, garde un repli, ne force pas sans vision ni avantage — surtout avant un objectif.",
+  "coach.tip.gold":
+    "Optimise ton économie : recall sur des paliers d'achat propres, ne meurs pas avec de l'or en poche, garde la vague qui pousse.",
+  "coach.good": "Bon",
+  "coach.allGood": "Solide sur ce rôle — rien d'alarmant dans tes moyennes.",
+  "coach.obj.title": "Morts autour des objectifs",
+  "coach.obj.empty": "Pas assez de données timeline pour analyser.",
+  "coach.obj.stat":
+    "{near}/{deaths} de tes morts ({pct}%) surviennent autour d'un objectif pris par l'adversaire.",
+  "coach.obj.games": "Sur tes {n} dernières parties classées.",
+  "coach.obj.good": "Tu contestes rarement un objectif perdu — bien joué.",
+  "coach.obj.warn":
+    "Tu meurs parfois autour d'objectifs adverses : recule si tu n'as ni la vision ni l'avantage.",
+  "coach.obj.bad":
+    "Tu meurs souvent en contestant des objectifs que l'adversaire prend. Ne contest pas un dragon/baron perdu : recule, ward la zone, et concède l'objectif plutôt qu'un kill.",
+  "mastery.title": "Maestria",
+  "mastery.level": "Niv. {n}",
+  "mastery.empty": "Aucune donnée de maestria.",
+  "challenges.title": "Challenges",
+  "challenges.points": "Points",
+  "challenges.percentile": "Top {n}%",
+  "challenges.empty": "Aucune donnée de challenges.",
+  "roles.title": "Performances par rôle",
+  "roles.empty": "Pas encore de données par rôle.",
+  "roles.games": "{n} parties",
+
+  // crossed players
+  "crossed.title": "Joué avec",
+  "crossed.empty":
+    "Personne pour l'instant — plus tu synchronises, plus on détecte les récurrents.",
+  "crossed.detail": "{n}× · {ally} allié / {enemy} ennemi",
+
+  // ping stats
+  "pings.title": "Pings",
+  "pings.empty": "Aucun ping enregistré pour l'instant.",
+
+  // live game
+  "live.title": "Partie en cours",
+  "live.notInGame": "Ce joueur n'est pas en partie actuellement.",
+  "live.loading": "Recherche d'une partie en cours…",
+  "live.error": "Impossible de récupérer la partie en direct.",
+  "live.check": "Vérifier",
+  "live.inGame": "En partie",
+  "live.since": "· depuis {min} min",
+  "live.blueTeam": "Équipe bleue",
+  "live.redTeam": "Équipe rouge",
+  "live.streak": "série {n}",
+  "live.tag.onFire": "En feu",
+  "live.tag.oneTrick": "Mono-champion",
+  "live.tag.carry": "Peut carry",
+  "live.tag.fed": "Dernière partie en feu",
+
+  // sidebar / search
+  "nav.home": "Accueil",
+  "search.recent": "Récents",
+  "search.notFound": "Joueur introuvable",
+  "search.unavailable": "Recherche indisponible (vérifie la clé API Riot)",
+  "search.noResult": "Aucun résultat — tape le pseudo complet avec #TAG",
+  "search.networkError": "Erreur réseau",
+  "search.searching": "Recherche…",
+  "search.level": "niv. {n}",
+  "search.placeholder": "Joueur#EUW",
+
+  // lp chart
+  "lpchart.title": "Courbe LP",
+  "lpchart.emptyNoData":
+    "L'historique LP se construit à chaque changement de LP (Riot ne fournit pas le passé).",
+  "lpchart.emptyFirst":
+    "Premier point enregistré — la courbe apparaît dès le prochain changement de LP.",
+  "lpchart.peak": "Pic",
+  "lpchart.avgRank": "Rang moyen : {tier} {division}",
+
+  // match detail panel
+  "detail.copyLink": "Copier le lien",
+  "detail.copied": "Copié !",
+  "detail.tab.general": "Général",
+  "detail.tab.details": "Détails",
+  "detail.tab.runes": "Runes",
+  "detail.noRunes": "Pas de runes pour ce mode.",
+  "detail.noBuild": "Build indisponible pour ce mode.",
+  "detail.laningAt15": "Laning @15",
+  "detail.build": "Ordre d'achat",
+  "detail.skillOrder": "Ordre des sorts",
+  "detail.wards": "Balises",
+  "detail.spellCasts": "Sorts lancés",
+  "detail.csPerMin": "CS/min",
+  "detail.goldPerMin": "Or/min",
+  "detail.damage": "Dégâts",
+  "detail.damageTaken": "Dégâts subis",
+  "detail.visionPerMin": "Vision/min",
+  "detail.loadingTimeline": "Chargement de la timeline…",
+  "detail.loadingDetail": "Chargement du détail…",
+  "detail.unavailable": "Détail indisponible.",
+  "detail.laning15": "Laning @15",
+  "detail.vsLaneOpp": "(vs adversaire de lane)",
+  "detail.cs": "CS",
+  "detail.gold": "Or",
+  "detail.xp": "XP",
+  "detail.stats": "Statistiques",
+  "detail.wardsTitle": "Balises",
+  "detail.wardsPlaced": "Posées",
+  "detail.wardsKilled": "Détruites",
+  "detail.controlWards": "Contrôle",
+  "detail.unitDmg": "dmg",
+  "detail.unitGold": "or",
+  "detail.unitVision": "vis",
+  "detail.unitPings": "pings",
+  "detail.unitCsM": "CS/m",
+  "obj.kills": "Kills",
+  "obj.towers": "Tours",
+  "obj.dragons": "Dragons",
+  "obj.barons": "Barons",
+  "obj.heralds": "Hérauts",
+  "obj.grubs": "Nuées",
+
+  // leaderboard / champions pages
+  // tiers
+  "tier.iron": "Fer",
+  "tier.bronze": "Bronze",
+  "tier.silver": "Argent",
+  "tier.gold": "Or",
+  "tier.platinum": "Platine",
+  "tier.emerald": "Émeraude",
+  "tier.diamond": "Diamant",
+  "tier.master": "Maître",
+  "tier.grandmaster": "Grand Maître",
+  "tier.challenger": "Challenger",
+
+  // roles
+  "role.top": "Top",
+  "role.jungle": "Jungle",
+  "role.mid": "Mid",
+  "role.adc": "ADC",
+  "role.support": "Support",
+  "role.other": "Autre",
+  "roles.col.role": "Rôle",
+  "roles.col.games": "Parties",
+  "roles.col.wr": "VIC",
+  "roles.syncHint": "Aucune donnée — clique sur « Actualiser » pour synchroniser.",
+
+  // pings
+  "pings.titleUsed": "Pings utilisés",
+  "pings.total": "{n} au total",
+  "pings.games": "sur {n} parties analysées",
+  "pings.syncHint": "Aucune donnée — synchronise pour enregistrer les pings de tes parties.",
+  "ping.onMyWay": "En route",
+  "ping.assistMe": "Aidez-moi",
+  "ping.enemyMissing": "Ennemi absent",
+  "ping.danger": "Danger",
+  "ping.getBack": "Repli",
+  "ping.push": "Pousser",
+  "ping.needVision": "Vision",
+  "ping.enemyVision": "Vision ennemie",
+  "ping.hold": "Tenir",
+  "ping.allIn": "All-in",
+  "ping.bait": "Appât",
+  "ping.command": "Commande",
+  "ping.visionCleared": "Vision nettoyée",
+  "ping.basic": "Basique",
+
+  // refresh
+  "refresh.syncing": "Synchro… {n} parties",
+  "refresh.added": "+{n} parties",
+
+  // performance summary (extra)
+  "perf.kda": "KDA",
+  "perf.kdaPerGame": "KDA moy. / partie",
+  "perf.carryAvg": "Note de carry moy.",
+  "perf.winShort": "V",
+  "perf.lossShort": "D",
+  "perf.gamesShort": "p",
+  "perf.gamesOne": "{n} partie",
+  "perf.gamesMany": "{n} parties",
+  "perf.avgRank": "Rang moyen",
+
+  // ranked card (extra)
+  "ranked.title": "Classé Solo / Duo",
+  "ranked.wlLine": "{wins}V · {losses}D · {wr}% VIC · {games} parties",
+  "ranked.avgGameRank": "Rang moyen des parties",
+  "ranked.lastN": "{n} dernières",
+  "ranked.ladderRank": "Rang ladder",
+  "ranked.delta30": "30 j",
+  "ranked.delta7": "7 j",
+
+  // queue names
+  "queue.400": "Normale",
+  "queue.420": "Classé Solo/Duo",
+  "queue.430": "Normale",
+  "queue.440": "Classé Flexible",
+  "queue.450": "ARAM",
+  "queue.490": "Partie rapide",
+  "queue.480": "Partie rapide",
+  "queue.700": "Clash",
+  "queue.720": "Clash ARAM",
+  "queue.900": "ARURF",
+  "queue.1020": "Un pour tous",
+  "queue.1300": "Nexus Blitz",
+  "queue.1400": "Grimoire ultime",
+  "queue.1700": "Arena",
+  "queue.1900": "URF",
+  "queue.2300": "Brawl",
+  "queue.bots": "Coop vs IA",
+  "queue.other": "Autre",
+
+  "leaderboard.title": "Classement",
+  "leaderboard.loading": "Chargement du classement…",
+  "leaderboard.unavailable": "Classement indisponible (clé API Riot ?).",
+  "leaderboard.col.player": "Joueur",
+  "leaderboard.col.wins": "Victoires",
+  "leaderboard.col.wr": "VIC",
+  "leaderboard.hidden": "Joueur masqué",
+  "leaderboard.live": "LIVE",
+  "leaderboard.inGame": "En partie",
+  "leaderboard.loadMore": "Voir plus de joueurs",
+  "champions.title": "Champions",
+  "champions.loading": "Chargement des champions…",
+  "champions.listUnavailable": "Liste indisponible.",
+  "champions.none": "Aucun champion.",
+  "champions.freeRotation": "Rotation gratuite",
+  "champions.freeBadge": "FREE",
+
+  // login
+  "login.title": "Connexion",
+  "login.riot": "Se connecter avec Riot",
+  "login.riotInfo":
+    "RiftLens utilise ton compte Riot pour récupérer et tenir à jour ton profil automatiquement.",
+  "login.riotPending": "Connexion Riot bientôt disponible — en attente de l'accès RSO.",
+  "login.subtitle": "Connecte-toi avec ton compte Riot",
+  "login.email": "Email",
+  "login.password": "Mot de passe",
+  "login.submit": "Se connecter",
+  "login.submitting": "Connexion…",
+  "login.or": "ou",
+  "login.error": "Erreur de connexion",
+
+  // footer
+  "a11y.skipToContent": "Aller au contenu principal",
+  "account.title": "Mon compte",
+  "account.notSignedIn": "Tu n'es pas connecté.",
+  "account.signedInAs": "Connecté en tant que {name}.",
+  "account.deleteTitle": "Supprimer mon compte",
+  "account.deleteWarning":
+    "Cette action supprime définitivement ton profil et toutes les données liées à ton compte Riot. Irréversible.",
+  "account.delete": "Supprimer mon compte",
+  "account.deleteConfirm": "Confirmer la suppression",
+  "account.deleting": "Suppression…",
+  "account.deleteError": "Échec de la suppression. Réessaie.",
+  "download.title": "Application bureau",
+  "download.subtitle":
+    "L'overlay in-game RiftLens : profils en champ select, infos live et import de runes.",
+  "download.cta": "Télécharger",
+  "download.forOS": "Télécharger pour {os}",
+  "download.get": "Télécharger",
+  "download.note": "Builds open source publiées sur GitHub Releases.",
+  "download.premiumTitle": "Fonctionnalité premium",
+  "download.premiumDesc":
+    "L'application bureau est réservée aux membres premium. Connecte-toi avec Riot pour y accéder.",
+  "download.premiumSoon": "Les offres premium arrivent bientôt.",
+  "download.featuresTitle": "Ce que l'app bureau ajoute",
+  "download.feature.overlay": "Overlay in-game (scoreboard live, timers d'objectifs).",
+  "download.feature.champSelect": "Panneau allié/ennemi en champ select.",
+  "download.feature.runes": "Import automatique de pages de runes.",
+  "nav.download": "Télécharger",
+  "footer.tagline": "Tracker League of Legends — profils, classement, coaching et live game.",
+  "footer.nav": "Navigation",
+  "footer.legal": "Légal",
+  "footer.privacy": "Confidentialité",
+  "footer.terms": "Conditions d'utilisation",
+  "footer.rights": "© {year} RiftLens. Tous droits réservés.",
+  "footer.disclaimer":
+    "RiftLens n'est pas approuvé par Riot Games et ne reflète pas les opinions de Riot Games ou de toute personne impliquée officiellement dans la production ou la gestion de League of Legends. League of Legends et Riot Games sont des marques de Riot Games, Inc.",
+  "seo.profileDesc":
+    "Stats, rang, historique de parties et coaching de {name} sur {region} — RiftLens.",
+
+  // home landing
+  "home.hero.title1": "Analyse ton jeu.",
+  "home.hero.title2": "Dépasse tes limites.",
+  "home.hero.subtitle":
+    "Stats détaillées, historique LP, live game et suivi des joueurs rencontrés.",
+  "home.tryExample": "Essayez :",
+  "home.season": "Saison 2 2026",
+  "home.feature.profile.title": "Profil joueur",
+  "home.feature.profile.desc":
+    "Stats ranked, historique de matchs, évolution LP — pour n'importe quel joueur.",
+  "home.feature.profile.hint": "Recherchez un joueur ci-dessus",
+  "home.feature.leaderboard.desc": "Top 200 joueurs EUW en temps réel.",
+  "home.feature.champions.desc": "Tier list, win rates et stats détaillées par champion.",
+  "home.feature.live.title": "Live Game",
+  "home.feature.live.desc":
+    "Analyse en temps réel d'une partie en cours. Connecte-toi pour voir les joueurs déjà rencontrés.",
+  "home.feature.live.hint": "Depuis un profil joueur",
+  "home.footer.disclaimer": "RiftLens n'est pas affilié à Riot Games.",
+  "home.footer.cta": "Se connecter pour plus de fonctionnalités →",
+
+  // placeholders
+  "leaderboard.subtitle": "Top Challenger Solo/Duo · Saison 2 2026",
+  "champions.subtitle": "Tous les champions de League of Legends",
+
+  // errors / not found
+  "errors.title": "Une erreur est survenue",
+  "errors.retry": "Réessayer",
+  "notFound.title": "404 — Page introuvable",
+  "notFound.back": "Retour à l'accueil",
+} as const
