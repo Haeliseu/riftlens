@@ -4,6 +4,7 @@ import { getProfileSummary, type ProfileSummary, type Region } from "@riftlens/r
 import { sql } from "drizzle-orm"
 import type { Metadata } from "next"
 import { after } from "next/server"
+import { AdSlot } from "@/components/ads/AdSlot"
 import { RecordRecentVisit } from "@/components/layout/RecordRecentVisit"
 import { MatchHistory } from "@/components/match/MatchHistory"
 import { ChallengesCard } from "@/components/profile/ChallengesCard"
@@ -167,6 +168,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 <RolePerformance puuid={summary.puuid} />
                 <CrossedPlayers puuid={summary.puuid} region={region} />
                 <PingStats puuid={summary.puuid} />
+                <AdSlot placement="profileSidebar" />
               </div>
               <div className="lg:col-span-2 space-y-4">
                 <MatchHistory region={region} puuid={summary.puuid} />

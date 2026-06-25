@@ -1,3 +1,4 @@
+import { AdSlot } from "@/components/ads/AdSlot"
 import { Footer } from "@/components/layout/Footer"
 import { Navbar } from "@/components/layout/Navbar"
 import { SkipLink } from "@/components/layout/SkipLink"
@@ -12,7 +13,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col overflow-y-auto">
         {/* grows to fill the viewport so the footer stays pinned to the bottom
             on short pages, but still scrolls when content overflows */}
-        <div className="flex-1 p-6">{children}</div>
+        <div className="flex-1 p-6">
+          <AdSlot placement="dashboardTop" className="mb-4" />
+          {children}
+        </div>
         <Footer />
       </main>
     </div>

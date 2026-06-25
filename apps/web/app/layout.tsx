@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
+import { AdSenseScript } from "@/components/ads/AdSenseScript"
 import { getLocale } from "@/lib/i18n/server"
 import { siteConfig, siteUrl } from "@/lib/seo"
 import { Providers } from "./providers"
@@ -58,6 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
         <SpeedInsights />
+        <AdSenseScript />
       </body>
     </html>
   )

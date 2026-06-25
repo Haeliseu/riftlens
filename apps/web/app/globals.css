@@ -84,3 +84,9 @@
     outline-offset: 2px;
   }
 }
+
+/* Collapse AdSense units that have no ad to show, so ads never leave an empty
+   frame (Google's "unfilled" status). Ads off entirely = nothing rendered. */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
