@@ -9,8 +9,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <StripQueryParams />
       <SkipLink />
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto">
-        <div className="p-6">{children}</div>
+      <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col overflow-y-auto">
+        {/* grows to fill the viewport so the footer stays pinned to the bottom
+            on short pages, but still scrolls when content overflows */}
+        <div className="flex-1 p-6">{children}</div>
         <Footer />
       </main>
     </div>
