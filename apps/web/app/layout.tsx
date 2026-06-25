@@ -1,3 +1,4 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { ThemeProvider } from "next-themes"
@@ -56,6 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Providers>{children}</Providers>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
