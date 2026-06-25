@@ -1,6 +1,5 @@
-import type { RoutingRegion } from "@riftlens/riot-api"
-import { getAccountByRiotId } from "@riftlens/riot-api"
-import { type NextRequest, NextResponse } from "next/server"
+import { getAccountByRiotId, type RoutingRegion } from "@riftlens/riot-api"
+import { CACHE, HttpError, jsonRoute } from "@/lib/api-route"
 import { riotClient } from "@/lib/riot-client"
 
 const REGION_TO_ROUTING: Record<string, RoutingRegion> = {
@@ -17,26 +16,13 @@ const REGION_TO_ROUTING: Record<string, RoutingRegion> = {
   OC1: "sea",
 }
 
-export async function GET(req: NextRequest) {
+export const GET = jsonRoute(async (req) => {
   const { searchParams } = req.nextUrl
   const gameName = searchParams.get("gameName")
   const tagLine = searchParams.get("tagLine")
-  const region = searchParams.get("region") ?? "EUW1"
+  if (!gameName || !tagLine) throw new HttpError(400, "Missing gameName or tagLine")
 
-  if (!gameName || !tagLine) {
-    return NextResponse.json({ error: "Missing gameName or tagLine" }, { status: 400 })
-  }
-
-  const routing = REGION_TO_ROUTING[region] ?? "europe"
-  const client = riotClient()
-
-  try {
-    const account = await getAccountByRiotId(client, routing, gameName, tagLine)
-    return NextResponse.json(account, {
-      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
-    })
-  } catch (err) {
-    const status = (err as { status?: number }).status ?? 500
-    return NextResponse.json({ error: String(err) }, { status })
-  }
-}
+  const routing = REGION_TO_ROUTING[searchParams.get("region") ?? "EUW1"] ?? "europe"
+  const account = await getAccountByRiotId(riotClient(), routing, gameName, tagLine)
+  return { data: account, cache: CACHE.long }
+})

@@ -1,10 +1,10 @@
-import type { Division, RankedEntry, Region, TierName } from "@riftlens/riot-api"
+import type { Division, RankedEntry, TierName } from "@riftlens/riot-api"
 import {
   computeAverageGameRank,
   getAverageGameRank,
   getLeagueEntriesByPuuid,
 } from "@riftlens/riot-api"
-import { type NextRequest, NextResponse } from "next/server"
+import { jsonRoute, regionParam, requireParam } from "@/lib/api-route"
 import { cachedRanks, cacheParticipantRank, recentParticipantPuuids } from "@/lib/profile-db"
 import { riotClient } from "@/lib/riot-client"
 
@@ -15,15 +15,9 @@ function capTier(tier: string): TierName {
 // Cap how many uncached participant ranks we fetch live per request (rate limits).
 const MAX_LIVE_LOOKUPS = 30
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl
-  const puuid = searchParams.get("puuid")
-  const region = (searchParams.get("region") ?? "EUW1") as Region
-
-  if (!puuid) {
-    return NextResponse.json({ error: "Missing puuid" }, { status: 400 })
-  }
-
+export const GET = jsonRoute(async (req) => {
+  const puuid = requireParam(req, "puuid")
+  const region = regionParam(req)
   const client = riotClient()
 
   // DB-backed path: participants of the last (up to) 20 stored games, ranks
@@ -65,23 +59,21 @@ export async function GET(req: NextRequest) {
 
       if (ranks.length > 0) {
         const { tier, division } = computeAverageGameRank(ranks)
-        return NextResponse.json(
-          { tier, division, sampleGames: Math.max(1, sampledGames), sampledPlayers: ranks.length },
-          { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800" } }
-        )
+        return {
+          data: {
+            tier,
+            division,
+            sampleGames: Math.max(1, sampledGames),
+            sampledPlayers: ranks.length,
+          },
+          cache: "public, s-maxage=300, stale-while-revalidate=1800",
+        }
       }
     }
   } catch {
     // DB not ready — fall through to a small live sample
   }
 
-  try {
-    const avg = await getAverageGameRank(client, region, puuid, 3)
-    return NextResponse.json(avg, {
-      headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=1800" },
-    })
-  } catch (err) {
-    const status = (err as { status?: number }).status ?? 500
-    return NextResponse.json({ error: String(err) }, { status })
-  }
-}
+  const avg = await getAverageGameRank(client, region, puuid, 3)
+  return { data: avg, cache: "public, s-maxage=600, stale-while-revalidate=1800" }
+})

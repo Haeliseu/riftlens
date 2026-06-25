@@ -33,7 +33,10 @@ export function jsonRoute<C = unknown>(
       if (err instanceof HttpError) {
         return NextResponse.json({ error: err.message }, { status: err.status })
       }
-      return NextResponse.json({ error: String(err) }, { status: 500 })
+      // Propagate the upstream status when present (e.g. Riot 404/429) so clients
+      // see the real code; otherwise 500. Unifies the routes' error handling.
+      const status = (err as { status?: number }).status ?? 500
+      return NextResponse.json({ error: String(err) }, { status })
     }
   }
 }
