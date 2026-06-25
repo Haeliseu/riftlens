@@ -17,6 +17,12 @@ export interface ChampionSpell {
   image: { full: string }
 }
 
+export interface ChampionSkin {
+  num: number
+  name: string
+  chromas: boolean
+}
+
 export interface ChampionDetail {
   id: string
   key: string
@@ -28,6 +34,7 @@ export interface ChampionDetail {
   stats: Record<string, number>
   spells: ChampionSpell[]
   passive: { name: string; description: string; image: { full: string } }
+  skins: ChampionSkin[]
   allytips: string[]
   enemytips: string[]
 }
@@ -76,6 +83,14 @@ export const passiveIconUrl = (version: string, full: string) =>
   `${DD}/${version}/img/passive/${full}`
 // Splash/loading art is version-free, keyed by the champion id (e.g. "Aatrox").
 export const championSplashUrl = (id: string) => `${DD}/img/champion/splash/${id}_0.jpg`
+/** Per-skin loading art (vertical) — good for thumbnails. */
+export const skinLoadingUrl = (id: string, num: number) =>
+  `${DD}/img/champion/loading/${id}_${num}.jpg`
+/** CommunityDragon centered splash art (champion well-framed), per numeric key + skin. */
+export const centeredSplashUrl = (key: string, num: number) =>
+  num === 0
+    ? `https://cdn.communitydragon.org/latest/champion/${key}/splash-art/centered`
+    : `https://cdn.communitydragon.org/latest/champion/${key}/splash-art/centered/skin/${num}`
 
 /** Strip DDragon's pseudo-HTML to plain text, keeping <br> as line breaks. */
 export function cleanText(html: string): string {

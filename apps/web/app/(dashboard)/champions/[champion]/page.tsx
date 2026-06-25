@@ -1,10 +1,10 @@
 import { ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { SkinGallery } from "@/components/champions/SkinGallery"
 import { Link } from "@/components/Link"
 import {
   type ChampionSpell,
-  championSplashUrl,
   cleanText,
   fetchChampion,
   passiveIconUrl,
@@ -113,32 +113,16 @@ export default async function ChampionPage({ params }: PageProps) {
         {t("champion.back")}
       </Link>
 
-      {/* Splash header */}
-      <div className="relative overflow-hidden rounded-xl border">
-        {/* Full splash at its natural ratio (no cropping) */}
-        {/* biome-ignore lint/performance/noImgElement: external CDN splash */}
-        <img src={championSplashUrl(c.id)} alt="" className="block h-auto w-full" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            {c.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white"
-              >
-                {tag}
-              </span>
-            ))}
-            {c.partype && (
-              <span className="rounded bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white">
-                {c.partype}
-              </span>
-            )}
-          </div>
-          <h1 className="mt-1.5 text-3xl font-bold text-white">{c.name}</h1>
-          <p className="text-sm capitalize text-white/80">{c.title}</p>
-        </div>
-      </div>
+      {/* Splash + skins (champ-select style) */}
+      <SkinGallery
+        champKey={c.key}
+        alias={c.id}
+        name={c.name}
+        title={c.title}
+        tags={c.tags}
+        partype={c.partype}
+        skins={c.skins}
+      />
 
       {/* Lore */}
       <section>
