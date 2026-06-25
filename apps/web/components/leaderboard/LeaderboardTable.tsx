@@ -199,7 +199,7 @@ export function LeaderboardTable() {
                   {liveStatus?.[r.puuid] &&
                     (href ? (
                       <Link
-                        href={`${href}?tab=live`}
+                        href={`${href}/live`}
                         title={t("leaderboard.inGame")}
                         className="flex flex-shrink-0 items-center gap-1 rounded bg-[var(--color-win)]/15 px-1.5 py-0.5 text-[10px] font-bold text-[var(--color-win)] hover:bg-[var(--color-win)]/25"
                       >

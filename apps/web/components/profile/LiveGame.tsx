@@ -8,7 +8,7 @@ import {
 } from "@riftlens/riot-api"
 import { Flame, Radio } from "lucide-react"
 import { Link } from "@/components/Link"
-import { type LiveParticipant, useLiveGame } from "@/hooks/useLiveGame"
+import { type LiveGameData, type LiveParticipant, useLiveGame } from "@/hooks/useLiveGame"
 import { useI18n } from "@/lib/i18n"
 import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { capitalizeTier, rankLabel } from "@/lib/tiers"
@@ -23,6 +23,7 @@ const TAG_META: Record<PlayerTag, { emoji: string; label: TranslationKey }> = {
 interface LiveGameProps {
   puuid?: string | null
   region: string
+  initialData?: LiveGameData | null
 }
 
 type T = ReturnType<typeof useI18n>["t"]
@@ -103,9 +104,9 @@ function PlayerRow({ p, region, t }: { p: LiveParticipant; region: string; t: T 
   )
 }
 
-export function LiveGame({ puuid, region }: LiveGameProps) {
+export function LiveGame({ puuid, region, initialData }: LiveGameProps) {
   const { t } = useI18n()
-  const { data, isLoading } = useLiveGame(puuid, region)
+  const { data, isLoading } = useLiveGame(puuid, region, initialData)
 
   if (isLoading) {
     return (

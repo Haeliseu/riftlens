@@ -23,7 +23,13 @@ export interface LiveGameData {
   participants: LiveParticipant[]
 }
 
-export function useLiveGame(puuid: string | null | undefined, region = "EUW1") {
+export function useLiveGame(
+  puuid: string | null | undefined,
+  region = "EUW1",
+  // When the page already fetched the live game server-side, seed the cache so
+  // the first paint shows data; react-query still refreshes once it goes stale.
+  initialData?: LiveGameData | null
+) {
   return useQuery({
     queryKey: ["live-game", region, puuid],
     queryFn: async () => {
@@ -33,5 +39,6 @@ export function useLiveGame(puuid: string | null | undefined, region = "EUW1") {
     },
     staleTime: 30_000,
     enabled: !!puuid,
+    ...(initialData !== undefined ? { initialData } : {}),
   })
 }

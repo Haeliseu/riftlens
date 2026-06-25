@@ -195,6 +195,7 @@ export const en = {
   "live.tag.oneTrick": "One-trick",
   "live.tag.carry": "Carry potential",
   "live.tag.fed": "Fed last game",
+  "live.backToProfile": "Back to profile",
 
   "nav.home": "Home",
   "search.recent": "Recent",

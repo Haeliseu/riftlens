@@ -216,6 +216,7 @@ export const fr = {
   "live.tag.oneTrick": "Mono-champion",
   "live.tag.carry": "Peut carry",
   "live.tag.fed": "Dernière partie en feu",
+  "live.backToProfile": "Retour au profil",
 
   // sidebar / search
   "nav.home": "Accueil",
