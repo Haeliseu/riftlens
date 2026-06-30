@@ -11,7 +11,10 @@ import { ThemeToggle } from "./ThemeToggle"
 
 const NAV_LINKS: { href: string; label: TranslationKey }[] = [
   { href: "/leaderboard", label: "leaderboard.title" },
+  { href: "/live-games", label: "nav.liveGames" },
   { href: "/champions", label: "champions.title" },
+  { href: "/items", label: "nav.items" },
+  { href: "/runes", label: "nav.runes" },
   { href: "/patch-notes", label: "patch.title" },
 ]
 
