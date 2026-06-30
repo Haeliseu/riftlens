@@ -2,7 +2,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { ThemeProvider } from "next-themes"
-import { Toaster } from "sonner"
 import { AdSenseScript } from "@/components/ads/AdSenseScript"
 import { getLocale } from "@/lib/i18n/server"
 import { siteConfig, siteUrl } from "@/lib/seo"
@@ -56,7 +55,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={geist.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Providers>{children}</Providers>
-          <Toaster richColors position="bottom-right" />
         </ThemeProvider>
         <SpeedInsights />
         <AdSenseScript />

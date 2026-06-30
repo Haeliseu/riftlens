@@ -6,6 +6,10 @@ import type { TranslationKey } from "@/lib/i18n/dictionaries"
 import { localePath } from "@/lib/i18n/locale-path"
 import { getLocale, getT } from "@/lib/i18n/server"
 
+// Edge runtime → low TTFB/no cold start for this dynamically-rendered landing
+// page (locale comes from a request header, so it can't be statically cached).
+export const runtime = "edge"
+
 interface Feature {
   icon: LucideIcon
   title: string
